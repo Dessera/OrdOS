@@ -1,28 +1,17 @@
-
-#include "asm/boot.h"
+#include "kernel/boot.h"
 #include "kernel/info.h"
 
 .code16
 .section ".bstext", "ax"
-
-ljmp $BOOTSEC, $_bootsec_start
-
 _bootsec_start:
   /* set up segment registers */
   movw %cs, %ax
   movw %ax, %ds
   movw %ax, %es
   movw %ax, %ss
-  xorw %sp, %sp
+  movw $BOOTSEC_ADDR, %sp
   sti
   cld
-
-  /* clear screen */
-  movw $0x0600, %ax
-  movw $0x0700, %bx
-  xorw %cx, %cx
-  movw $0x184f, %di
-  int $0x10
 
   movw $_bsd_welcome, %si
   call _bsu_print
@@ -30,32 +19,32 @@ _bootsec_start:
   movw $_bsd_loading_indicator, %si
   call _bsu_print
 
-  movw $LDRSEC, %ax
-  movw %ax, %es
-
   /* read loader to mem */
+_bs_load_ldr:
   movw $0x0080, %dx
-
-  movw $0x0002, %cx   # from sector 2
-  movw $0x0204, %ax   # read 4 sectors
-  movw $0x0000, %bx   # buffer
+  movw $LDRSTART, %cx
+  movw $LDRSEC_ADDR, %bx
+_bs_load_ldr_retry:
+  movb $0x02, %ah
+  movb $LDRSIZE, %al
   int $0x13
-
-  # restore es
-  movw %cs, %ax
-  movw %ax, %es
-
-  ljmp $LDRENTRY, $0x0000
+  jnc _bs_load_ldr_done
+_bs_load_ldr_error:
+  movw $_bsd_retry_indicator, %si
+  call _bsu_print
+  jmp _bs_load_ldr_retry
+_bs_load_ldr_done:
+  ljmp $0x0, $LDRENTRY_ADDR
 
 _bsu_print: # params : %si = string
   push %ax
   push %bx
-  movw $0x7, %bx
+  movw $0x0007, %bx
 _bsu_print_loop:
   lodsb
   andb %al, %al
   jz _bsu_print_done
-  movb $0xe, %ah
+  movb $0x0e, %ah
   int $0x10
   jmp _bsu_print_loop
 _bsu_print_done:
@@ -71,9 +60,11 @@ _bsd_welcome:
   .ascii KFULLNAME_STR, "\n\r\0"
 _bsd_loading_indicator:
   .asciz "Loading kernel...\n\r"
+_bsd_retry_indicator:
+  .asciz "Failed to load kernel, retrying...\n\r"
 
 .org 0x7E
-boot_flag: .word 0xAA55
+boot_flag: .word 0xaa55
 
 .section ".ldrtext", "ax"
 .gdt_table:
@@ -81,11 +72,6 @@ boot_flag: .word 0xAA55
 .globl _start
 _start:
   /* reset segment registers for current cs */
-  movw %cs, %ax
-  movw %ax, %ds
-  movw %ax, %es
-  movw %ax, %ss
-  xorw %sp, %sp
 
   movw $_ldr_msg, %si
   call _ldr_print
@@ -97,12 +83,12 @@ _ldr_end:
 _ldr_print: # params : %si = string
   push %ax
   push %bx
-  movw $0x7, %bx
+  movw $0x0007, %bx
 _ldr_print_loop:
   lodsb
   andb %al, %al
   jz _ldr_print_done
-  movb $0xe, %ah
+  movb $0x0e, %ah
   int $0x10
   jmp _ldr_print_loop
 _ldr_print_done:
@@ -114,3 +100,5 @@ _ldr_print_done:
 
 _ldr_msg:
   .asciz "Here is unimplemented loader\n\r"
+
+.org 0x800

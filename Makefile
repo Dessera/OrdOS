@@ -11,10 +11,11 @@ TARGET = $(BUILD_DIR)/$(NAMEFILE)
 DEBUG =
 TRACE =
 
+INCFLAGS = -Iinclude
 
 CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes	\
 					-fno-builtin -fno-stack-protector -nostdinc -nostdlib			\
-					-I./include -m32 -D KVERSION=$(VERSION) -D KNAME=$(NAME)
+					-m32 $(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
 
 ifneq ($(DEBUG),)
 CFLAGS += -g -D DEBUG
@@ -22,7 +23,8 @@ endif
 
 ASFLAGS = $(CFLAGS)
 
-LDSCRIPT = kernel.ld
+LDSCRIPT_TEMPLATE = kernel.ld.template
+LDSCRIPT = $(BUILD_DIR)/kernel.ld
 LDFLAGS = -z noexecstack --oformat binary
 
 targets :=
@@ -54,6 +56,11 @@ targets += $(patsubst %.o, $(BOOT_DIR)/%.o,$(boot_targets))
 
 # 	-------------------- KERNEL -------------------
 final_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(targets))
+
+$(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
+	@mkdir -p $(BUILD_DIR)
+	$(hide)gcc -E -P $(INCFLAGS) - < $< > $@
+	@echo "	[CP] $(LDSCRIPT)"
 
 $(TARGET): $(final_objs) $(LDSCRIPT)
 	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(final_objs)

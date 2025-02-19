@@ -1,3 +1,0 @@
-#define BOOTSEC 0x07c0
-#define LDRSEC 0x0090
-#define LDRENTRY 0x0090

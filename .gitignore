@@ -57,6 +57,10 @@ dkms.conf
 
 # End of https://www.toptal.com/developers/gitignore/api/c
 
+.direnv
+.envrc
+/result
+/result-*
 /build
 .cache
 .vscode
