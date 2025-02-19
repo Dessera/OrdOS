@@ -8,7 +8,7 @@ BOOT_DIR = boot
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
 
-DEBUG =
+DEBUG = 1
 TRACE =
 
 INCFLAGS = -Iinclude
@@ -77,5 +77,4 @@ qemu: $(TARGET)
 endif
 
 rebuild: clean all
-# 	-----------------------------------------------
 # 	-----------------------------------------------

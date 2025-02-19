@@ -1,4 +1,5 @@
 #include "kernel/boot.h"
+#include "kernel/gdt.h"
 #include "kernel/info.h"
 
 .code16
@@ -10,7 +11,9 @@ _bootsec_start:
   movw %ax, %es
   movw %ax, %ss
   movw $BOOTSEC_ADDR, %sp
-  sti
+
+  /* disable interrupts because they're not ready */
+  cli
   cld
 
   movw $_bsd_welcome, %si
@@ -67,18 +70,35 @@ _bsd_retry_indicator:
 boot_flag: .word 0xaa55
 
 .section ".ldrtext", "ax"
-.gdt_table:
+_gdt_table:
+  GDT_DESC_NULL()
+  GDT_DESC_CODE()
+  GDT_DESC_DATA()
+_gdt_table_ptr:
+  .word . - _gdt_table - 1
+  .long _gdt_table
 
+.org LDRENTRY_OFFSET
 .globl _start
 _start:
-  /* reset segment registers for current cs */
-
-  movw $_ldr_msg, %si
+  movw $_ldr_enter_protected_mode_indicator, %si
   call _ldr_print
 
-_ldr_end:
-  hlt
-  jmp _ldr_end
+  /* enable A20 */
+  inb $0x92, %al
+  orb $0x02, %al
+  outb %al, $0x92
+
+  /* load gdt */
+  lgdt _gdt_table_ptr
+
+  /* enable protected mode */
+  movl %cr0, %eax
+  orl $0x01, %eax
+  movl %eax, %cr0
+
+  /* jump to _start_protected */
+  ljmp $GDT_CODE_SELECTOR, $_start_protected
 
 _ldr_print: # params : %si = string
   push %ax
@@ -96,9 +116,20 @@ _ldr_print_done:
   pop %ax
   ret
 
+.code32
+_start_protected:
+  movw $GDT_DATA_SELECTOR, %ax
+  movw %ax, %ds
+  movw %ax, %es
+  movw %ax, %ss
+  mov $LDRSEC_ADDR, %esp
+
+  /* Terminate boot process */
+  jmp .
+
 .section ".ldrdata", "a"
 
-_ldr_msg:
-  .asciz "Here is unimplemented loader\n\r"
+_ldr_enter_protected_mode_indicator:
+  .asciz "Entering protected mode...\n\r"
 
 .org 0x800
