@@ -48,10 +48,12 @@
 #define GDT_DESC_NULL() GDT_DESC(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 #define GDT_DESC_CODE()                                                        \
-  GDT_DESC(0xFFFF, 0xF, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0)
+  GDT_DESC(0xffff, 0xf, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0)
 
 #define GDT_DESC_DATA()                                                        \
-  GDT_DESC(0xFFFF, 0xF, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
+  GDT_DESC(0xffff, 0xf, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
+#define GDT_DESC_VIDEO()                                                       \
+  GDT_DESC(0x0007, 0xb, 0x8000, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
 #define GDT_CODE_SELECTOR 0x08
 #define GDT_DATA_SELECTOR 0x10

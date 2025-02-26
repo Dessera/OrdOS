@@ -1,0 +1,7 @@
+#pragma once
+
+#define E820MAGIC 0x534d4150
+#define E820FUNC 0x0000e820
+
+#define PAGE_SIZE 4096
+#define PAGE_TABLE_ADDR 0x100000 // 1MB

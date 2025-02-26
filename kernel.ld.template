@@ -13,6 +13,10 @@ SECTIONS
   .ldrtext LDRSEC_ADDR : AT(0x200) { *(.ldrtext) }
   .ldrdata : { *(.ldrdata) }
 
+  .text : AT(0xa00) { *(.text*) }
+  .data : { *(.data*) }
+  .bss : { *(.bss*) }
+
   /DISCARD/ : {
     *(.note*)
   }

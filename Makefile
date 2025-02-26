@@ -4,6 +4,8 @@ NAMEFILE = $(shell echo $(NAME) | tr 'A-Z' 'a-z')
 
 BUILD_DIR = build
 BOOT_DIR = boot
+KERNEL_DIR = kernel
+INCLUDE_DIR = include
 
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
@@ -11,7 +13,7 @@ TARGET = $(BUILD_DIR)/$(NAMEFILE)
 DEBUG = 1
 TRACE =
 
-INCFLAGS = -Iinclude
+INCFLAGS = -I$(INCLUDE_DIR)
 
 CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes	\
 					-fno-builtin -fno-stack-protector -nostdinc -nostdlib			\
@@ -55,6 +57,12 @@ targets += $(patsubst %.o, $(BOOT_DIR)/%.o,$(boot_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- KERNEL -------------------
+include kernel/Makefile
+
+targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
+# 	-----------------------------------------------
+
+# 	-------------------- FINAL --------------------
 final_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(targets))
 
 $(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
