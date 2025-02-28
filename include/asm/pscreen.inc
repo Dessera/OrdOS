@@ -2,6 +2,15 @@
 
 #include "kernel/screen.h"
 
+_pclear:
+  pusha
+  movl $SCREEN_BUFFER_ADDR, %edi
+  movl $SCREEN_WIDTH * SCREEN_HEIGHT, %ecx
+  movb $0x0, %al
+  rep stosb
+  popa
+  ret
+
 _pprint: # params : %esi = string, %eax = line
   pusha
 

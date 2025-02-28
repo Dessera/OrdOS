@@ -60,7 +60,7 @@ _bprint_done:
 .section ".bsdata", "a"
 
 _bsd_welcome:
-  .ascii KFULLNAME_STR, "\n\r\0"
+  .ascii KFULLNAME_STR, " STEP 1\n\r\0"
 _bsd_loading_indicator:
   .asciz "Loading STEP 2...\n\r"
 _bsd_retry_indicator:
@@ -173,8 +173,64 @@ _start_protected:
   movw %ax, %ss
   movl $LDRSEC_ADDR, %esp
 
-  movl $0x01, %eax
+  call _pclear
+
+  movl $0x00, %eax
   movl $_prot_welcome, %esi
+  call _pprint
+
+_prot_page_setup:
+  /* clear page table */
+  movl $PAGE_TABLE_ADDR, %edi
+  movl $PAGE_SIZE, %ecx
+  movb $0, %al
+  rep stosb
+_prot_page_init:
+  /* map first 4MB */
+  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR)
+  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR + 0xc00)
+  /* map page table itself */
+  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(0), 1, 1, 1), (PAGE_TABLE_ADDR + 0xffc)
+
+  /* map 1MB in first 4MB */
+_prot_kernel_page_init:
+  movl $0x100, %ecx
+  movl $PDE_DESC(0, 1, 1, 1), %eax
+  movl $INDEX_PAGE_TABLE_ADDR(1), %edi
+_prot_kernel_page_loop:
+  movl %eax, (%edi)
+  addl $0x1000, %eax
+  addl $0x4, %edi
+  loop _prot_kernel_page_loop
+
+  /* map 1GB kernel memory */
+_prot_kernel_mem_init:
+  movl $0x0fe, %ecx
+  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(2), 1, 1, 1), %eax
+  movl $PAGE_TABLE_ADDR + 0xc04, %edi
+_prot_kernel_mem_loop:
+  movl %eax, (%edi)
+  addl $0x1000, %eax
+  addl $0x4, %edi
+  loop _prot_kernel_mem_loop
+
+  /* modify gdt & cr3 */
+  sgdt _gdt_table_ptr
+
+  addl $0xc0000000, (_gdt_table_ptr + 2)
+  addl $0xc0000000, %esp
+
+  movl $PAGE_TABLE_ADDR, %eax
+  movl %eax, %cr3
+
+  movl %cr0, %eax
+  orl $0x80000000, %eax
+  movl %eax, %cr0
+
+  lgdt _gdt_table_ptr
+
+  movl $0x01, %eax
+  movl $_prot_page_ok, %esi
   call _pprint
 
   /* Terminate boot process */
@@ -190,4 +246,6 @@ _lb_mem_error:
 _lb_mem_ok:
   .asciz "Memory info fetched\n\r"
 _prot_welcome:
-  .asciz "In protected mode"
+  .ascii KFULLNAME_STR, " STEP 2\0"
+_prot_page_ok:
+  .asciz "Page table setup successfully"
