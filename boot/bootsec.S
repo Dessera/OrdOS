@@ -3,6 +3,13 @@
 #include "kernel/info.h"
 #include "kernel/mem.h"
 
+/* print before protected mode */
+#define BPRINT(str) movw str, %si; call _bprint
+#define LPRINT(str) movw str, %si; call _lprint
+
+/* print after protected mode */
+#define PPRINT(line, str) movl line, %eax; movl str, %esi; call _pprint
+
 .code16
 .section ".bstext", "ax"
 _bootsec_start:
@@ -17,15 +24,12 @@ _bootsec_start:
   cli
   cld
 
-  movw $_bsd_welcome, %si
-  call _bprint
-
-  movw $_bsd_loading_indicator, %si
-  call _bprint
+  BPRINT($_bsd_welcome)
+  BPRINT($_bsd_loading_indicator)
 
   /* read loader to mem */
 _bs_load_ldr:
-  movw $0x0080, %dx
+  movw $0x80, %dx
   movw $LDRSTART, %cx
   movw $LDRSEC_ADDR, %bx
 _bs_load_ldr_retry:
@@ -34,16 +38,15 @@ _bs_load_ldr_retry:
   int $0x13
   jnc _bs_load_ldr_done
 _bs_load_ldr_error:
-  movw $_bsd_retry_indicator, %si
-  call _bprint
+  BPRINT($_bsd_retry_indicator)
   jmp _bs_load_ldr_retry
 _bs_load_ldr_done:
-  ljmp $0x0, $LDRENTRY_ADDR
+  ljmp $0x00, $LDRENTRY_ADDR
 
 
 _bprint: # params : %si = string
   pusha
-  movw $0x0007, %bx
+  movw $0x07, %bx
 _bprint_loop:
   lodsb
   andb %al, %al
@@ -66,7 +69,7 @@ _bsd_loading_indicator:
 _bsd_retry_indicator:
   .asciz "Failed to load STEP 2, retrying...\n\r"
 
-.org 0x7E
+.org 0x7e
 boot_flag: .word 0xaa55
 
 .section ".ldrtext", "ax"
@@ -85,17 +88,17 @@ _gdt_table_ptr:
 
   /* ards buffer 244 bytes */
 _ards_buf:
-  .space 244
+  .space 0xf4
 _ards_nr:
   .word 0
 
 .org LDRENTRY_OFFSET
 .globl _start
 _start:
-  movw $_lb_welcome, %si
-  call _lprint
+  LPRINT($_lb_welcome)
 
   /* check memory */
+  LPRINT($_lb_mem_indicator)
   xorl %ebx, %ebx
   movl $E820MAGIC, %edx
   movw $_ards_buf, %di
@@ -106,7 +109,7 @@ _ldr_fetch_ards:
   jc _ldr_mem_error
   addw %cx, %di
   incw _ards_nr
-  cmpl $0x0, %ebx
+  cmpl $0x00, %ebx
   jnz _ldr_fetch_ards
 
   movw (_ards_nr), %cx
@@ -124,12 +127,10 @@ _ldr_next_mem:
   jmp _ldr_mem_ok
 
 _ldr_mem_error:
-  movw $_lb_mem_error, %si
-  call _lprint
+  LPRINT($_lb_mem_error)
   jmp _ldr_error_hlt
 _ldr_mem_ok:
-  movw $_lb_mem_ok, %si
-  call _lprint
+  LPRINT($_lb_mem_ok)
 
   /* enable A20 */
   inb $0x92, %al
@@ -153,7 +154,7 @@ _ldr_error_hlt:
 
 _lprint: # params : %si = string
   pusha
-  movw $0x0007, %bx
+  movw $0x07, %bx
 _lprint_loop:
   lodsb
   andb %al, %al
@@ -175,15 +176,15 @@ _start_protected:
 
   call _pclear
 
-  movl $0x00, %eax
-  movl $_prot_welcome, %esi
-  call _pprint
+  PPRINT($0x00, $_pb_welcome)
+
+  PPRINT($0x01, $_pb_page_indicator)
 
 _prot_page_setup:
   /* clear page table */
   movl $PAGE_TABLE_ADDR, %edi
   movl $PAGE_SIZE, %ecx
-  movb $0, %al
+  movb $0x00, %al
   rep stosb
 _prot_page_init:
   /* map first 4MB */
@@ -200,18 +201,18 @@ _prot_kernel_page_init:
 _prot_kernel_page_loop:
   movl %eax, (%edi)
   addl $0x1000, %eax
-  addl $0x4, %edi
+  addl $0x04, %edi
   loop _prot_kernel_page_loop
 
   /* map 1GB kernel memory */
 _prot_kernel_mem_init:
-  movl $0x0fe, %ecx
+  movl $0xfe, %ecx
   movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(2), 1, 1, 1), %eax
   movl $PAGE_TABLE_ADDR + 0xc04, %edi
 _prot_kernel_mem_loop:
   movl %eax, (%edi)
   addl $0x1000, %eax
-  addl $0x4, %edi
+  addl $0x04, %edi
   loop _prot_kernel_mem_loop
 
   /* modify gdt & cr3 */
@@ -229,9 +230,7 @@ _prot_kernel_mem_loop:
 
   lgdt _gdt_table_ptr
 
-  movl $0x01, %eax
-  movl $_prot_page_ok, %esi
-  call _pprint
+  PPRINT($0x02, $_pb_page_ok)
 
   /* Terminate boot process */
   jmp .
@@ -241,11 +240,15 @@ _prot_kernel_mem_loop:
 .section ".ldrdata", "a"
 _lb_welcome:
   .asciz "STEP 2 loaded\n\r"
+_lb_mem_indicator:
+  .asciz "Fetching memory info\n\r"
 _lb_mem_error:
   .asciz "Failed to fetch memory info\n\r"
 _lb_mem_ok:
   .asciz "Memory info fetched\n\r"
-_prot_welcome:
+_pb_welcome:
   .ascii KFULLNAME_STR, " STEP 2\0"
-_prot_page_ok:
+_pb_page_indicator:
+  .asciz "Setup page table"
+_pb_page_ok:
   .asciz "Page table setup successfully"
