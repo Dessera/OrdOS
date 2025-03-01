@@ -1,3 +1,4 @@
+#include "config.h"
 #include "kernel/boot.h"
 
 OUTPUT_FORMAT("binary")
@@ -13,7 +14,7 @@ SECTIONS
   .ldrtext LDRSEC_ADDR : AT(0x200 * LDRSTART) { *(.ldrtext) }
   .ldrdata : { *(.ldrdata) }
 
-  .text KERNELSEC_ADDR : AT(0x200 * KERNELSTART) { *(.text*) }
+  .text KERNELENTRY_ADDR : AT(0x200 * KERNELSTART) { *(.text*) }
   .data : { *(.data*) }
   .rodata : { *(.rodata*) }
   .bss : { *(.bss*) }

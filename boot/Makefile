@@ -1,1 +1,1 @@
-boot_targets := bootsec.o
+boot_targets := bootsec.o loader.o
