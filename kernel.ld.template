@@ -1,20 +1,21 @@
 #include "kernel/boot.h"
 
-OUTPUT_FORMAT("elf32-i386")
+OUTPUT_FORMAT("binary")
 OUTPUT_ARCH(i386)
 ENTRY(_start)
 
 
 SECTIONS
 {
-  .bstext BOOTSEC_ADDR : AT(0) { *(.bstext) }
+  .bstext BOOTSEC_ADDR : AT(0x00) { *(.bstext) }
   .bsdata : { *(.bsdata) }
 
-  .ldrtext LDRSEC_ADDR : AT(0x200) { *(.ldrtext) }
+  .ldrtext LDRSEC_ADDR : AT(0x200 * LDRSTART) { *(.ldrtext) }
   .ldrdata : { *(.ldrdata) }
 
-  .text : AT(0xa00) { *(.text*) }
+  .text KERNELSEC_ADDR : AT(0x200 * KERNELSTART) { *(.text*) }
   .data : { *(.data*) }
+  .rodata : { *(.rodata*) }
   .bss : { *(.bss*) }
 
   /DISCARD/ : {

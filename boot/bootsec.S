@@ -2,6 +2,7 @@
 #include "kernel/gdt.h"
 #include "kernel/info.h"
 #include "kernel/mem.h"
+#include "kernel/disk.h"
 
 /* print before protected mode */
 #define BPRINT(str) movw str, %si; call _bprint
@@ -30,7 +31,7 @@ _bootsec_start:
   /* read loader to mem */
 _bs_load_ldr:
   movw $0x80, %dx
-  movw $LDRSTART, %cx
+  movw $LDRSTART + 1, %cx
   movw $LDRSEC_ADDR, %bx
 _bs_load_ldr_retry:
   movb $0x02, %ah
@@ -95,10 +96,10 @@ _ards_nr:
 .org LDRENTRY_OFFSET
 .globl _start
 _start:
-  LPRINT($_lb_welcome)
-
   /* check memory */
+
   LPRINT($_lb_mem_indicator)
+
   xorl %ebx, %ebx
   movl $E820MAGIC, %edx
   movw $_ards_buf, %di
@@ -127,10 +128,11 @@ _ldr_next_mem:
   jmp _ldr_mem_ok
 
 _ldr_mem_error:
+
   LPRINT($_lb_mem_error)
+
   jmp _ldr_error_hlt
 _ldr_mem_ok:
-  LPRINT($_lb_mem_ok)
 
   /* enable A20 */
   inb $0x92, %al
@@ -190,6 +192,7 @@ _prot_page_init:
   /* map first 4MB */
   movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR)
   movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR + 0xc00)
+
   /* map page table itself */
   movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(0), 1, 1, 1), (PAGE_TABLE_ADDR + 0xffc)
 
@@ -230,25 +233,83 @@ _prot_kernel_mem_loop:
 
   lgdt _gdt_table_ptr
 
-  PPRINT($0x02, $_pb_page_ok)
+  PPRINT($0x02, $_pb_kernel_indicator)
 
-  /* Terminate boot process */
+  call _prot_load_kernel
+
+  /* reset stack & enter kernel */
+  movl $0xc009f000, %esp
+  xorl %ebp, %ebp
+  call kmain
+
   jmp .
+
 
 #include "asm/pscreen.inc"
 
+_prot_load_kernel:
+  pusha
+
+  call _prot_disk_wait
+
+  movw $DISK_CMD_SECS, %dx
+  movb $KERNELSIZE, %al
+  outb %al, %dx
+
+  movw $DISK_CMD_LBALOW, %dx
+  movl $KERNELSTART, %eax
+  outb %al, %dx
+
+  movw $DISK_CMD_LBAMID, %dx
+  shrl $8, %eax
+  outb %al, %dx
+
+  movw $DISK_CMD_LBAHIGH, %dx
+  shrl $8, %eax
+  outb %al, %dx
+
+  movw $DISK_CMD_LBAEX, %dx
+  shrl $8, %eax
+  andb $0x0f, %al
+  orb $0xe0, %al
+  outb %al, %dx
+
+  movw $DISK_CMD_CTRL, %dx
+  movb $DISK_CMD_READ, %al
+  outb %al, %dx
+
+  call _prot_disk_wait
+
+  movw $DISK_PORT_DATA, %dx
+  movl $KERNELSIZE * 0x80, %ecx
+  movl $KERNELSEC_ADDR, %edi
+_prot_load_kernel_loop:
+  rep insl
+
+  popa
+  ret
+
+_prot_disk_wait:
+  pushw %dx
+  pushw %ax
+  movw $DISK_CMD_CTRL, %dx
+_prot_disk_wait_loop:
+  inb %dx, %al
+  andb $DISK_STATUS_READY | DISK_STATUS_BUSY, %al
+  cmpb $DISK_STATUS_READY, %al
+  jne _prot_disk_wait_loop
+  popw %ax
+  popw %dx
+  ret
+
 .section ".ldrdata", "a"
-_lb_welcome:
-  .asciz "STEP 2 loaded\n\r"
 _lb_mem_indicator:
   .asciz "Fetching memory info\n\r"
 _lb_mem_error:
   .asciz "Failed to fetch memory info\n\r"
-_lb_mem_ok:
-  .asciz "Memory info fetched\n\r"
 _pb_welcome:
   .ascii KFULLNAME_STR, " STEP 2\0"
 _pb_page_indicator:
   .asciz "Setup page table"
-_pb_page_ok:
-  .asciz "Page table setup successfully"
+_pb_kernel_indicator:
+  .asciz "Loading kernel"

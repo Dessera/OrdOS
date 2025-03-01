@@ -11,13 +11,12 @@ _pclear:
   popa
   ret
 
-_pprint: # params : %esi = string, %eax = line
+_pprint: // params : %esi = string, %eax = line
   pusha
 
   movl $SCREEN_WIDTH, %ecx
   mull %ecx
   movl $SCREEN_BUFFER_ADDR, %edx
-  # get real mem position (mul 160 to eax)
   addl %eax, %edx
 
   movl $0x0, %ecx

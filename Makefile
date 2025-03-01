@@ -15,19 +15,21 @@ TRACE =
 
 INCFLAGS = -I$(INCLUDE_DIR)
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes	\
-					-fno-builtin -fno-stack-protector -nostdinc -nostdlib			\
-					-m32 $(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
+CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes					\
+					-fno-builtin -fno-pie -fno-pic -fno-stack-protector -nostdinc			\
+					-nostdlib -m32 $(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
 
 ifneq ($(DEBUG),)
-CFLAGS += -g -D DEBUG
+CFLAGS += -g -O0 -D DEBUG
+else
+CFLAGS += -Os
 endif
 
 ASFLAGS = $(CFLAGS)
 
 LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
-LDFLAGS = -z noexecstack --oformat binary
+LDFLAGS = -z noexecstack
 
 targets :=
 
