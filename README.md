@@ -6,7 +6,7 @@ For now, there is only a bootsector in this repository.
 
 ## TODOS
 
-1. [ ] `bootsec.S` refactoring
+1. [x] `bootsec.S` refactoring
 2. [ ] Interupts
 3. [ ] Kernel library
 4. [ ] Memory management
