@@ -22,3 +22,6 @@ struct idt_desc_t
 
 void
 init_idt(void);
+
+void
+common_intr_handler(u32 irq);

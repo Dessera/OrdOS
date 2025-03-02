@@ -1,6 +1,32 @@
-#include "kernel/interrupt/vecs.h"
+#define INTR_ERR nop
+#define INTR_NOERR pushl $0
+
+#define INTR_VEC_ID(index) idt_##index##_desc
+
+#define INTR_VEC_ENTRY(index, err)                                             \
+.section ".text";                                                              \
+INTR_VEC_ID(index):;                                                           \
+  err;                                                                         \
+  push %ds;                                                                    \
+  push %es;                                                                    \
+  push %fs;                                                                    \
+  push %gs;                                                                    \
+  pushal;                                                                      \
+  movb $0x20, %al;                                                             \
+  outb %al, $0x0a;                                                             \
+  outb %al, $0x20;                                                             \
+  pushl $index;                                                                \
+  call common_intr_handler;                                                    \
+  addl $0x04, %esp;                                                            \
+  jmp _asm_intr_exit;                                                          \
+.section ".data";                                                              \
+  .long INTR_VEC_ID(index)
 
 .section ".data"
+
+_asm_intr_label:
+  .asciz "intr occurred\n"
+
 .globl _asm_intr_vecs
 _asm_intr_vecs:
 INTR_VEC_ENTRY(0x00, INTR_NOERR)
@@ -38,3 +64,13 @@ INTR_VEC_ENTRY(0x1f, INTR_NOERR)
 
 // IRQs
 INTR_VEC_ENTRY(0x20, INTR_NOERR)
+
+.section ".text"
+_asm_intr_exit:
+  popal
+  pop %gs
+  pop %fs
+  pop %es
+  pop %ds
+  addl $0x04, %esp
+  iret
