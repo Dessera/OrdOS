@@ -2,7 +2,7 @@
 #include "kernel/info.h"
 #include "kernel/mem.h"
 #include "kernel/disk.h"
-#include "kernel/screen.h"
+#include "kernel/device/vga.h"
 
 // print before protected mode
 #define LPRINT(str) movw str, %si; call _lprint
@@ -101,6 +101,7 @@ _ldr_error_hlt:
  */
 _lprint:
   pusha
+  cld
   movw $0x07, %bx
 _lprint_loop:
   lodsb
@@ -132,7 +133,10 @@ _prot_page_setup:
   movl $PAGE_TABLE_ADDR, %edi
   movl $PAGE_SIZE, %ecx
   movb $0x00, %al
+  
+  cld
   rep stosb
+
 _prot_page_init:
   // map first 4MB
   movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR)
@@ -206,8 +210,10 @@ _pclear:
   movw $GDT_VIDEO_SELECTOR, %ax
   movw %ax, %es
   movl $0x0, %edi
-  movl $SCREEN_WIDTH * SCREEN_HEIGHT, %ecx
+  movl $VGA_BUF_WIDTH * VGA_BUF_HEIGHT, %ecx
   movw $0x0720, %ax
+
+  cld
   rep stosw
 
   popw %ax
@@ -224,8 +230,9 @@ _pclear:
  */
 _pprint:
   pushal
+  cld
 
-  movl $SCREEN_WIDTH * 2, %ecx
+  movl $VGA_BUF_WIDTH * 2, %ecx
   mull %ecx
   movl %eax, %edx
   movw $GDT_VIDEO_SELECTOR, %ax

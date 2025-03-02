@@ -25,7 +25,7 @@ else
 CFLAGS += -Os
 endif
 
-ASFLAGS = $(CFLAGS)
+ASFLAGS = $(CFLAGS) -D __ASM__
 
 LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld

@@ -16,7 +16,6 @@ _bootsec_start:
 
   // disable interrupts because they're not ready
   cli
-  cld
 
   BPRINT($_bsd_welcome)
   BPRINT($_bsd_loading_indicator)
@@ -45,6 +44,7 @@ _bs_load_ldr_done:
  */
 _bprint:
   pusha
+  cld
   movw $0x07, %bx
 _bprint_loop:
   lodsb
