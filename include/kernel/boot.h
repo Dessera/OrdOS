@@ -1,6 +1,10 @@
 #pragma once
 
 #include "config.h"
+#include "kernel/mem.h"
+
+// Address of the kernel base
+#define KERNELBASE (PDE_KERNEL_OFFSET << 20)
 
 // Real address of the LDR entry
 #define LDRENTRY_ADDR (LDRSEC_ADDR + LDRENTRY_OFFSET)
@@ -9,7 +13,7 @@
 #define KERNELENTRY_ADDR (KERNELBASE + KERNELSEC_ADDR)
 
 // LDR sector start
-#define LDRSTART (MBRSIZE)
+#define LDRSTART 0x01
 
 // Kernel sector start
 #define KERNELSTART (LDRSTART + LDRSIZE)

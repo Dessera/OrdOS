@@ -168,8 +168,6 @@ _prot_kernel_mem_loop:
 
   movl (_gdt_table_ptr + 2), %ebx
   orl $KERNELBASE, GDT_VIDEO_SELECTOR + 4(%ebx)
-  orl $KERNELBASE, GDT_CODE_SELECTOR + 4(%ebx)
-  orl $KERNELBASE, GDT_DATA_SELECTOR + 4(%ebx)
 
   addl $KERNELBASE, (_gdt_table_ptr + 2)
   addl $KERNELBASE, %esp
@@ -193,7 +191,6 @@ _prot_kernel_mem_loop:
 
   // jump to kernel
   movl $KERNELBASE + 0x9f000, %esp
-  xorl %ebp, %ebp
   call kmain
 
 _prot_error_hlt:
@@ -204,12 +201,18 @@ _prot_error_hlt:
  * Clear screen
  */
 _pclear:
-  pusha
-  movl $SCREEN_BUFFER_ADDR, %edi
+  pushl %eax
+  pushw %es
+  movw $GDT_VIDEO_SELECTOR, %ax
+  movw %ax, %es
+  movl $0x0, %edi
   movl $SCREEN_WIDTH * SCREEN_HEIGHT, %ecx
-  movb $0x0, %al
-  rep stosb
-  popa
+  movw $0x0720, %ax
+  rep stosw
+
+  popw %ax
+  movw %ax, %es
+  popl %eax
   ret
 
 /*
@@ -220,12 +223,13 @@ _pclear:
  *    %eax = line number
  */
 _pprint:
-  pusha
+  pushal
 
-  movl $SCREEN_WIDTH, %ecx
+  movl $SCREEN_WIDTH * 2, %ecx
   mull %ecx
-  movl $SCREEN_BUFFER_ADDR, %edx
-  addl %eax, %edx
+  movl %eax, %edx
+  movw $GDT_VIDEO_SELECTOR, %ax
+  movw %ax, %gs
 
   movl $0x0, %ecx
 _pprint_loop:
@@ -233,11 +237,11 @@ _pprint_loop:
   andb %al, %al
   jz _pprint_done
   movb $0x0f, %ah
-  movw %ax, (%edx, %ecx, 2)
+  movw %ax, %gs:(%edx, %ecx, 2)
   incl %ecx
   jmp _pprint_loop
 _pprint_done:
-  popa
+  popal
   ret
 
 /*
@@ -249,7 +253,7 @@ _pprint_done:
  *   %edi = destination buffer
  */
 _prot_load_kernel:
-  pusha
+  pushal
 
   call _prot_disk_wait
 
@@ -291,9 +295,14 @@ _prot_load_kernel:
   mull %ebx
   movw $DISK_PORT_DATA, %dx
   movl %eax, %ecx
-  rep insl
+_prot_load_kernel_loop:
+  call _prot_disk_wait
+  inl %dx, %eax
+  movl %eax, (%edi)
+  addl $4, %edi
+  loop _prot_load_kernel_loop
 
-  popa
+  popal
   ret
 
 /*

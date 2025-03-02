@@ -10,6 +10,8 @@ typedef signed short i16;
 typedef signed int i32;
 typedef signed long long i64;
 
+typedef u32 size_t;
+
 typedef u8 bool;
 
 #ifndef true

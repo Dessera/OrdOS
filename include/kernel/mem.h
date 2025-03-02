@@ -72,4 +72,4 @@
 
 #define PDE_DESC(base, p, w, u) ((base) | PDE_P(p) | PDE_RW(w) | PDE_US(u))
 
-#define PDE_KERNEL_OFFSET (KERNELBASE >> 20)
+#define PDE_KERNEL_OFFSET (PAGE_SIZE - (PAGE_SIZE >> KERNEL_MEM_FACTOR))
