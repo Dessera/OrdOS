@@ -12,7 +12,7 @@ typedef signed long long i64;
 
 typedef u32 size_t;
 
-typedef u8 bool;
+typedef _Bool bool;
 
 #ifndef true
 #define true (1)

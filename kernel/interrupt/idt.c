@@ -12,15 +12,6 @@ extern void* _asm_intr_vecs[IDT_SIZE];
 
 static struct idt_desc_t idt[IDT_SIZE];
 
-void
-intr_common_handler(u32 irq)
-{
-  if (irq == 0x27 || irq == 0x2f) { // Ignore certain interrupts
-    return;
-  }
-  kputchar('.');
-}
-
 static void
 mkidt_desc(struct idt_desc_t* idt_desc, u16 sel, u32 offs, u8 attr)
 {
@@ -45,11 +36,42 @@ init_idt_desc(void)
 void
 init_idt(void)
 {
+  kputs("Initializing IDT...\n");
+
   init_idt_desc();
   init_pci();
 
   u64 idt_ptr = MK_IDT_PTR(idt);
-
   lidt(idt_ptr);
-  sti();
+
+  set_intr_status(true);
+}
+
+void
+intr_common_handler(u32 irq)
+{
+  if (irq == 0x27 || irq == 0x2f) { // Ignore certain interrupts
+    return;
+  }
+  kputchar('.');
+}
+
+bool
+get_intr_status(void)
+{
+  return (eflags() & INTR_STATUS_MASK) ? true : false;
+}
+
+bool
+set_intr_status(bool status)
+{
+  bool old_status = get_intr_status();
+
+  if (status && !old_status) {
+    sti();
+  } else if (!status && old_status) {
+    cli();
+  }
+
+  return old_status;
 }

@@ -52,3 +52,13 @@ lidt(u64 idt_ptr)
 {
   __asm__ volatile("lidt %0" : : "m"(idt_ptr));
 }
+
+static inline u32
+eflags(void)
+{
+  u32 eflags = 0;
+  __asm__ volatile("pushfl;"
+                   "popl %0"
+                   : "=g"(eflags));
+  return eflags;
+}

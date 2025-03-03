@@ -12,4 +12,4 @@
 void
 init_pci(void);
 
-#endif /* __ASM__ */
+#endif
