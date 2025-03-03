@@ -6,9 +6,11 @@ BUILD_DIR = build
 BOOT_DIR = boot
 KERNEL_DIR = kernel
 INCLUDE_DIR = include
+TEST_DIR = test
 
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
+TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 
 DEBUG = 1
 TRACE =
@@ -87,4 +89,8 @@ qemu: $(TARGET)
 endif
 
 rebuild: clean all
+# 	-----------------------------------------------
+
+# 	-------------------- TESTER -------------------
+include test/Makefile
 # 	-----------------------------------------------

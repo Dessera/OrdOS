@@ -1,7 +1,7 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/device/pci.h"
 #include "kernel/mem.h"
-#include "kernel/types.h"
+#include "kernel/stddef.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 

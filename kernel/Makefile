@@ -1,6 +1,6 @@
 interrupt_targets := vecs.o idt.o
 device_targets := pci.o sys_clk.o vga.o
-utils_targets := print.o mm.o
+utils_targets := print.o mm.o string.o
 
 kernel_targets := entry.o assert.o
 

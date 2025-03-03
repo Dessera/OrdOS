@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "kernel/stddef.h"
 
 size_t
 kputs(const char* str);
@@ -9,7 +9,7 @@ size_t
 kput_u32(u32 num);
 
 size_t
-kputchar(u8 c);
+kputchar(char c);
 
 void
 kscrclear(void);

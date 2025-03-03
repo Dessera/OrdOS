@@ -1,9 +1,8 @@
-#include "kernel/assert.h"
 #include "kernel/device/sys_clk.h"
 #include "kernel/device/vga.h"
 #include "kernel/info.h"
 #include "kernel/interrupt/idt.h"
-#include "kernel/types.h"
+#include "kernel/stddef.h"
 #include "kernel/utils/print.h"
 
 void

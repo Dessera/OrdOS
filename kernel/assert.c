@@ -1,6 +1,6 @@
 #include "kernel/assert.h"
 #include "kernel/interrupt/idt.h"
-#include "kernel/types.h"
+#include "kernel/stddef.h"
 #include "kernel/utils/print.h"
 void
 kernel_panic_handler(u32 line,

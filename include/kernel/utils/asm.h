@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "kernel/stddef.h"
 
 static inline void
 outb(u16 port, u8 data)
@@ -61,4 +61,10 @@ eflags(void)
                    "popl %0"
                    : "=g"(eflags));
   return eflags;
+}
+
+static inline void
+hlt(void)
+{
+  __asm__ volatile("hlt");
 }

@@ -68,7 +68,7 @@ kput_u32(u32 num)
 }
 
 size_t
-kputchar(u8 c)
+kputchar(char c)
 {
   u16 cursor = kVGA_GET_CURSOR();
   switch (c) {
