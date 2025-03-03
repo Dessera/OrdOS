@@ -1,26 +1,13 @@
 #include "kernel/utils/string.h"
 #include "kernel/assert.h"
-#include "kernel/device/vga.h"
-#include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
 void
-kmain(void);
-
-static void
-kinit(void)
-{
-  init_vga();
-}
+ktester(void);
 
 void
-kmain(void)
+ktester(void)
 {
-
-  kinit();
-
-  // declare this in the stack
-  // char buf[50] = { 0 };
   char buf[50];
   const char* str = "Hello, world!";
   const char* str2 = "Hello, xorld!";
@@ -52,8 +39,4 @@ kmain(void)
 
   // test kstrchrs
   KASSERT(kstrchrs(str, 'l') == 3);
-
-  kputs("All tests passed!");
-
-  hlt();
 }

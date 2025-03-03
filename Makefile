@@ -89,6 +89,7 @@ rebuild: clean all
 
 # 	-------------------- TESTER -------------------
 test_targets := $(filter-out $(KERNEL_DIR)/entry.o,$(targets))
+test_targets += $(TEST_DIR)/tester.o
 test_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(test_targets))
 
 include test/Makefile
