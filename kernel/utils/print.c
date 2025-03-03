@@ -70,7 +70,7 @@ kput_u32(u32 num)
 size_t
 kputchar(char c)
 {
-  u16 cursor = kVGA_GET_CURSOR();
+  u16 cursor = kget_cursor();
   switch (c) {
     case '\n':
       cursor = __kputlf(cursor);
@@ -109,7 +109,7 @@ kscrclear(void)
 }
 
 u16
-kVGA_GET_CURSOR(void)
+kget_cursor(void)
 {
   outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
   u8 cursor_hb = inb(VGA_PORT_DATA);

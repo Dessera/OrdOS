@@ -18,7 +18,7 @@ void
 kscrscroll(size_t rows);
 
 u16
-kVGA_GET_CURSOR(void);
+kget_cursor(void);
 
 void
 kset_cursor(u16 cur);
