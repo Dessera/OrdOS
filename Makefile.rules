@@ -1,9 +1,0 @@
-$(BUILD_DIR)/%.o: %.S
-	@mkdir -p $(dir $@)
-	$(hide)$(CC) $(ASFLAGS) -c $< -o $@
-	@echo "	[AS] $<"
-
-$(BUILD_DIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(hide)$(CC) $(CFLAGS) -c $< -o $@
-	@echo "	[CC] $<"

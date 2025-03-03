@@ -46,14 +46,6 @@ endif
 
 all: $(TARGET)
 
-clean:
-	$(hide)rm -rf $(BUILD_DIR)
-	@echo "	[RM] $(BUILD_DIR)"
-
-
-include Makefile.rules
-
-
 # 	-------------------- BOOT ---------------------
 include boot/Makefile
 
@@ -88,9 +80,41 @@ qemu: $(TARGET)
 	qemu-system-i386 -drive format=raw,file=$(TARGET)
 endif
 
+clean:
+	$(hide)rm -rf $(BUILD_DIR)
+	@echo "	[RM] $(BUILD_DIR)"
+
 rebuild: clean all
 # 	-----------------------------------------------
 
 # 	-------------------- TESTER -------------------
+test_targets := $(filter-out $(KERNEL_DIR)/entry.o,$(targets))
+test_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(test_targets))
+
 include test/Makefile
+
+test: $(patsubst %, $(TEST_TARGET_DIR)/%,$(test_entries))
+
+# makefile remove them for unknown reason (at least idk)
+# use this to prevent it
+test_entry_objs := $(patsubst %, $(TEST_TARGET_DIR)/%.o,$(test_entries))
+.PRECIOUS: $(test_entry_objs)
+# 	-----------------------------------------------
+
+# 	-------------------- RULES --------------------
+$(BUILD_DIR)/%.o: %.S
+	@mkdir -p $(dir $@)
+	$(hide)$(CC) $(ASFLAGS) -c $< -o $@
+	@echo "	[AS] $<"
+
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(hide)$(CC) $(CFLAGS) -c $< -o $@
+	@echo "	[CC] $<"
+
+.PRECIOUS: $(TEST_TARGET_DIR)/utils/string.o
+
+$(TEST_TARGET_DIR)/%: $(TEST_TARGET_DIR)/%.o $(LDSCRIPT) $(test_objs)
+	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(test_objs) $<
+	@echo "	[TESTER] $@"
 # 	-----------------------------------------------
