@@ -56,6 +56,7 @@
                       nixfmt-rfc-style
                       bear
                       gdb
+                      qemu
                     ])
                     ++ [
                       clang-tools

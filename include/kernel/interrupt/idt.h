@@ -24,4 +24,4 @@ void
 init_idt(void);
 
 void
-common_intr_handler(u32 irq);
+intr_common_handler(u32 irq);

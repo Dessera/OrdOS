@@ -1,3 +1,5 @@
+#include "kernel/device/pci.h"
+
 #define INTR_ERR nop
 #define INTR_NOERR pushl $0
 
@@ -7,18 +9,8 @@
 .section ".text";                                                              \
 INTR_VEC_ID(index):;                                                           \
   err;                                                                         \
-  push %ds;                                                                    \
-  push %es;                                                                    \
-  push %fs;                                                                    \
-  push %gs;                                                                    \
-  pushal;                                                                      \
-  movb $0x20, %al;                                                             \
-  outb %al, $0x0a;                                                             \
-  outb %al, $0x20;                                                             \
   pushl $index;                                                                \
-  call common_intr_handler;                                                    \
-  addl $0x04, %esp;                                                            \
-  jmp _asm_intr_exit;                                                          \
+  jmp _asm_intr_common_handler;                                                \
 .section ".data";                                                              \
   .long INTR_VEC_ID(index)
 
@@ -62,11 +54,32 @@ INTR_VEC_ENTRY(0x1f, INTR_NOERR)
 INTR_VEC_ENTRY(0x20, INTR_NOERR)
 
 .section ".text"
-_asm_intr_exit:
-  popal
-  pop %gs
-  pop %fs
-  pop %es
-  pop %ds
+
+_asm_intr_common_handler:
+  pushl %ds
+  pushl %es
+  pushl %fs
+  pushl %gs
+  pushal
+  // get index and repush it for later
+  mov 0x30(%esp), %eax
+  pushl %eax
+  movb $PIC_EOI, %al
+  outb %al, $PIC_MASTER_CMD
+  outb %al, $PIC_SLAVE_CMD
+
+  // call c handler with intr index
+  call intr_common_handler
+
+  // pop index
   addl $0x04, %esp
+  
+  popal
+  popl %gs
+  popl %fs
+  popl %es
+  popl %ds
+
+  // pop index & err
+  addl $0x08, %esp
   iret

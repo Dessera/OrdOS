@@ -5,12 +5,15 @@
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
+#define MK_IDT_PTR(idt_addr)                                                   \
+  (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))
+
 extern void* _asm_intr_vecs[IDT_SIZE];
 
 static struct idt_desc_t idt[IDT_SIZE];
 
 void
-common_intr_handler(u32 irq)
+intr_common_handler(u32 irq)
 {
   if (irq == 0x27 || irq == 0x2f) { // Ignore certain interrupts
     return;
@@ -45,8 +48,8 @@ init_idt(void)
   init_idt_desc();
   init_pci();
 
-  u64 idt_ptr = ((u64)(u32)idt << 16) | (sizeof(idt) - 1);
-  __asm__ volatile("lidt %0" : : "m"(idt_ptr));
+  u64 idt_ptr = MK_IDT_PTR(idt);
 
+  lidt(idt_ptr);
   sti();
 }

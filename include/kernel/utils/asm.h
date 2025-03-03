@@ -46,3 +46,9 @@ cli(void)
 {
   __asm__ volatile("cli");
 }
+
+static inline void
+lidt(u64 idt_ptr)
+{
+  __asm__ volatile("lidt %0" : : "m"(idt_ptr));
+}
