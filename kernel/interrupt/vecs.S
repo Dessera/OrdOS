@@ -23,10 +23,6 @@ INTR_VEC_ID(index):;                                                           \
   .long INTR_VEC_ID(index)
 
 .section ".data"
-
-_asm_intr_label:
-  .asciz "intr occurred\n"
-
 .globl _asm_intr_vecs
 _asm_intr_vecs:
 INTR_VEC_ENTRY(0x00, INTR_NOERR)
