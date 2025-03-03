@@ -1,6 +1,5 @@
 #include "kernel/utils/string.h"
 #include "kernel/assert.h"
-#include "kernel/utils/print.h"
 
 void
 ktester(void);
