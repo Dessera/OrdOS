@@ -8,6 +8,11 @@
     (type*)((char*)__mptr - OFFSET_OF(type, member));                          \
   })
 
+#define VA_LIST __builtin_va_list
+#define VA_START __builtin_va_start
+#define VA_END __builtin_va_end
+#define VA_ARG __builtin_va_arg
+
 #ifndef NULL
 #define NULL ((void*)0)
 #endif

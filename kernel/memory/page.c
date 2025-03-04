@@ -1,8 +1,13 @@
 #include "kernel/memory/page.h"
 #include "common.h"
+#include "kernel/assert.h"
 #include "kernel/config/memory.h"
+#include "kernel/types.h"
 #include "kernel/utils/bitmap.h"
+#include "kernel/utils/mm.h"
 #include "kernel/utils/print.h"
+
+#define CHK_ALLOC_SIZE(size) (size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC)
 
 struct pmempool
 {
@@ -49,10 +54,79 @@ init_mempool(void)
               kbitmap_size);
 }
 
+static void*
+alloc_vmem_page(size_t size)
+{
+  ssize_t index = bitmap_alloc(&kvmmap.vmmap, size);
+  if (index == -1) {
+    return NULL;
+  }
+  return (void*)(kvmmap.vstart + index * MEM_PAGE_SIZE);
+}
+
+static void*
+alloc_pmem_page(struct pmempool* pool)
+{
+  ssize_t index = bitmap_alloc(&pool->pmmap, 1);
+  if (index == -1) {
+    return NULL;
+  }
+  return (void*)(pool->pstart + index * MEM_PAGE_SIZE);
+}
+
+static void
+link_mem_page(void* paddr, void* vaddr)
+{
+  u32* pde = PAGE_GET_PDE((u32)vaddr);
+  u32* pte = PAGE_GET_PTE((u32)vaddr);
+
+  KASSERT_MSG(!(*pte & PAGE_PTE_P_MASK), "Duplicate page table allocation");
+
+  if (*pde & PAGE_PDE_P_MASK) {
+    if (!(*pte & PAGE_PTE_P_MASK)) {
+      *pte = PAGE_PTE_DESC((u32)paddr, 1, 1, 1);
+    }
+  } else {
+    void* new_page = alloc_pmem_page(&kmem_pool);
+
+    *pde = PAGE_PDE_DESC((u32)new_page, 1, 1, 1);
+
+    kmemset(pte, 0, MEM_PAGE_SIZE);
+    *pte = PAGE_PTE_DESC((u32)paddr, 1, 1, 1);
+  }
+}
+
 void
 init_mm(void)
 {
   kputs("Initializing memory management...\n");
 
   init_mempool();
+}
+
+void*
+alloc_page(size_t size)
+{
+  KASSERT(CHK_ALLOC_SIZE(size));
+
+  void* vm_addr = alloc_vmem_page(size);
+  if (vm_addr == NULL) {
+    return NULL;
+  }
+
+  void* vmaddr_start = vm_addr;
+  while (size > 0) {
+    void* pm_addr = alloc_pmem_page(&kmem_pool);
+    if (pm_addr == NULL) {
+      // TODO: revert all allocations
+      return NULL;
+    }
+
+    link_mem_page(pm_addr, vm_addr);
+
+    vm_addr += MEM_PAGE_SIZE;
+    size--;
+  }
+
+  return vmaddr_start;
 }

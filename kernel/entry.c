@@ -28,6 +28,18 @@ kmain(void)
 {
   kinit();
 
+  void* mm = alloc_page(1);
+  kput_u32((u32)mm);
+  kputchar('\n');
+
+  void* mm2 = alloc_page(5);
+  kput_u32((u32)mm2);
+  kputchar('\n');
+
+  void* mm3 = alloc_page(3);
+  kput_u32((u32)mm3);
+  kputchar('\n');
+
   while (true) {
     hlt();
   }

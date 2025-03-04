@@ -1,4 +1,5 @@
 #include "kernel/interrupt/idt.h"
+#include "kernel/config/interrupt.h"
 #include "kernel/device/pci.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/types.h"
@@ -13,9 +14,9 @@
 void
 intr_common_handler(u32 irq);
 
-extern void* _asm_intr_vecs[IDT_SIZE];
+extern void* _asm_intr_vecs[INTR_IDT_SIZE];
 
-static struct idt_desc_t idt[IDT_SIZE];
+static struct idt_desc_t idt[INTR_IDT_SIZE];
 
 static void
 mkidt_desc(struct idt_desc_t* idt_desc, u16 sel, u32 offs, u8 attr)
@@ -30,7 +31,7 @@ mkidt_desc(struct idt_desc_t* idt_desc, u16 sel, u32 offs, u8 attr)
 static void
 init_idt_desc(void)
 {
-  for (u16 i = 0; i < IDT_SIZE; i++) {
+  for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
     mkidt_desc(&idt[i],
                GDT_CODE_SELECTOR,
                (u32)_asm_intr_vecs[i],

@@ -6,9 +6,18 @@
 #define PAGE_PDE_DESC_SIZE 4
 #define PAGE_PTE_DESC_SIZE PAGE_PDE_DESC_SIZE
 
+#define PAGE_PDE_VSTART 0xfffff000
+#define PAGE_PTE_VSTART 0xffc00000
+
+#define PAGE_PDE_MASK 0xffc00000
+#define PAGE_PTE_MASK 0x003ff000
+
 #define PAGE_PDE_P(sign) (sign)
 #define PAGE_PDE_RW(sign) ((sign) << 1)
 #define PAGE_PDE_US(sign) ((sign) << 2)
+
+#define PAGE_PDE_P_MASK (PAGE_PDE_P(1))
+#define PAGE_PTE_P_MASK PAGE_PDE_P_MASK
 
 #define PAGE_PDE_DESC(base, p, w, u)                                           \
   ((base) | PAGE_PDE_P(p) | PAGE_PDE_RW(w) | PAGE_PDE_US(u))
@@ -17,6 +26,15 @@
 #define PAGE_TABLE_INDEX(index) ((index) * MEM_PAGE_SIZE + MEM_PAGE_TABLE_START)
 
 #define PAGE_PDE_KERNEL_OFFSET (MEM_KERNEL_VSTART >> 20)
+
+#define PAGE_PDE_INDEX(vaddr) (((vaddr) & PAGE_PDE_MASK) >> 22)
+#define PAGE_PTE_INDEX(vaddr) (((vaddr) & PAGE_PTE_MASK) >> 12)
+
+#define PAGE_GET_PDE(vaddr)                                                    \
+  ((u32*)(PAGE_PDE_INDEX(vaddr) * 4 + PAGE_PDE_VSTART))
+#define PAGE_GET_PTE(vaddr)                                                    \
+  ((u32*)(PAGE_PTE_INDEX(vaddr) * 4 + PAGE_PTE_VSTART +                        \
+          ((vaddr & PAGE_PDE_MASK) >> 10)))
 
 #define PAGE_INITIAL_ENTRIES                                                   \
   ((MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET) / PAGE_PDE_DESC_SIZE)

@@ -1,5 +1,6 @@
 #include "kernel/utils/print.h"
 #include "kernel/device/vga.h"
+#include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/mm.h"
 

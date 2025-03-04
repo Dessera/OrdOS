@@ -3,7 +3,6 @@
 #include "kernel/assert.h"
 #include "kernel/types.h"
 
-#define IDT_SIZE 0x21
 #define IDT_TYPE_INTR 0xe
 #define IDT_TYPE_TRAP 0x6
 
