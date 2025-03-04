@@ -19,9 +19,10 @@ TESTER =
 
 INCFLAGS = -I$(INCLUDE_DIR)
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -mno-sse	\
-					-fno-builtin -fno-pie -fno-pic -fno-stack-protector -nostdinc			\
-					-nostdlib -m32 $(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
+CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -std=c11		\
+					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
+					-nostdinc -nostdlib -m32 																						\
+					$(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
 
 ifneq ($(DEBUG),)
 CFLAGS += -g -O0 -D DEBUG
