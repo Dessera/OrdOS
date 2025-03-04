@@ -3,7 +3,7 @@
 #include "kernel/info.h"
 #include "kernel/interrupt/idt.h"
 #include "kernel/memory/page.h"
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 

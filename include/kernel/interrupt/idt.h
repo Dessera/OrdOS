@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/assert.h"
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 
 #define IDT_SIZE 0x21
 #define IDT_TYPE_INTR 0xe
@@ -11,8 +11,6 @@
 #define IDT_DPL_USER 3
 
 #define IDT_DESC_ATTR(p, dpl, type) ((p << 7) | (dpl << 5) | (type))
-
-#define INTR_STATUS_MASK 0x200
 
 struct idt_desc_t
 {

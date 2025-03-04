@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 
 /**
  * @brief Bitmap data structure

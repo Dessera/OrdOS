@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 
 #ifdef DEBUG
 #define KASSERT(expr)                                                          \

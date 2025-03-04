@@ -1,12 +1,14 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/device/pci.h"
 #include "kernel/memory/gdt.h"
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
 #define MK_IDT_PTR(idt_addr)                                                   \
   (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))
+
+#define INTR_STATUS_MASK 0x200
 
 void
 intr_common_handler(u32 irq);

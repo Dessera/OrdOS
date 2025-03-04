@@ -1,7 +1,7 @@
 #include "kernel/utils/mm.h"
 #include "kernel/assert.h"
-#include "kernel/stddef.h"
-#include <kernel/stddef.h>
+#include "kernel/types.h"
+#include <kernel/types.h>
 
 void
 kmemcpy(void* dest, const void* src, size_t n)

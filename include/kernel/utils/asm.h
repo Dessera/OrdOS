@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 
 static inline void
 outb(u16 port, u8 data)

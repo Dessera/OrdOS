@@ -27,7 +27,7 @@
 
 #ifndef __ASM__
 
-#include "kernel/stddef.h"
+#include "kernel/types.h"
 #include "kernel/utils/bitmap.h"
 
 struct vmem_map
@@ -38,5 +38,8 @@ struct vmem_map
 
 void
 init_mm(void);
+
+void*
+alloc_page(size_t size);
 
 #endif
