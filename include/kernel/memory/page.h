@@ -11,6 +11,7 @@
 
 #define PAGE_PDE_MASK 0xffc00000
 #define PAGE_PTE_MASK 0x003ff000
+#define PAGE_ADDR_MASK 0x00000fff
 
 #define PAGE_PDE_P(sign) (sign)
 #define PAGE_PDE_RW(sign) ((sign) << 1)
@@ -27,14 +28,18 @@
 
 #define PAGE_PDE_KERNEL_OFFSET (MEM_KERNEL_VSTART >> 20)
 
-#define PAGE_PDE_INDEX(vaddr) (((vaddr) & PAGE_PDE_MASK) >> 22)
-#define PAGE_PTE_INDEX(vaddr) (((vaddr) & PAGE_PTE_MASK) >> 12)
+#define PAGE_PDE_INDEX(vaddr) (((u32)(vaddr) & PAGE_PDE_MASK) >> 22)
+#define PAGE_PTE_INDEX(vaddr) (((u32)(vaddr) & PAGE_PTE_MASK) >> 12)
 
 #define PAGE_GET_PDE(vaddr)                                                    \
   ((u32*)(PAGE_PDE_INDEX(vaddr) * 4 + PAGE_PDE_VSTART))
 #define PAGE_GET_PTE(vaddr)                                                    \
   ((u32*)(PAGE_PTE_INDEX(vaddr) * 4 + PAGE_PTE_VSTART +                        \
-          ((vaddr & PAGE_PDE_MASK) >> 10)))
+          (((u32)vaddr & PAGE_PDE_MASK) >> 10)))
+
+#define PAGE_VADDR_TO_PADDR(vaddr)                                             \
+  ((void*)((*PAGE_GET_PTE(vaddr) & PAGE_PDE_VSTART) +                          \
+           ((u32)vaddr & PAGE_ADDR_MASK)))
 
 #define PAGE_INITIAL_ENTRIES                                                   \
   ((MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET) / PAGE_PDE_DESC_SIZE)
@@ -59,5 +64,8 @@ init_mm(void);
 
 void*
 alloc_page(size_t size);
+
+void
+free_page(void* addr, size_t size);
 
 #endif

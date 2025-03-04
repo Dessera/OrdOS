@@ -40,6 +40,12 @@ kmain(void)
   kput_u32((u32)mm3);
   kputchar('\n');
 
+  free_page(mm2, 8);
+
+  void* mm4 = alloc_page(3);
+  kput_u32((u32)mm4);
+  kputchar('\n');
+
   while (true) {
     hlt();
   }

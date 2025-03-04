@@ -3,11 +3,10 @@
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/types.h"
+#include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/mm.h"
 #include "kernel/utils/print.h"
-
-#define CHK_ALLOC_SIZE(size) (size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC)
 
 struct pmempool
 {
@@ -64,10 +63,19 @@ alloc_vmem_page(size_t size)
   return (void*)(kvmmap.vstart + index * MEM_PAGE_SIZE);
 }
 
+static void
+free_vmem_page(void* vaddr, size_t size)
+{
+  size_t index = ((u32)vaddr - kvmmap.vstart) / MEM_PAGE_SIZE;
+  for (size_t i = 0; i < size; i++) {
+    bitmap_set(&kvmmap.vmmap, index + i, false);
+  }
+}
+
 static void*
 alloc_pmem_page(struct pmempool* pool)
 {
-  ssize_t index = bitmap_alloc(&pool->pmmap, 1);
+  ssize_t index = bitmap_alloc(&pool->pmmap, true);
   if (index == -1) {
     return NULL;
   }
@@ -75,10 +83,17 @@ alloc_pmem_page(struct pmempool* pool)
 }
 
 static void
+free_pmem_page(struct pmempool* pool, void* paddr)
+{
+  size_t index = ((u32)paddr - pool->pstart) / MEM_PAGE_SIZE;
+  bitmap_set(&pool->pmmap, index, false);
+}
+
+static void
 link_mem_page(void* paddr, void* vaddr)
 {
-  u32* pde = PAGE_GET_PDE((u32)vaddr);
-  u32* pte = PAGE_GET_PTE((u32)vaddr);
+  u32* pde = PAGE_GET_PDE(vaddr);
+  u32* pte = PAGE_GET_PTE(vaddr);
 
   KASSERT_MSG(!(*pte & PAGE_PTE_P_MASK), "Duplicate page table allocation");
 
@@ -96,6 +111,14 @@ link_mem_page(void* paddr, void* vaddr)
   }
 }
 
+static void
+unlink_mem_page(void* vaddr)
+{
+  u32* pte = PAGE_GET_PTE(vaddr);
+  *pte &= ~PAGE_PDE_P(0);
+  invlpg(vaddr);
+}
+
 void
 init_mm(void)
 {
@@ -107,7 +130,7 @@ init_mm(void)
 void*
 alloc_page(size_t size)
 {
-  KASSERT(CHK_ALLOC_SIZE(size));
+  KASSERT(size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC);
 
   void* vm_addr = alloc_vmem_page(size);
   if (vm_addr == NULL) {
@@ -129,4 +152,31 @@ alloc_page(size_t size)
   }
 
   return vmaddr_start;
+}
+
+void
+free_page(void* vaddr, size_t size)
+{
+  KASSERT(((u32)vaddr & MEM_PAGE_SIZE) == 0);
+  void* paddr = PAGE_VADDR_TO_PADDR(vaddr);
+  KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
+          (u32)paddr >= KMEMMB(1) + KMEMKB(1));
+
+  void* vaddr_start = vaddr;
+  if ((u32)paddr >= umem_pool.pstart) {
+    // TODO: free user memory
+  } else {
+    for (size_t i = 0; i < size; i++) {
+      paddr = PAGE_VADDR_TO_PADDR(vaddr);
+      KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
+              (u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart);
+
+      free_pmem_page(&kmem_pool, paddr);
+      unlink_mem_page(vaddr);
+
+      vaddr += MEM_PAGE_SIZE;
+    }
+
+    free_vmem_page(vaddr_start, size);
+  }
 }

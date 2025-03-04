@@ -68,3 +68,9 @@ hlt(void)
 {
   __asm__ volatile("hlt");
 }
+
+static inline void
+invlpg(void* addr)
+{
+  __asm__ volatile("invlpg %0" : : "m"(addr) : "memory");
+}
