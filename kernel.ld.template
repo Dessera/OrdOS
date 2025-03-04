@@ -1,4 +1,4 @@
-#include "config.h"
+#include "kernel/config/general.h"
 #include "kernel/boot.h"
 
 OUTPUT_FORMAT("binary")

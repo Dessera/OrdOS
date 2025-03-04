@@ -1,8 +1,12 @@
 #include "kernel/boot.h"
 #include "kernel/info.h"
-#include "kernel/mem.h"
+#include "kernel/memory/gdt.h"
+#include "kernel/memory/page.h"
 #include "kernel/disk.h"
 #include "kernel/device/vga.h"
+
+#define E820MAGIC 0x534d4150
+#define E820FUNC 0xe820
 
 // print before protected mode
 #define LPRINT(str) movw str, %si; call _lprint
@@ -27,10 +31,13 @@ _gdt_table_ptr:
   .long _gdt_table
 
   // ards buffer 244 bytes
-_ards_buf:
+_asm_mem_zone:
   .space 0xf4
-_ards_nr:
+_asm_mem_nr:
   .word 0
+.globl _asm_mem_bytes
+_asm_mem_bytes:
+  .long 0
 
 .org LDRENTRY_OFFSET
 .globl _start
@@ -41,19 +48,19 @@ _start:
 
   xorl %ebx, %ebx
   movl $E820MAGIC, %edx
-  movw $_ards_buf, %di
+  movw $_asm_mem_zone, %di
 _ldr_fetch_ards:
   movl $E820FUNC, %eax
   movl $0x14, %ecx
   int $0x15
   jc _ldr_mem_error
   addw %cx, %di
-  incw _ards_nr
+  incw _asm_mem_nr
   cmpl $0x00, %ebx
   jnz _ldr_fetch_ards
 
-  movw (_ards_nr), %cx
-  movl $_ards_buf, %ebx
+  movw (_asm_mem_nr), %cx
+  movl $_asm_mem_zone, %ebx
   xorl %edx, %edx
 _ldr_find_mem:
   movl (%ebx), %eax
@@ -72,6 +79,7 @@ _ldr_mem_error:
 
   jmp _ldr_error_hlt
 _ldr_mem_ok:
+  movl %edx, _asm_mem_bytes
 
   // enable A20
   inb $0x92, %al

@@ -1,4 +1,4 @@
 
 
-test_entries := utils/string
+test_entries := utils/string utils/bitmap
 

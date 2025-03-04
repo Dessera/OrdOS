@@ -39,9 +39,6 @@ KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, offs_hb) == 6,
 void
 init_idt(void);
 
-void
-intr_common_handler(u32 irq);
-
 bool
 get_intr_status(void);
 

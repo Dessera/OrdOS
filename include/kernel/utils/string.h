@@ -8,7 +8,7 @@ kstrcpy(char* dest, const char* src);
 size_t
 kstrlen(const char* str);
 
-i32
+ssize_t
 kstrcmp(const char* str1, const char* str2);
 
 char*

@@ -15,9 +15,11 @@ TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 DEBUG = 1
 TRACE =
 
+TESTER =
+
 INCFLAGS = -I$(INCLUDE_DIR)
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes					\
+CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -mno-sse	\
 					-fno-builtin -fno-pie -fno-pic -fno-stack-protector -nostdinc			\
 					-nostdlib -m32 $(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
 
@@ -67,7 +69,7 @@ $(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
 	@echo "	[CP] $(LDSCRIPT)"
 
 $(TARGET): $(final_objs) $(LDSCRIPT)
-	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(final_objs)
+	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(final_objs) -Map $(TARGET).map
 	@echo "	[LD] $(TARGET)"
 # 	-----------------------------------------------
 
@@ -100,6 +102,9 @@ test: $(patsubst %, $(TEST_TARGET_DIR)/%,$(test_entries))
 # use this to prevent it
 test_entry_objs := $(patsubst %, $(TEST_TARGET_DIR)/%.o,$(test_entries))
 .PRECIOUS: $(test_entry_objs)
+
+qemu_test: $(TEST_TARGET_DIR)/$(TESTER)
+	qemu-system-i386 -drive format=raw,file=$(TEST_TARGET_DIR)/$(TESTER)
 # 	-----------------------------------------------
 
 # 	-------------------- RULES --------------------
@@ -112,8 +117,6 @@ $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(hide)$(CC) $(CFLAGS) -c $< -o $@
 	@echo "	[CC] $<"
-
-.PRECIOUS: $(TEST_TARGET_DIR)/utils/string.o
 
 $(TEST_TARGET_DIR)/%: $(TEST_TARGET_DIR)/%.o $(LDSCRIPT) $(test_objs)
 	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(test_objs) $<

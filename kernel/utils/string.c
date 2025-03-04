@@ -1,5 +1,6 @@
 #include "kernel/utils/string.h"
 #include "kernel/assert.h"
+#include "kernel/stddef.h"
 
 char*
 kstrcpy(char* dest, const char* src)
@@ -22,7 +23,7 @@ kstrlen(const char* str)
   return str_ptr - str;
 }
 
-i32
+ssize_t
 kstrcmp(const char* str1, const char* str2)
 {
   KASSERT(str1 != NULL && str2 != NULL);

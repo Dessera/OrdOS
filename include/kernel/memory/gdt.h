@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #define GDT_G(sign) (sign << 7)
 #define GDT_G_1B GDT_G(0)
 #define GDT_G_4K GDT_G(1)
@@ -60,16 +58,3 @@
 #define GDT_CODE_SELECTOR 0x08
 #define GDT_DATA_SELECTOR 0x10
 #define GDT_VIDEO_SELECTOR 0x18
-
-#define E820MAGIC 0x534d4150
-#define E820FUNC 0xe820
-
-#define INDEX_PAGE_TABLE_ADDR(index) ((index) * PAGE_SIZE + PAGE_TABLE_ADDR)
-
-#define PDE_P(sign) (sign)
-#define PDE_RW(sign) (sign << 1)
-#define PDE_US(sign) (sign << 2)
-
-#define PDE_DESC(base, p, w, u) ((base) | PDE_P(p) | PDE_RW(w) | PDE_US(u))
-
-#define PDE_KERNEL_OFFSET (PAGE_SIZE - (PAGE_SIZE >> KERNEL_MEM_FACTOR))

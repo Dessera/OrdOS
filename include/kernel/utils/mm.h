@@ -22,5 +22,5 @@ kmemcpy(void* dest, const void* src, size_t n);
 void
 kmemset(void* dest, u8 c, size_t n);
 
-u32
+ssize_t
 kmemcmp(const void* s1, const void* s2, size_t n);

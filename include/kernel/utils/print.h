@@ -2,13 +2,13 @@
 
 #include "kernel/stddef.h"
 
-size_t
+void
 kputs(const char* str);
 
-size_t
+void
 kput_u32(u32 num);
 
-size_t
+void
 kputchar(char c);
 
 void

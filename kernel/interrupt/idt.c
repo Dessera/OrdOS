@@ -1,12 +1,15 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/device/pci.h"
-#include "kernel/mem.h"
+#include "kernel/memory/gdt.h"
 #include "kernel/stddef.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
 #define MK_IDT_PTR(idt_addr)                                                   \
   (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))
+
+void
+intr_common_handler(u32 irq);
 
 extern void* _asm_intr_vecs[IDT_SIZE];
 
@@ -50,10 +53,7 @@ init_idt(void)
 void
 intr_common_handler(u32 irq)
 {
-  if (irq == 0x27 || irq == 0x2f) { // Ignore certain interrupts
-    return;
-  }
-  kputchar('.');
+  (void)irq;
 }
 
 bool

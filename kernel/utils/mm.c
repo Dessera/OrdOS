@@ -24,7 +24,7 @@ kmemset(void* dest, u8 c, size_t n)
   }
 }
 
-u32
+ssize_t
 kmemcmp(const void* s1, const void* s2, size_t n)
 {
   KASSERT(s1 != NULL && s2 != NULL);

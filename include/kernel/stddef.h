@@ -2,6 +2,12 @@
 
 #define OFFSET_OF(type, member) __builtin_offsetof(type, member)
 
+#define container_of(ptr, type, member)                                        \
+  ({                                                                           \
+    const typeof(((type*)0)->member)* __mptr = (ptr);                          \
+    (type*)((char*)__mptr - OFFSET_OF(type, member));                          \
+  })
+
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
@@ -25,5 +31,11 @@ typedef signed int i32;
 typedef signed long long i64;
 
 typedef u32 size_t;
+typedef i32 ssize_t;
+
+#define MAX_SIZE_T ((size_t)-1)
+#define MIN_SIZE_T ((size_t)0)
+#define MAX_SSIZE_T ((ssize_t)0x7FFFFFFF)
+#define MIN_SSIZE_T ((ssize_t)0x80000000)
 
 typedef _Bool bool;

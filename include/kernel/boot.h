@@ -1,7 +1,7 @@
 #pragma once
 
-#include "config.h"
-#include "kernel/mem.h"
+#include "kernel/config/general.h"
+#include "kernel/config/memory.h"
 
 // Address of the kernel base
 #define KERNELBASE (PDE_KERNEL_OFFSET << 20)

@@ -6,9 +6,9 @@
 static u16
 __kputchar(u8 c, u16 cursor)
 {
-  __asm__ volatile("movw %%ax, (%%ebx)"
-                   :
-                   : "b"(VGA_GET_ADDR(cursor)), "a"(c | (0x07 << 8)));
+  u16 payload = (u16)c | (0x07 << 8);
+  u16* addr = (u16*)VGA_GET_ADDR(cursor);
+  *addr = payload;
 
   return cursor + 1;
 }
@@ -47,27 +47,26 @@ kscrscroll(size_t rows)
           VGA_GET_BUF_SIZE(rows));
 }
 
-size_t
+void
 kputs(const char* str)
 {
-  size_t len = 0;
   while (*str != '\0') {
-    len += kputchar(*str++);
+    kputchar(*str++);
   }
-  return len;
 }
 
-size_t
+void
 kput_u32(u32 num)
 {
   if (num < 10) {
-    return kputchar(num + '0');
+    kputchar(num + '0');
   } else {
-    return kput_u32(num / 10) + kputchar(num % 10 + '0');
+    kput_u32(num / 10);
+    kputchar(num % 10 + '0');
   }
 }
 
-size_t
+void
 kputchar(char c)
 {
   u16 cursor = kget_cursor();
@@ -94,15 +93,15 @@ kputchar(char c)
   }
 
   kset_cursor(cursor);
-
-  return 1;
 }
 
 void
 kscrclear(void)
 {
+  u16* cursor = (u16*)0;
   for (size_t i = 0; i < VGA_DP_SIZE; i++) {
-    __asm__ volatile("movw $0x0720, (%%ebx)" : : "b"(VGA_GET_ADDR(i)));
+    cursor = (u16*)VGA_GET_ADDR(i);
+    *cursor = 0x0720;
   }
 
   kset_cursor(0);

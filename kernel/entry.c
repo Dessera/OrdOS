@@ -2,7 +2,9 @@
 #include "kernel/device/vga.h"
 #include "kernel/info.h"
 #include "kernel/interrupt/idt.h"
+#include "kernel/memory/page.h"
 #include "kernel/stddef.h"
+#include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
 void
@@ -18,6 +20,7 @@ kinit(void)
 
   init_idt();
   init_sys_clk();
+  init_mm();
 }
 
 void
@@ -25,6 +28,7 @@ kmain(void)
 {
   kinit();
 
-  while (true)
-    ;
+  while (true) {
+    hlt();
+  }
 }
