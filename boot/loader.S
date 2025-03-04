@@ -1,3 +1,4 @@
+#include "kernel/config/boot.h"
 #include "kernel/boot.h"
 #include "kernel/info.h"
 #include "kernel/memory/gdt.h"
@@ -39,7 +40,7 @@ _asm_mem_nr:
 _asm_mem_bytes:
   .long 0
 
-.org LDRENTRY_OFFSET
+.org BOOT_LDR_ENTRY_OFFSET
 .globl _start
 _start:
   // check memory
@@ -128,7 +129,7 @@ _start_protected:
   movw %ax, %ds
   movw %ax, %es
   movw %ax, %ss
-  movl $LDRSEC_ADDR, %esp
+  movl $BOOT_LDR_START, %esp
 
   call _pclear
 
@@ -138,8 +139,8 @@ _start_protected:
 
 _prot_page_setup:
   // clear page table
-  movl $PAGE_TABLE_ADDR, %edi
-  movl $PAGE_SIZE, %ecx
+  movl $MEM_PAGE_TABLE_START, %edi
+  movl $MEM_PAGE_SIZE, %ecx
   movb $0x00, %al
   
   cld
@@ -147,45 +148,45 @@ _prot_page_setup:
 
 _prot_page_init:
   // map first 4MB
-  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR)
-  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(1), 1, 1, 1), (PAGE_TABLE_ADDR + PDE_KERNEL_OFFSET)
+  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(1), 1, 1, 1), (MEM_PAGE_TABLE_START)
+  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(1), 1, 1, 1), (MEM_PAGE_TABLE_START + PAGE_PDE_KERNEL_OFFSET)
 
   // map page table itself
-  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(0), 1, 1, 1), (PAGE_TABLE_ADDR + PAGE_SIZE - 0x04)
+  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(0), 1, 1, 1), (MEM_PAGE_TABLE_START + MEM_PAGE_SIZE - 0x04)
 
   // map kernel storage
 _prot_kernel_page_init:
   movl $0x100, %ecx
-  movl $PDE_DESC(0, 1, 1, 1), %eax
-  movl $INDEX_PAGE_TABLE_ADDR(1), %edi
+  movl $PAGE_PDE_DESC(0, 1, 1, 1), %eax
+  movl $PAGE_TABLE_INDEX(1), %edi
 _prot_kernel_page_loop:
   movl %eax, (%edi)
-  addl $PAGE_SIZE, %eax
+  addl $MEM_PAGE_SIZE, %eax
   addl $0x04, %edi
   loop _prot_kernel_page_loop
 
   // map kernel memory
 _prot_kernel_mem_init:
-  movl $PDE_DESC(INDEX_PAGE_TABLE_ADDR(2), 1, 1, 1), %eax
-  movl $PAGE_TABLE_ADDR + PDE_KERNEL_OFFSET + 0x04, %edi
+  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(2), 1, 1, 1), %eax
+  movl $MEM_PAGE_TABLE_START + PAGE_PDE_KERNEL_OFFSET + 0x04, %edi
 _prot_kernel_mem_loop:
   movl %eax, (%edi)
-  addl $PAGE_SIZE, %eax
+  addl $MEM_PAGE_SIZE, %eax
   addl $0x04, %edi
-  cmpl $PAGE_TABLE_ADDR + PAGE_SIZE - 0x04, %edi
+  cmpl $MEM_PAGE_TABLE_START + MEM_PAGE_SIZE - 0x04, %edi
   jne _prot_kernel_mem_loop
 
   // update gdt
   sgdt _gdt_table_ptr
 
   movl (_gdt_table_ptr + 2), %ebx
-  orl $KERNELBASE, GDT_VIDEO_SELECTOR + 4(%ebx)
+  orl $MEM_KERNEL_VSTART, GDT_VIDEO_SELECTOR + 4(%ebx)
 
-  addl $KERNELBASE, (_gdt_table_ptr + 2)
-  addl $KERNELBASE, %esp
+  addl $MEM_KERNEL_VSTART, (_gdt_table_ptr + 2)
+  addl $MEM_KERNEL_VSTART, %esp
 
   // load page table
-  movl $PAGE_TABLE_ADDR, %eax
+  movl $MEM_PAGE_TABLE_START, %eax
   movl %eax, %cr3
 
   movl %cr0, %eax
@@ -196,13 +197,13 @@ _prot_kernel_mem_loop:
 
   // load kernel
   PPRINT($0x02, $_pb_kernel_indicator)
-  movl $KERNELSIZE, %ecx
-  movl $KERNELSTART, %eax
-  movl $KERNELENTRY_ADDR, %edi
+  movl $BOOT_KERNEL_SIZE, %ecx
+  movl $BOOT_KERNEL_SEC_START, %eax
+  movl $BOOT_KERNEL_ENTRY_START, %edi
   call _prot_load_kernel
 
   // jump to kernel
-  movl $KERNELBASE + 0x9f000, %esp
+  movl $PAGE_KERNEL_STACK_VSTART, %esp
   call kmain
 
 _prot_error_hlt:

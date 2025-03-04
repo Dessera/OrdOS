@@ -1,4 +1,4 @@
-#include "kernel/config/general.h"
+#include "kernel/config/boot.h"
 #include "kernel/boot.h"
 
 OUTPUT_FORMAT("binary")
@@ -8,13 +8,13 @@ ENTRY(_start)
 
 SECTIONS
 {
-  .bstext BOOTSEC_ADDR : AT(0x00) { *(.bstext) }
+  .bstext BOOT_MBR_START : AT(0x00) { *(.bstext) }
   .bsdata : { *(.bsdata) }
 
-  .ldrtext LDRSEC_ADDR : AT(0x200 * LDRSTART) { *(.ldrtext) }
+  .ldrtext BOOT_LDR_START : AT(BOOT_SEC_SIZE * BOOT_LDR_SEC_START) { *(.ldrtext) }
   .ldrdata : { *(.ldrdata) }
 
-  .text KERNELENTRY_ADDR : AT(0x200 * KERNELSTART) { *(.text*) }
+  .text BOOT_KERNEL_ENTRY_START : AT(BOOT_SEC_SIZE * BOOT_KERNEL_SEC_START) { *(.text*) }
   .data : { *(.data*) }
   .rodata : { *(.rodata*) }
   .bss : { *(.bss*) }

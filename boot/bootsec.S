@@ -1,3 +1,4 @@
+#include "kernel/config/boot.h"
 #include "kernel/boot.h"
 #include "kernel/info.h"
 
@@ -12,7 +13,7 @@ _bootsec_start:
   movw %ax, %ds
   movw %ax, %es
   movw %ax, %ss
-  movw $BOOTSEC_ADDR, %sp
+  movw $BOOT_MBR_START, %sp
 
   // disable interrupts because they're not ready
   cli
@@ -23,18 +24,18 @@ _bootsec_start:
   // read loader to mem
 _bs_load_ldr:
   movw $0x80, %dx
-  movw $LDRSTART + 1, %cx
-  movw $LDRSEC_ADDR, %bx
+  movw $BOOT_LDR_SEC_START + 1, %cx
+  movw $BOOT_LDR_START, %bx
 _bs_load_ldr_retry:
   movb $0x02, %ah
-  movb $LDRSIZE, %al
+  movb $BOOT_LDR_SIZE, %al
   int $0x13
   jnc _bs_load_ldr_done
 _bs_load_ldr_error:
   BPRINT($_bsd_retry_indicator)
   jmp _bs_load_ldr_retry
 _bs_load_ldr_done:
-  ljmp $0x00, $LDRENTRY_ADDR
+  ljmp $0x00, $BOOT_LDR_ENTRY_START
 
 /*
  * Print string to screen

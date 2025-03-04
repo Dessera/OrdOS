@@ -2,7 +2,7 @@
 
 #define OFFSET_OF(type, member) __builtin_offsetof(type, member)
 
-#define container_of(ptr, type, member)                                        \
+#define CONTAINER_OF(ptr, type, member)                                        \
   ({                                                                           \
     const typeof(((type*)0)->member)* __mptr = (ptr);                          \
     (type*)((char*)__mptr - OFFSET_OF(type, member));                          \
