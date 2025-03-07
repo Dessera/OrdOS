@@ -1,18 +1,34 @@
 #include "kernel/interrupt/idt.h"
+#include "kernel/assert.h"
 #include "kernel/config/interrupt.h"
-#include "kernel/device/pci.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
-#include "kernel/utils/print.h"
 
 #define MK_IDT_PTR(idt_addr)                                                   \
   (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))
 
-#define INTR_STATUS_MASK 0x200
+struct idt_desc_t
+{
+  u16 offs_lb;
+  u16 sel;
+  u8 nargs;
+  u8 attr;
+  u16 offs_hb;
+} __attribute((packed));
 
-void
-intr_common_handler(u32 irq);
+KSTATIC_ASSERT_MSG(sizeof(struct idt_desc_t) == 8,
+                   "idt_desc_t size is not 8 bytes");
+KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, offs_lb) == 0,
+                   "idt_desc_t offs_lb offset is not 0");
+KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, sel) == 2,
+                   "idt_desc_t sel offset is not 2");
+KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, nargs) == 4,
+                   "idt_desc_t nargs offset is not 4");
+KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, attr) == 5,
+                   "idt_desc_t attr offset is not 5");
+KSTATIC_ASSERT_MSG(OFFSET_OF(struct idt_desc_t, offs_hb) == 6,
+                   "idt_desc_t offs_hb offset is not 6");
 
 extern void* _asm_intr_vecs[INTR_IDT_SIZE];
 
@@ -42,39 +58,8 @@ init_idt_desc(void)
 void
 init_idt(void)
 {
-  kputs("Initializing IDT...\n");
-
   init_idt_desc();
-  init_pci();
 
   u64 idt_ptr = MK_IDT_PTR(idt);
   lidt(idt_ptr);
-
-  set_intr_status(true);
-}
-
-void
-intr_common_handler(u32 irq)
-{
-  (void)irq;
-}
-
-bool
-get_intr_status(void)
-{
-  return (eflags() & INTR_STATUS_MASK) ? true : false;
-}
-
-bool
-set_intr_status(bool status)
-{
-  bool old_status = get_intr_status();
-
-  if (status && !old_status) {
-    sti();
-  } else if (!status && old_status) {
-    cli();
-  }
-
-  return old_status;
 }
