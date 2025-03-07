@@ -4,7 +4,7 @@ device_targets := pci.o sys_clk.o vga.o
 
 utils_targets := print.o mm.o string.o bitmap.o list_head.o
 
-memory_targets := page.o
+memory_targets := page.o mm.o
 
 kernel_targets := entry.o assert.o
 

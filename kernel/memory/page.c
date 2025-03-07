@@ -6,7 +6,12 @@
 #include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/mm.h"
-#include "kernel/utils/print.h"
+
+struct vmem_map
+{
+  struct bitmap vmmap;
+  u32 vstart;
+};
 
 struct pmempool
 {
@@ -21,8 +26,8 @@ static struct pmempool kmem_pool;
 static struct pmempool umem_pool;
 static struct vmem_map kvmmap;
 
-static void
-init_mempool(void)
+void
+init_page(void)
 {
   size_t mem_used = MEM_PAGE_SIZE * PAGE_INITIAL_ENTRIES +
                     KMEMMB(1); // 256 pages for kernel + 1mb low mem
@@ -117,14 +122,6 @@ unlink_mem_page(void* vaddr)
   u32* pte = PAGE_GET_PTE(vaddr);
   *pte &= ~PAGE_PDE_P(0);
   invlpg(vaddr);
-}
-
-void
-init_mm(void)
-{
-  kputs("Initializing memory management...\n");
-
-  init_mempool();
 }
 
 void*

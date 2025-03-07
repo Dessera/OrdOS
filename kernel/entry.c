@@ -2,9 +2,8 @@
 #include "kernel/device/vga.h"
 #include "kernel/info.h"
 #include "kernel/interrupt/intr.h"
-#include "kernel/memory/page.h"
+#include "kernel/memory/mm.h"
 #include "kernel/types.h"
-#include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
 void
@@ -28,7 +27,6 @@ kmain(void)
 {
   kinit();
 
-  while (true) {
-    hlt();
-  }
+  while (true)
+    ;
 }
