@@ -32,3 +32,6 @@ struct task_t
 
   u32 tmagic;
 };
+
+void
+init_task(void);

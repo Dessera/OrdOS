@@ -1,11 +1,14 @@
-#include "kernel/device/sys_clk.h"
 #include "kernel/device/vga.h"
 #include "kernel/info.h"
-#include "kernel/interrupt/intr.h"
-#include "kernel/memory/mm.h"
+#include "kernel/interrupt/interrupt.h"
+#include "kernel/memory/memory.h"
+#include "kernel/task/sync.h"
+#include "kernel/task/task.h"
 #include "kernel/task/thread.h"
 #include "kernel/types.h"
 #include "kernel/utils/print.h"
+
+struct spin_lock_t g_lock;
 
 void
 kmain(void);
@@ -22,12 +25,14 @@ kinit(void)
   kputs(" STEP 3\n");
 
   init_intr();
-  init_sys_clk();
   init_mm();
-  init_thread();
+  init_task();
 
-  thread_run("t1", 31, thread_test, " OA ");
-  thread_run("t2", 31, thread_test, " OB ");
+  spin_lock_init(&g_lock);
+
+  thread_run("thread_a", 16, thread_test, "A A A A A A A A A A A A A A A ");
+  thread_run("thread_b", 8, thread_test, "B B B B B B B B B B B B B B B ");
+  thread_run("thread_b", 4, thread_test, "C C C C C C C C C C C C C C C ");
 
   intr_set_status(true);
 }
@@ -36,9 +41,6 @@ void
 kmain(void)
 {
   kinit();
-
-  // thread_run("thread_test", 31, thread_test, " OA ");
-  // thread_run("thread_test", 31, thread_test, " OB ");
 
   while (true)
     ;
@@ -50,6 +52,8 @@ thread_test(void* arg)
   char* str = (char*)arg;
 
   while (true) {
+    spin_lock(&g_lock);
     kputs(str);
+    spin_unlock(&g_lock);
   }
 }

@@ -1,5 +1,5 @@
 #include "kernel/assert.h"
-#include "kernel/interrupt/intr.h"
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/types.h"
 #include "kernel/utils/print.h"
 

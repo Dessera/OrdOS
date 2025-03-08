@@ -2,14 +2,13 @@
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/config/task.h"
-#include "kernel/interrupt/intr.h"
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
 #include "kernel/utils/mm.h"
-#include "kernel/utils/print.h"
 #include "kernel/utils/string.h"
 
 extern void
@@ -21,14 +20,32 @@ static struct list_head thread_ready_list;
 static struct list_head thread_all_list;
 
 static void
-kernel_thread(task_function_t function, void* arg)
+__kernel_thread(task_function_t function, void* arg)
 {
   intr_set_status(true);
   function(arg);
 }
 
 static void
-init_thread_task(struct task_t* task, char* name, u8 priority)
+__thread_schedule_handler(u32 irq)
+{
+  (void)irq;
+
+  struct task_t* task = thread_current();
+
+  KASSERT_MSG(task->tmagic == TASK_MAGIC, "invalid task object");
+
+  task->elapsed_ticks++;
+
+  if (task->ticks > 0) {
+    task->ticks--;
+  } else {
+    thread_schedule();
+  }
+}
+
+static void
+__init_thread_task(struct task_t* task, char* name, u8 priority)
 {
   kmemset(task, 0, sizeof(struct task_t));
   kstrcpy(task->name, name);
@@ -42,7 +59,7 @@ init_thread_task(struct task_t* task, char* name, u8 priority)
 }
 
 static void
-init_thread_stack(struct task_t* task, task_function_t function, void* arg)
+__init_thread_stack(struct task_t* task, task_function_t function, void* arg)
 {
   task->kstack -= sizeof(struct intr_context_t);
   task->kstack -= sizeof(struct thread_context_t);
@@ -50,7 +67,7 @@ init_thread_stack(struct task_t* task, task_function_t function, void* arg)
   struct thread_context_t* ctx = (struct thread_context_t*)task->kstack;
   ctx->func = function;
   ctx->arg = arg;
-  ctx->eip = kernel_thread;
+  ctx->eip = __kernel_thread;
 
   ctx->ebp = 0;
   ctx->ebx = 0;
@@ -59,10 +76,10 @@ init_thread_stack(struct task_t* task, task_function_t function, void* arg)
 }
 
 static void
-init_main_thread(void)
+__init_main_thread(void)
 {
   main_thread = thread_current();
-  init_thread_task(main_thread, "kmain", 31);
+  __init_thread_task(main_thread, "kmain", 31);
   main_thread->status = TASK_STATUS_RUNNING;
   list_add_tail(&main_thread->global_node, &thread_all_list);
 }
@@ -73,15 +90,16 @@ init_thread(void)
   list_init(&thread_ready_list);
   list_init(&thread_all_list);
 
-  init_main_thread();
+  __init_main_thread();
+  intr_register_handler(0x20, __thread_schedule_handler);
 }
 
 struct task_t*
 thread_run(char* name, u8 priority, task_function_t function, void* arg)
 {
   struct task_t* task = alloc_page(TASK_PCB_PAGE_SIZE);
-  init_thread_task(task, name, priority);
-  init_thread_stack(task, function, arg);
+  __init_thread_task(task, name, priority);
+  __init_thread_stack(task, function, arg);
 
   list_add_tail(&task->global_node, &thread_all_list);
   list_add_tail(&task->node, &thread_ready_list);
@@ -98,10 +116,9 @@ thread_current(void)
 }
 
 void
-thread_scheduler(void)
+thread_schedule(void)
 {
-  KASSERT_MSG(intr_get_status() == false,
-              "thread_scheduler: interrupt is enabled");
+  KASSERT_MSG(intr_get_status() == false, "interrupt is enabled");
 
   struct task_t* curr = thread_current();
   if (curr->status == TASK_STATUS_RUNNING) {
@@ -110,11 +127,50 @@ thread_scheduler(void)
     curr->status = TASK_STATUS_READY;
   }
 
-  KASSERT_MSG(!list_empty(&thread_ready_list),
-              "thread_scheduler: no ready thread");
+  KASSERT_MSG(!list_empty(&thread_ready_list), "no ready thread");
   thread_running = list_pop(&thread_ready_list);
   struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
   next->status = TASK_STATUS_RUNNING;
 
   thread_switch_to(curr, next);
+}
+
+void
+thread_block(enum task_status_t status)
+{
+  bool old_intr_status = intr_set_status(false);
+
+  KASSERT_MSG(status == TASK_STATUS_BLOCKED || status == TASK_STATUS_WAITING ||
+                status == TASK_STATUS_SUSPENDED,
+              "invalid status")
+
+  struct task_t* curr = thread_current();
+  curr->status = status;
+
+  thread_schedule();
+
+  intr_set_status(old_intr_status);
+}
+
+void
+thread_unblock(struct task_t* task)
+{
+  bool old_intr_status = intr_set_status(false);
+
+  KASSERT_MSG(task->status == TASK_STATUS_BLOCKED ||
+                task->status == TASK_STATUS_WAITING ||
+                task->status == TASK_STATUS_SUSPENDED,
+              "invalid status")
+
+  if (task->status == TASK_STATUS_READY) {
+    return;
+  }
+
+  KASSERT_MSG(list_find(&thread_ready_list, &task->node) == -1,
+              "task is already in ready list")
+
+  list_add_tail(&task->node, &thread_ready_list);
+  task->status = TASK_STATUS_READY;
+
+  intr_set_status(old_intr_status);
 }

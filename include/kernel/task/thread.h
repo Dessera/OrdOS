@@ -12,4 +12,10 @@ struct task_t*
 thread_current(void);
 
 void
-thread_scheduler(void);
+thread_schedule(void);
+
+void
+thread_block(enum task_status_t status);
+
+void
+thread_unblock(struct task_t* task);

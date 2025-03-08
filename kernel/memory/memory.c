@@ -1,4 +1,4 @@
-#include "kernel/memory/mm.h"
+#include "kernel/memory/memory.h"
 #include "kernel/memory/page.h"
 #include "kernel/utils/print.h"
 

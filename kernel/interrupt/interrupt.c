@@ -1,8 +1,8 @@
-#include "kernel/interrupt/intr.h"
-#include "kernel/assert.h"
 #include "kernel/config/interrupt.h"
+#include "kernel/assert.h"
 #include "kernel/device/pci.h"
 #include "kernel/interrupt/idt.h"
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
 
@@ -40,16 +40,16 @@ __init_exception_handlers(void)
 void
 intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
 {
-  KASSERT_MSG(interrupt_number < INTR_IDT_SIZE, "Invalid interrupt ID");
+  KASSERT_MSG(interrupt_number < INTR_IDT_SIZE, "invalid interrupt id");
   KWARNON_NOT_MSG(interrupt_handlers[interrupt_number],
-                  "Overwriting existing interrupt handler");
+                  "overwriting existing interrupt handler");
   interrupt_handlers[interrupt_number] = handler;
 }
 
 void
 init_intr(void)
 {
-  kputs("Initializing Interrupt...\n");
+  kputs("Initializing interrupt...\n");
   init_idt();
 
   __init_exception_handlers();
@@ -80,7 +80,7 @@ intr_set_status(bool status)
 void
 intr_common_handler(u32 irq)
 {
-  KASSERT_MSG(irq < INTR_IDT_SIZE, "Invalid interrupt ID");
+  KASSERT_MSG(irq < INTR_IDT_SIZE, "invalid interrupt id");
 
   if (interrupt_handlers[irq]) {
     interrupt_handlers[irq](irq);

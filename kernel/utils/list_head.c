@@ -1,4 +1,5 @@
 #include "kernel/utils/list_head.h"
+#include "kernel/types.h"
 
 void
 list_init(struct list_head* head)
@@ -48,4 +49,19 @@ list_pop(struct list_head* head)
   struct list_head* entry = head->next;
   list_del(entry);
   return entry;
+}
+
+ssize_t
+list_find(struct list_head* head, struct list_head* entry)
+{
+  ssize_t index = 0;
+  struct list_head* current;
+  LIST_FOR_EACH(current, head)
+  {
+    if (current == entry) {
+      return index;
+    }
+    index++;
+  }
+  return -1;
 }

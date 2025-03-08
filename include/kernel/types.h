@@ -35,9 +35,13 @@ typedef signed long long i64;
 typedef u32 size_t;
 typedef i32 ssize_t;
 
+#define NPOS ((ssize_t) - 1)
+
 #define MAX_SIZE_T ((size_t)-1)
 #define MIN_SIZE_T ((size_t)0)
 #define MAX_SSIZE_T ((ssize_t)0x7FFFFFFF)
 #define MIN_SSIZE_T ((ssize_t)0x80000000)
 
 typedef _Bool bool;
+
+#define FORCE_INLINE __attribute__((always_inline)) inline

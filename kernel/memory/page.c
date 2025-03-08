@@ -100,7 +100,7 @@ link_mem_page(void* paddr, void* vaddr)
   u32* pde = PAGE_GET_PDE(vaddr);
   u32* pte = PAGE_GET_PTE(vaddr);
 
-  KASSERT_MSG(!(*pte & PAGE_PTE_P_MASK), "Duplicate page table allocation");
+  KASSERT_MSG(!(*pte & PAGE_PTE_P_MASK), "duplicate page table allocation");
 
   if (*pde & PAGE_PDE_P_MASK) {
     if (!(*pte & PAGE_PTE_P_MASK)) {
