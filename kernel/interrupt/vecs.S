@@ -62,7 +62,7 @@ _asm_intr_common_handler:
   pushl %gs
   pushal
   // get index and repush it for later
-  mov 0x30(%esp), %eax
+  movl 0x30(%esp), %eax
   pushl %eax
   movb $PIC_EOI, %al
   outb %al, $PIC_MASTER_CMD

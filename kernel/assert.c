@@ -2,6 +2,7 @@
 #include "kernel/interrupt/intr.h"
 #include "kernel/types.h"
 #include "kernel/utils/print.h"
+
 void
 kernel_panic_handler(u32 line,
                      const char* file,

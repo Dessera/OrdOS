@@ -37,3 +37,15 @@ list_empty(struct list_head* head)
 {
   return head->next == head;
 }
+
+struct list_head*
+list_pop(struct list_head* head)
+{
+  if (list_empty(head)) {
+    return NULL;
+  }
+
+  struct list_head* entry = head->next;
+  list_del(entry);
+  return entry;
+}

@@ -23,6 +23,7 @@
 #define KASSERT(expr)
 #define KASSERT_MSG(expr, msg)
 #define KWARNON(expr)
+#define KWARNON_MSG(expr, msg)
 #endif
 
 #define KSTATIC_ASSERT(expr) _Static_assert(expr, #expr)
@@ -32,6 +33,8 @@
 #define KASSERT_NOT_MSG(expr, msg) KASSERT_MSG(!(expr), msg)
 #define KWARNON_NOT(expr) KWARNON(!(expr))
 #define KWARNON_NOT_MSG(expr, msg) KWARNON_MSG(!(expr), msg)
+
+#define KPANIC(msg) kernel_panic_handler(__LINE__, __FILE__, __func__, msg)
 
 void
 kernel_panic_handler(u32 line,

@@ -2,6 +2,8 @@
 
 #include "kernel/types.h"
 
+#define INTR_RESERVE_SIZE 0x20
+
 typedef void (*interrupt_handler_t)(u32);
 
 void

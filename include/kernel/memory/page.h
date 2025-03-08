@@ -9,6 +9,8 @@
 #define PAGE_PDE_VSTART 0xfffff000
 #define PAGE_PTE_VSTART 0xffc00000
 
+#define PAGE_SELECTOR_MASK 0xfffff000
+
 #define PAGE_PDE_MASK 0xffc00000
 #define PAGE_PTE_MASK 0x003ff000
 #define PAGE_ADDR_MASK 0x00000fff

@@ -3,10 +3,7 @@
 #define OFFSET_OF(type, member) __builtin_offsetof(type, member)
 
 #define CONTAINER_OF(ptr, type, member)                                        \
-  ({                                                                           \
-    const typeof(((type*)0)->member)* __mptr = (ptr);                          \
-    (type*)((char*)__mptr - OFFSET_OF(type, member));                          \
-  })
+  (type*)((char*)(ptr) - OFFSET_OF(type, member))
 
 #define VA_LIST __builtin_va_list
 #define VA_START __builtin_va_start
