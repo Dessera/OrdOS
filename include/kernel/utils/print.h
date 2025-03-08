@@ -6,6 +6,18 @@ void
 kputs(const char* str);
 
 void
+kprint(const char* str, ...);
+
+void
+kprintln(const char* str, ...);
+
+void
+ksprint(char* buf, const char* str, ...);
+
+void
+kvsprint(char* buf, const char* fmt, VA_LIST args);
+
+void
 kput_u32(u32 num);
 
 void

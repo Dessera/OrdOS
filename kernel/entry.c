@@ -29,6 +29,8 @@ kmain(void)
 {
   kinit();
 
+  kprintln("%d %i %u %x %X %s", 42, -42, 42, 42, 42, "42");
+
   while (true)
     ;
 }

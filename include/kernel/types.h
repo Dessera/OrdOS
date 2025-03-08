@@ -47,3 +47,11 @@ typedef _Bool bool;
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
 #define CLEAN_UP(type, cleaner) type __attribute__((cleanup(cleaner)))
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+
+void
+itoa(char* buffer, i32 value, u8 base);
+
+void
+utoa(char* buffer, u32 value, u8 base);
