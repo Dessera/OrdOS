@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "kernel/common.h"
 
 // if no KVERSION and KNAME are defined, use defaults
 #ifndef KVERSION

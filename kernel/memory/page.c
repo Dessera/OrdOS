@@ -1,11 +1,11 @@
 #include "kernel/memory/page.h"
-#include "common.h"
 #include "kernel/assert.h"
+#include "kernel/common.h"
 #include "kernel/config/memory.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"
-#include "kernel/utils/mm.h"
+#include "kernel/utils/string.h"
 
 struct vmem_map
 {
@@ -59,7 +59,7 @@ init_page(void)
 }
 
 static void*
-alloc_vmem_page(size_t size)
+__alloc_vmem_page(size_t size)
 {
   ssize_t index = bitmap_alloc(&kvmmap.vmmap, size);
   if (index == -1) {
@@ -69,7 +69,7 @@ alloc_vmem_page(size_t size)
 }
 
 static void
-free_vmem_page(void* vaddr, size_t size)
+__free_vmem_page(void* vaddr, size_t size)
 {
   size_t index = ((u32)vaddr - kvmmap.vstart) / MEM_PAGE_SIZE;
   for (size_t i = 0; i < size; i++) {
@@ -78,7 +78,7 @@ free_vmem_page(void* vaddr, size_t size)
 }
 
 static void*
-alloc_pmem_page(struct pmempool* pool)
+__alloc_pmem_page(struct pmempool* pool)
 {
   ssize_t index = bitmap_alloc(&pool->pmmap, true);
   if (index == -1) {
@@ -88,26 +88,26 @@ alloc_pmem_page(struct pmempool* pool)
 }
 
 static void
-free_pmem_page(struct pmempool* pool, void* paddr)
+__free_pmem_page(struct pmempool* pool, void* paddr)
 {
   size_t index = ((u32)paddr - pool->pstart) / MEM_PAGE_SIZE;
   bitmap_set(&pool->pmmap, index, false);
 }
 
 static void
-link_mem_page(void* paddr, void* vaddr)
+__link_mem_page(void* paddr, void* vaddr)
 {
   u32* pde = PAGE_GET_PDE(vaddr);
   u32* pte = PAGE_GET_PTE(vaddr);
 
-  KASSERT_MSG(!(*pte & PAGE_PTE_P_MASK), "duplicate page table allocation");
+  KASSERT_NOT_MSG(*pte & PAGE_PTE_P_MASK, "duplicate page table allocation");
 
   if (*pde & PAGE_PDE_P_MASK) {
     if (!(*pte & PAGE_PTE_P_MASK)) {
       *pte = PAGE_PTE_DESC((u32)paddr, 1, 1, 1);
     }
   } else {
-    void* new_page = alloc_pmem_page(&kmem_pool);
+    void* new_page = __alloc_pmem_page(&kmem_pool);
 
     *pde = PAGE_PDE_DESC((u32)new_page, 1, 1, 1);
 
@@ -117,7 +117,7 @@ link_mem_page(void* paddr, void* vaddr)
 }
 
 static void
-unlink_mem_page(void* vaddr)
+__unlink_mem_page(void* vaddr)
 {
   u32* pte = PAGE_GET_PTE(vaddr);
   *pte &= ~PAGE_PDE_P(0);
@@ -129,20 +129,20 @@ alloc_page(size_t size)
 {
   KASSERT(size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC);
 
-  void* vm_addr = alloc_vmem_page(size);
+  void* vm_addr = __alloc_vmem_page(size);
   if (vm_addr == NULL) {
     return NULL;
   }
 
   void* vmaddr_start = vm_addr;
   while (size > 0) {
-    void* pm_addr = alloc_pmem_page(&kmem_pool);
+    void* pm_addr = __alloc_pmem_page(&kmem_pool);
     if (pm_addr == NULL) {
       // TODO: revert all allocations
       return NULL;
     }
 
-    link_mem_page(pm_addr, vm_addr);
+    __link_mem_page(pm_addr, vm_addr);
 
     vm_addr += MEM_PAGE_SIZE;
     size--;
@@ -168,12 +168,12 @@ free_page(void* vaddr, size_t size)
       KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
               (u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart);
 
-      free_pmem_page(&kmem_pool, paddr);
-      unlink_mem_page(vaddr);
+      __free_pmem_page(&kmem_pool, paddr);
+      __unlink_mem_page(vaddr);
 
       vaddr += MEM_PAGE_SIZE;
     }
 
-    free_vmem_page(vaddr_start, size);
+    __free_vmem_page(vaddr_start, size);
   }
 }

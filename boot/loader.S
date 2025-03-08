@@ -3,7 +3,7 @@
 #include "kernel/info.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/memory/page.h"
-#include "kernel/disk.h"
+#include "kernel/device/disk.h"
 #include "kernel/device/vga.h"
 
 #define E820MAGIC 0x534d4150

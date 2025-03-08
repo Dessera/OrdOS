@@ -5,14 +5,14 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"
+#include "kernel/task/sync.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
-#include "kernel/utils/mm.h"
 #include "kernel/utils/string.h"
 
 extern void
-thread_switch_to(struct task_t* curr, struct task_t* next);
+_asm_thread_switch_to(struct task_t* curr, struct task_t* next);
 
 static struct task_t* main_thread;
 static struct list_head* thread_running;
@@ -45,7 +45,7 @@ __thread_schedule_handler(u32 irq)
 }
 
 static void
-__init_thread_task(struct task_t* task, char* name, u8 priority)
+__thread_init_task(struct task_t* task, char* name, u8 priority)
 {
   kmemset(task, 0, sizeof(struct task_t));
   kstrcpy(task->name, name);
@@ -59,7 +59,7 @@ __init_thread_task(struct task_t* task, char* name, u8 priority)
 }
 
 static void
-__init_thread_stack(struct task_t* task, task_function_t function, void* arg)
+__thread_init_stack(struct task_t* task, task_function_t function, void* arg)
 {
   task->kstack -= sizeof(struct intr_context_t);
   task->kstack -= sizeof(struct thread_context_t);
@@ -76,21 +76,29 @@ __init_thread_stack(struct task_t* task, task_function_t function, void* arg)
 }
 
 static void
+__init_thread_queue(void)
+{
+  list_init(&thread_ready_list);
+  list_init(&thread_all_list);
+}
+
+static void
 __init_main_thread(void)
 {
   main_thread = thread_current();
-  __init_thread_task(main_thread, "kmain", 31);
+  __thread_init_task(main_thread, "kmain", 31);
   main_thread->status = TASK_STATUS_RUNNING;
+
   list_add_tail(&main_thread->global_node, &thread_all_list);
+  thread_running = &main_thread->node;
 }
 
 void
 init_thread(void)
 {
-  list_init(&thread_ready_list);
-  list_init(&thread_all_list);
-
+  __init_thread_queue();
   __init_main_thread();
+
   intr_register_handler(0x20, __thread_schedule_handler);
 }
 
@@ -98,8 +106,8 @@ struct task_t*
 thread_run(char* name, u8 priority, task_function_t function, void* arg)
 {
   struct task_t* task = alloc_page(TASK_PCB_PAGE_SIZE);
-  __init_thread_task(task, name, priority);
-  __init_thread_stack(task, function, arg);
+  __thread_init_task(task, name, priority);
+  __thread_init_stack(task, function, arg);
 
   list_add_tail(&task->global_node, &thread_all_list);
   list_add_tail(&task->node, &thread_ready_list);
@@ -132,13 +140,13 @@ thread_schedule(void)
   struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
   next->status = TASK_STATUS_RUNNING;
 
-  thread_switch_to(curr, next);
+  _asm_thread_switch_to(curr, next);
 }
 
 void
-thread_block(enum task_status_t status)
+thread_yield(enum task_status_t status)
 {
-  bool old_intr_status = intr_set_status(false);
+  bool old_intr_status = intr_lock();
 
   KASSERT_MSG(status == TASK_STATUS_BLOCKED || status == TASK_STATUS_WAITING ||
                 status == TASK_STATUS_SUSPENDED,
@@ -149,13 +157,13 @@ thread_block(enum task_status_t status)
 
   thread_schedule();
 
-  intr_set_status(old_intr_status);
+  intr_unlock(old_intr_status);
 }
 
 void
-thread_unblock(struct task_t* task)
+thread_resume(struct task_t* task)
 {
-  bool old_intr_status = intr_set_status(false);
+  bool old_intr_status = intr_lock();
 
   KASSERT_MSG(task->status == TASK_STATUS_BLOCKED ||
                 task->status == TASK_STATUS_WAITING ||
@@ -172,5 +180,5 @@ thread_unblock(struct task_t* task)
   list_add_tail(&task->node, &thread_ready_list);
   task->status = TASK_STATUS_READY;
 
-  intr_set_status(old_intr_status);
+  intr_unlock(old_intr_status);
 }

@@ -2,7 +2,7 @@
 #include "kernel/device/vga.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
-#include "kernel/utils/mm.h"
+#include "kernel/utils/string.h"
 
 static u16
 __kputchar(u8 c, u16 cursor)

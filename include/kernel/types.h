@@ -45,3 +45,5 @@ typedef i32 ssize_t;
 typedef _Bool bool;
 
 #define FORCE_INLINE __attribute__((always_inline)) inline
+
+#define CLEAN_UP(type, cleaner) type __attribute__((cleanup(cleaner)))

@@ -15,7 +15,7 @@ void
 thread_schedule(void);
 
 void
-thread_block(enum task_status_t status);
+thread_yield(enum task_status_t status);
 
 void
-thread_unblock(struct task_t* task);
+thread_resume(struct task_t* task);

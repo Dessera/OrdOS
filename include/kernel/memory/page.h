@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "kernel/common.h"
 #include "kernel/config/memory.h"
 
 #define PAGE_PDE_DESC_SIZE 4

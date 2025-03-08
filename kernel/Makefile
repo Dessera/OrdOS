@@ -1,10 +1,10 @@
-interrupt_targets := vecs.o idt.o interrupt.o
+interrupt_targets := idt.o interrupt.o vecs.o
 
 device_targets := pci.o sys_clk.o vga.o
 
 task_targets := thread.o switch.o task.o sync.o
 
-utils_targets := print.o mm.o string.o bitmap.o list_head.o
+utils_targets := print.o string.o bitmap.o list_head.o
 
 memory_targets := page.o memory.o
 
