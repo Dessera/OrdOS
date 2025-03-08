@@ -2,12 +2,9 @@
 #include "kernel/info.h"
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/memory.h"
-#include "kernel/task/sync.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/print.h"
-
-struct spin_lock_t g_lock;
 
 void
 kmain(void);

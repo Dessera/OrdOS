@@ -9,9 +9,9 @@ For now, there is only a bootsector in this repository.
 1. [x] `bootsec.S` refactoring
 2. [x] Interupts (no devices support yet)
 3. [x] Kernel library (partial)
-4. [ ] Memory management
+4. [x] Memory management (page only)
 5. [ ] File system
-6. [ ] Task management
+6. [x] Task management (kernel thread only)
 7. [ ] Shell
 
 ## Build
@@ -21,10 +21,11 @@ For now, there is only a bootsector in this repository.
 Build commands:
 
 ```bash
-make all      # Build all
-make clean    # Clean all
-make rebuild  # Clean and build all
-make qemu     # Build and run qemu
+make all          # Build all
+make clean        # Clean all
+make rebuild      # Clean and build all
+make qemu         # Build and run qemu
+make qemu DEBUG=  # Build and run qemu with no debug flags (-s -S)
 ```
 
 Testers:
