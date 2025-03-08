@@ -13,7 +13,8 @@ TARGET = $(BUILD_DIR)/$(NAMEFILE)
 TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 
 DEBUG = 1
-TRACE =
+LOGLEVEL = 3		# 0: none, 1: error, 2: warning, 3: info, 4: debug 5: trace
+BUILD_TRACE =
 
 TESTER =
 
@@ -21,8 +22,8 @@ INCFLAGS = -I$(INCLUDE_DIR)
 
 CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -std=c11		\
 					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
-					-nostdinc -nostdlib -m32 																						\
-					$(INCFLAGS) -D KVERSION=$(VERSION) -D KNAME=$(NAME)
+					-nostdinc -nostdlib -m32 $(INCFLAGS) 																\
+					-D KVERSION=$(VERSION) -D KNAME=$(NAME) -D LOGLEVEL=$(LOGLEVEL)
 
 ifneq ($(DEBUG),)
 CFLAGS += -g -O0 -D DEBUG
@@ -38,8 +39,8 @@ LDFLAGS = -z noexecstack
 
 targets :=
 
-# if TRACE is set, set hide to empty, otherwise set it to @
-ifeq ($(TRACE),)
+# if BUILD_TRACE is set, set hide to empty, otherwise set it to @
+ifeq ($(BUILD_TRACE),)
 hide=@
 else
 hide=

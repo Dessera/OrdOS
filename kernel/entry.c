@@ -1,6 +1,7 @@
 #include "kernel/device/vga.h"
 #include "kernel/info.h"
 #include "kernel/interrupt/interrupt.h"
+#include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
@@ -29,7 +30,11 @@ kmain(void)
 {
   kinit();
 
-  kprintln("%d %i %u %x %X %s", 42, -42, 42, 42, 42, "42");
+  KTRACE("Kernel main function %d", 42);
+  KDEBUG("Kernel main function %d", 42);
+  KINFO("Kernel main function %d", 42);
+  KWARNING("Kernel main function %d", 42);
+  KERROR("Kernel main function %d", 42);
 
   while (true)
     ;

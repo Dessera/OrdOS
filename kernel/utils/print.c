@@ -183,7 +183,7 @@ __kvsprint_default(char** pbuf, const char** pfmt)
 void
 kprint(const char* str, ...)
 {
-  char buf[UTILS_PRINT_BUFSIZE];
+  char buf[UTILS_PRINT_BUFSIZE] = { 0 };
   VA_LIST args;
   VA_START(args, str);
   kvsprint(buf, str, args);
@@ -195,7 +195,7 @@ kprint(const char* str, ...)
 void
 kprintln(const char* str, ...)
 {
-  char buf[UTILS_PRINT_BUFSIZE];
+  char buf[UTILS_PRINT_BUFSIZE] = { 0 };
   VA_LIST args;
   VA_START(args, str);
   kvsprint(buf, str, args);
@@ -245,4 +245,6 @@ kvsprint(char* buf, const char* fmt, VA_LIST args)
       __kvsprint_default(&buf, &fmt);
     }
   }
+
+  *buf = '\0';
 }
