@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/types.h"
+#include "kernel/utils/list_head.h"
 
 struct spin_lock_t
 {
@@ -13,6 +14,20 @@ void
 spin_lock(struct spin_lock_t* lock);
 void
 spin_unlock(struct spin_lock_t* lock);
+
+struct lock_t
+{
+  u8 flag;
+  struct spin_lock_t guard;
+  struct list_head wait_queue;
+};
+
+void
+lock_init(struct lock_t* lck);
+void
+lock(struct lock_t* lck);
+void
+unlock(struct lock_t* lck);
 
 bool
 intr_lock(void);

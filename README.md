@@ -10,8 +10,17 @@ For now, there is only a bootsector in this repository.
 2. [x] Interupts (no devices support yet)
 3. [x] Kernel library (partial)
 4. [x] Memory management (page only)
+
+   - [x] page management
+   - [ ] a simple memory allocator
+
 5. [ ] File system
 6. [x] Task management (kernel thread only)
+
+   - [x] lock
+   - [ ] thread safe list_head
+   - [ ] thread safe kprint
+
 7. [ ] Shell
 
 ## Build

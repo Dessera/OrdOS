@@ -1,11 +1,11 @@
-#include "kernel/device/vga.h"
 #include "kernel/info.h"
-#include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
-#include "kernel/memory/memory.h"
-#include "kernel/memory/page.h"
-#include "kernel/task/task.h"
 #include "kernel/types.h"
+
+#include "kernel/device/vga.h"
+#include "kernel/interrupt/interrupt.h"
+#include "kernel/memory/memory.h"
+#include "kernel/task/task.h"
 
 void
 kmain(void);

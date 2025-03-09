@@ -15,7 +15,10 @@ void
 thread_schedule(void);
 
 void
-thread_yield(enum task_status_t status);
+thread_yield(void);
 
 void
-thread_resume(struct task_t* task);
+thread_park(void);
+
+void
+thread_unpark(struct task_t* task);

@@ -20,8 +20,7 @@ __default_nop_handler(u32 irq)
 static void
 __default_exception_handler(u32 irq)
 {
-  kput_u32(irq);
-  KPANIC("Unhandled exception occurred");
+  KPANIC("unhandled exception %x occurred", irq);
 }
 
 static void

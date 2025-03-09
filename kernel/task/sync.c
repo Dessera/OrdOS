@@ -1,6 +1,9 @@
 #include "kernel/task/sync.h"
 #include "kernel/interrupt/interrupt.h"
+#include "kernel/task/task.h"
+#include "kernel/task/thread.h"
 #include "kernel/types.h"
+#include "kernel/utils/list_head.h"
 
 void
 spin_lock_init(struct spin_lock_t* lock)
@@ -19,6 +22,45 @@ void
 spin_unlock(struct spin_lock_t* lock)
 {
   lock->flag = 0;
+}
+
+void
+lock_init(struct lock_t* lck)
+{
+  lck->flag = 0;
+  spin_lock_init(&lck->guard);
+  list_init(&lck->wait_queue);
+}
+
+void
+lock(struct lock_t* lck)
+{
+  spin_lock(&lck->guard);
+  if (lck->flag == 0) {
+    lck->flag = 1;
+    spin_unlock(&lck->guard);
+  } else {
+    struct task_t* task = thread_current();
+    list_add_tail(&task->node, &lck->wait_queue);
+    spin_unlock(&lck->guard);
+    thread_park();
+  }
+}
+
+void
+unlock(struct lock_t* lck)
+{
+  spin_lock(&lck->guard);
+
+  if (list_empty(&lck->wait_queue)) {
+    lck->flag = 0;
+  } else {
+    struct task_t* task =
+      LIST_ENTRY(list_pop(&lck->wait_queue), struct task_t, node);
+    thread_unpark(task);
+  }
+
+  spin_unlock(&lck->guard);
 }
 
 bool

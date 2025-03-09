@@ -25,7 +25,7 @@ extern const char* debug_level_str[7];
 
 #define KLOG_WITH(level, func, line, fmt, ...)                                 \
   do {                                                                         \
-    const char* level_str = level < 6 ? debug_level_str[level] : "UNKNOWN";    \
+    const char* level_str = level <= 6 ? debug_level_str[level] : "UNKNOWN";   \
     kprint("[ %s ] %s:%u > ", level_str, func, line);                          \
     kprintln(fmt, ##__VA_ARGS__);                                              \
   } while (0)
