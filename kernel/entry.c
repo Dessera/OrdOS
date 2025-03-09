@@ -3,6 +3,7 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
+#include "kernel/memory/page.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
 

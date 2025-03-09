@@ -2,7 +2,6 @@
 #include "kernel/device/sys_clk.h"
 #include "kernel/log.h"
 #include "kernel/task/thread.h"
-#include "kernel/utils/print.h"
 void
 init_task(void)
 {

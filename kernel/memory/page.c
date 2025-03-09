@@ -121,7 +121,7 @@ static void
 __unlink_mem_page(void* vaddr)
 {
   u32* pte = PAGE_GET_PTE(vaddr);
-  *pte &= ~PAGE_PDE_P(0);
+  *pte &= ~PAGE_PDE_P(1);
   invlpg(vaddr);
 }
 
