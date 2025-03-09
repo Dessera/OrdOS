@@ -5,7 +5,7 @@
 char*
 kstrcpy(char* dest, const char* src)
 {
-  KASSERT(dest != NULL && src != NULL);
+  KASSERT(dest != NULL && src != NULL, "dest and src must not be NULL");
   char* dest_ptr = dest;
   while ((*dest++ = *src++))
     ;
@@ -15,7 +15,7 @@ kstrcpy(char* dest, const char* src)
 size_t
 kstrlen(const char* str)
 {
-  KASSERT(str != NULL);
+  KASSERT(str != NULL, "str must not be NULL");
   const char* str_ptr = str;
   while (*str_ptr) {
     str_ptr++;
@@ -26,7 +26,7 @@ kstrlen(const char* str)
 ssize_t
 kstrcmp(const char* str1, const char* str2)
 {
-  KASSERT(str1 != NULL && str2 != NULL);
+  KASSERT(str1 != NULL && str2 != NULL, "str1 and str2 must not be NULL");
   while (*str1 && (*str1 == *str2)) {
     str1++;
     str2++;
@@ -37,7 +37,7 @@ kstrcmp(const char* str1, const char* str2)
 char*
 kstrchr(const char* str, const char c)
 {
-  KASSERT(str != NULL);
+  KASSERT(str != NULL, "str must not be NULL");
   while (*str && *str != c) {
     str++;
   }
@@ -47,7 +47,7 @@ kstrchr(const char* str, const char c)
 char*
 kstrrchr(const char* str, const char c)
 {
-  KASSERT(str != NULL);
+  KASSERT(str != NULL, "str must not be NULL");
   const char* last_ptr = NULL;
   while (*str) {
     if (*str == c) {
@@ -61,7 +61,7 @@ kstrrchr(const char* str, const char c)
 char*
 kstrcat(char* dest, const char* src)
 {
-  KASSERT(dest != NULL && src != NULL);
+  KASSERT(dest != NULL && src != NULL, "dest and src must not be NULL");
   char* dest_ptr = dest;
   while (*dest) {
     dest++;
@@ -73,7 +73,7 @@ kstrcat(char* dest, const char* src)
 size_t
 kstrchrs(const char* str, const char c)
 {
-  KASSERT(str != NULL);
+  KASSERT(str != NULL, "str must not be NULL");
   size_t count = 0;
   while (*str) {
     if (*str == c) {
@@ -87,7 +87,7 @@ kstrchrs(const char* str, const char c)
 void
 kmemcpy(void* dest, const void* src, size_t n)
 {
-  KASSERT(dest != NULL && src != NULL);
+  KASSERT(dest != NULL && src != NULL, "dest and src must not be NULL");
   u8* d = dest;
   const u8* s = src;
   while (n--) {
@@ -98,7 +98,7 @@ kmemcpy(void* dest, const void* src, size_t n)
 void
 kmemset(void* dest, u8 c, size_t n)
 {
-  KASSERT(dest != NULL);
+  KASSERT(dest != NULL, "dest must not be NULL");
   u8* d = dest;
   while (n--) {
     *d++ = c;
@@ -108,7 +108,7 @@ kmemset(void* dest, u8 c, size_t n)
 ssize_t
 kmemcmp(const void* s1, const void* s2, size_t n)
 {
-  KASSERT(s1 != NULL && s2 != NULL);
+  KASSERT(s1 != NULL && s2 != NULL, "s1 and s2 must not be NULL");
   const u8* is1 = s1;
   const u8* is2 = s2;
   while (n--) {

@@ -7,7 +7,9 @@ static void
 __itoa_impl(char** buffer, i32 value, u8 base)
 {
   static char digits[] = "0123456789abcdef";
-  KASSERT_MSG(base >= 2 && base <= ARRAY_SIZE(digits), "base out of range");
+  KASSERT(base >= 2 && base <= ARRAY_SIZE(digits),
+          "base out of range, received %u",
+          base);
 
   if (value < 0) {
     **buffer = '-';
@@ -36,7 +38,9 @@ static void
 __utoa_impl(char** buffer, u32 value, u8 base)
 {
   static char digits[] = "0123456789abcdef";
-  KASSERT_MSG(base >= 2 && base <= ARRAY_SIZE(digits), "base out of range");
+  KASSERT(base >= 2 && base <= ARRAY_SIZE(digits),
+          "base out of range, received %u",
+          base);
 
   if (value < base) {
     **buffer = digits[value];

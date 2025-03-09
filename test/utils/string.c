@@ -14,28 +14,28 @@ ktester(void)
   const char* str4 = "Hello, world!Hello, xorld!Hello, vorld!";
 
   // test kstrlen
-  KASSERT(kstrlen(str) == 13);
+  KASSERT_EXPR(kstrlen(str) == 13);
 
   // test kstrcmp
-  KASSERT(kstrcmp(str, str) == 0);
-  KASSERT(kstrcmp(str, str2) == 1);
-  KASSERT(kstrcmp(str, str3) == -1);
+  KASSERT_EXPR(kstrcmp(str, str) == 0);
+  KASSERT_EXPR(kstrcmp(str, str2) == 1);
+  KASSERT_EXPR(kstrcmp(str, str3) == -1);
 
   // test kstrcpy
   kstrcpy(buf, str);
-  KASSERT(kstrcmp(buf, str) == 0);
+  KASSERT_EXPR(kstrcmp(buf, str) == 0);
 
   // test kstrcat
   kstrcat(buf, str2);
   kstrcat(buf, str3);
-  KASSERT_MSG(kstrcmp(buf, str4) == 0, buf);
+  KASSERT_EXPR(kstrcmp(buf, str4) == 0);
 
   // test kstrchr
-  KASSERT(kstrchr(str, 'o') == str + 4);
+  KASSERT_EXPR(kstrchr(str, 'o') == str + 4);
 
   // test kstrrchr
-  KASSERT(kstrrchr(str, 'o') == str + 8);
+  KASSERT_EXPR(kstrrchr(str, 'o') == str + 8);
 
   // test kstrchrs
-  KASSERT(kstrchrs(str, 'l') == 3);
+  KASSERT_EXPR(kstrchrs(str, 'l') == 3);
 }

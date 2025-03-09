@@ -39,7 +39,11 @@ bitmap_find(struct bitmap* bitmap, size_t size, bool value)
       end++;
 
       if (end - start == size) {
-        KASSERT(end - 1 <= MAX_SSIZE_T || start <= MAX_SSIZE_T);
+        KASSERT(end - 1 <= MAX_SSIZE_T || start <= MAX_SSIZE_T,
+                "bitmap find index out of range, start=%u, end=%u, max=%d",
+                start,
+                end,
+                MAX_SSIZE_T);
         return start;
       }
     }

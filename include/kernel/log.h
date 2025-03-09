@@ -1,50 +1,73 @@
 #pragma once
 
+#include "kernel/interrupt/interrupt.h" // for intr_set_status
 #include "kernel/types.h"
-#include "kernel/utils/print.h"
+#include "kernel/utils/asm.h"   // for hlt
+#include "kernel/utils/print.h" // for kprint, kprintln
+
+#define LOGLEVEL_NONE 0
+#define LOGLEVEL_ERROR 1
+#define LOGLEVEL_WARNING 2
+#define LOGLEVEL_INFO 3
+#define LOGLEVEL_DEBUG 4
+#define LOGLEVEL_TRACE 5
+
+// used only for assert
+#define LOGLEVEL_PANIC 6
 
 // 0 : none, 1 : error, 2 : warning, 3 : info, 4 : debug 5 : trace
 #ifndef LOGLEVEL
-#define LOGLEVEL 3
+#define LOGLEVEL LOGLEVEL_INFO
 #endif
 
 // debug level to string helpers
-const char* debug_level_str[] = { "NONE", "ERROR", "WARNING",
-                                  "INFO", "DEBUG", "TRACE" };
+extern const char* debug_level_str[7];
 
-#define KLOG(level, fmt, ...)                                                  \
+#define KLOG_WITH(level, func, line, fmt, ...)                                 \
   do {                                                                         \
-    const char* level_str = level < 5 ? debug_level_str[level] : "UNKNOWN";    \
-    kprint("[ %s ] %s:%u > ", level_str, __func__, __LINE__);                  \
+    const char* level_str = level < 6 ? debug_level_str[level] : "UNKNOWN";    \
+    kprint("[ %s ] %s:%u > ", level_str, func, line);                          \
     kprintln(fmt, ##__VA_ARGS__);                                              \
   } while (0)
 
-#if LOGLEVEL < 5
+#define KLOG(level, fmt, ...)                                                  \
+  KLOG_WITH(level, __func__, __LINE__, fmt, ##__VA_ARGS__)
+
+#if LOGLEVEL < LOGLEVEL_TRACE
 #define KTRACE(fmt, ...)
 #else
-#define KTRACE(fmt, ...) KLOG(5, fmt, ##__VA_ARGS__)
+#define KTRACE(fmt, ...) KLOG(LOGLEVEL_TRACE, fmt, ##__VA_ARGS__)
 #endif
 
-#if LOGLEVEL < 4
+#if LOGLEVEL < LOGLEVEL_DEBUG
 #define KDEBUG(fmt, ...)
 #else
-#define KDEBUG(fmt, ...) KLOG(4, fmt, ##__VA_ARGS__)
+#define KDEBUG(fmt, ...) KLOG(LOGLEVEL_DEBUG, fmt, ##__VA_ARGS__)
 #endif
 
-#if LOGLEVEL < 3
+#if LOGLEVEL < LOGLEVEL_INFO
 #define KINFO(fmt, ...)
 #else
-#define KINFO(fmt, ...) KLOG(3, fmt, ##__VA_ARGS__)
+#define KINFO(fmt, ...) KLOG(LOGLEVEL_INFO, fmt, ##__VA_ARGS__)
 #endif
 
-#if LOGLEVEL < 2
+#if LOGLEVEL < LOGLEVEL_WARNING
 #define KWARNING(fmt, ...)
 #else
-#define KWARNING(fmt, ...) KLOG(2, fmt, ##__VA_ARGS__)
+#define KWARNING(fmt, ...) KLOG(LOGLEVEL_WARNING, fmt, ##__VA_ARGS__)
 #endif
 
-#if LOGLEVEL < 1
+#if LOGLEVEL < LOGLEVEL_ERROR
 #define KERROR(fmt, ...)
 #else
-#define KERROR(fmt, ...) KLOG(1, fmt, ##__VA_ARGS__)
+#define KERROR(fmt, ...) KLOG(LOGLEVEL_ERROR fmt, ##__VA_ARGS__)
 #endif
+
+#define KPANIC(msg, ...)                                                       \
+  do {                                                                         \
+    intr_set_status(false);                                                    \
+    KLOG(LOGLEVEL_PANIC, msg, ##__VA_ARGS__);                                  \
+    while (true) {                                                             \
+      hlt();                                                                   \
+    }                                                                          \
+  } while (0)

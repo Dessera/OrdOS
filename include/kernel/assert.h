@@ -1,49 +1,18 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "kernel/log.h"
 
 #ifdef DEBUG
-#define KASSERT(expr)                                                          \
+#define KASSERT(expr, msg, ...)                                                \
   if (!(expr)) {                                                               \
-    kernel_panic_handler(__LINE__, __FILE__, __func__, #expr);                 \
-  }
-#define KASSERT_MSG(expr, msg)                                                 \
-  if (!(expr)) {                                                               \
-    kernel_panic_handler(__LINE__, __FILE__, __func__, msg);                   \
-  }
-#define KWARNON(expr)                                                          \
-  if (!(expr)) {                                                               \
-    kernel_warn_handler(__LINE__, __FILE__, __func__, #expr);                  \
-  }
-#define KWARNON_MSG(expr, msg)                                                 \
-  if (!(expr)) {                                                               \
-    kernel_warn_handler(__LINE__, __FILE__, __func__, msg);                    \
+    KPANIC(msg, ##__VA_ARGS__);                                                \
   }
 #else
-#define KASSERT(expr)
-#define KASSERT_MSG(expr, msg)
-#define KWARNON(expr)
-#define KWARNON_MSG(expr, msg)
+#define KASSERT(expr, msg, ...)
 #endif
 
-#define KSTATIC_ASSERT(expr) _Static_assert(expr, #expr)
-#define KSTATIC_ASSERT_MSG(expr, msg) _Static_assert(expr, msg)
+#define KSTATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 
-#define KASSERT_NOT(expr) KASSERT(!(expr))
-#define KASSERT_NOT_MSG(expr, msg) KASSERT_MSG(!(expr), msg)
-#define KWARNON_NOT(expr) KWARNON(!(expr))
-#define KWARNON_NOT_MSG(expr, msg) KWARNON_MSG(!(expr), msg)
+#define KASSERT_EXPR(expr) KASSERT(expr, "assertion failed: %s", #expr)
 
-#define KPANIC(msg) kernel_panic_handler(__LINE__, __FILE__, __func__, msg)
-
-void
-kernel_panic_handler(u32 line,
-                     const char* file,
-                     const char* func,
-                     const char* msg);
-
-void
-kernel_warn_handler(u32 line,
-                    const char* file,
-                    const char* func,
-                    const char* msg);
+#define KASSERT_NOT(expr, msg, ...) KASSERT(!(expr), msg, ##__VA_ARGS__)

@@ -5,7 +5,6 @@
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
 #include "kernel/types.h"
-#include "kernel/utils/print.h"
 
 void
 kmain(void);
@@ -15,8 +14,7 @@ kinit(void)
 {
   init_vga();
 
-  kputs(KFULLNAME_STR);
-  kputs(" STEP 3\n");
+  KINFO("%s STEP 3", KFULLNAME_STR);
 
   init_intr();
   init_mm();
@@ -29,12 +27,6 @@ void
 kmain(void)
 {
   kinit();
-
-  KTRACE("Kernel main function %d", 42);
-  KDEBUG("Kernel main function %d", 42);
-  KINFO("Kernel main function %d", 42);
-  KWARNING("Kernel main function %d", 42);
-  KERROR("Kernel main function %d", 42);
 
   while (true)
     ;

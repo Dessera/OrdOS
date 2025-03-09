@@ -33,7 +33,7 @@ __thread_schedule_handler(u32 irq)
 
   struct task_t* task = thread_current();
 
-  KASSERT_MSG(task->tmagic == TASK_MAGIC, "invalid task object");
+  KASSERT(task->tmagic == TASK_MAGIC, "invalid task object at %x", task);
 
   task->elapsed_ticks++;
 
@@ -126,7 +126,7 @@ thread_current(void)
 void
 thread_schedule(void)
 {
-  KASSERT_MSG(intr_get_status() == false, "interrupt is enabled");
+  KASSERT(intr_get_status() == false, "interrupt is enabled when scheduling");
 
   struct task_t* curr = thread_current();
   if (curr->status == TASK_STATUS_RUNNING) {
@@ -135,7 +135,7 @@ thread_schedule(void)
     curr->status = TASK_STATUS_READY;
   }
 
-  KASSERT_MSG(!list_empty(&thread_ready_list), "no ready thread");
+  KASSERT(!list_empty(&thread_ready_list), "no ready thread to schedule");
   thread_running = list_pop(&thread_ready_list);
   struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
   next->status = TASK_STATUS_RUNNING;
@@ -148,9 +148,10 @@ thread_yield(enum task_status_t status)
 {
   bool old_intr_status = intr_lock();
 
-  KASSERT_MSG(status == TASK_STATUS_BLOCKED || status == TASK_STATUS_WAITING ||
-                status == TASK_STATUS_SUSPENDED,
-              "invalid status")
+  KASSERT(status == TASK_STATUS_BLOCKED || status == TASK_STATUS_WAITING ||
+            status == TASK_STATUS_SUSPENDED,
+          "invalid status when yielding, received %u",
+          (u32)status)
 
   struct task_t* curr = thread_current();
   curr->status = status;
@@ -165,17 +166,19 @@ thread_resume(struct task_t* task)
 {
   bool old_intr_status = intr_lock();
 
-  KASSERT_MSG(task->status == TASK_STATUS_BLOCKED ||
-                task->status == TASK_STATUS_WAITING ||
-                task->status == TASK_STATUS_SUSPENDED,
-              "invalid status")
+  KASSERT(task->status == TASK_STATUS_BLOCKED ||
+            task->status == TASK_STATUS_WAITING ||
+            task->status == TASK_STATUS_SUSPENDED,
+          "invalid status when resuming, received %u",
+          (u32)(task->status));
 
   if (task->status == TASK_STATUS_READY) {
     return;
   }
 
-  KASSERT_MSG(list_find(&thread_ready_list, &task->node) == -1,
-              "task is already in ready list")
+  KASSERT(list_find(&thread_ready_list, &task->node) == -1,
+          "task %x is already in ready list",
+          task);
 
   list_add_tail(&task->node, &thread_ready_list);
   task->status = TASK_STATUS_READY;

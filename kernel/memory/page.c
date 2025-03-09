@@ -100,7 +100,8 @@ __link_mem_page(void* paddr, void* vaddr)
   u32* pde = PAGE_GET_PDE(vaddr);
   u32* pte = PAGE_GET_PTE(vaddr);
 
-  KASSERT_NOT_MSG(*pte & PAGE_PTE_P_MASK, "duplicate page table allocation");
+  KASSERT(
+    !(*pte & PAGE_PTE_P_MASK), "duplicate page table allocation at %x", vaddr);
 
   if (*pde & PAGE_PDE_P_MASK) {
     if (!(*pte & PAGE_PTE_P_MASK)) {
@@ -127,7 +128,10 @@ __unlink_mem_page(void* vaddr)
 void*
 alloc_page(size_t size)
 {
-  KASSERT(size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC);
+  KASSERT(size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC,
+          "requested too many pages, alloc %u pages, but only %u allowed",
+          size,
+          MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC);
 
   void* vm_addr = __alloc_vmem_page(size);
   if (vm_addr == NULL) {
@@ -154,10 +158,13 @@ alloc_page(size_t size)
 void
 free_page(void* vaddr, size_t size)
 {
-  KASSERT(((u32)vaddr & MEM_PAGE_SIZE) == 0);
+  KASSERT(
+    ((u32)vaddr & MEM_PAGE_SIZE) == 0, "vaddr %x is not page aligned", vaddr);
   void* paddr = PAGE_VADDR_TO_PADDR(vaddr);
   KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
-          (u32)paddr >= KMEMMB(1) + KMEMKB(1));
+            (u32)paddr >= KMEMMB(1) + KMEMKB(1),
+          "cannot free paddr %x outside of memory pool",
+          paddr);
 
   void* vaddr_start = vaddr;
   if ((u32)paddr >= umem_pool.pstart) {
@@ -166,7 +173,9 @@ free_page(void* vaddr, size_t size)
     for (size_t i = 0; i < size; i++) {
       paddr = PAGE_VADDR_TO_PADDR(vaddr);
       KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
-              (u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart);
+                (u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart,
+              "paddr %x is not kernel memory, but treated as such",
+              paddr);
 
       __free_pmem_page(&kmem_pool, paddr);
       __unlink_mem_page(vaddr);
