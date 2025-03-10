@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/interrupt/interrupt.h" // for intr_set_status
+#include "kernel/task/sync.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"   // for hlt
 #include "kernel/utils/print.h" // for kprint, kprintln
@@ -15,19 +16,21 @@
 // used only for assert
 #define LOGLEVEL_PANIC 6
 
-// 0 : none, 1 : error, 2 : warning, 3 : info, 4 : debug 5 : trace
 #ifndef LOGLEVEL
 #define LOGLEVEL LOGLEVEL_INFO
 #endif
 
 // debug level to string helpers
 extern const char* debug_level_str[7];
+extern struct lock_t klog_lock;
 
 #define KLOG_WITH(level, func, line, fmt, ...)                                 \
   do {                                                                         \
     const char* level_str = level <= 6 ? debug_level_str[level] : "UNKNOWN";   \
+    lock(&klog_lock);                                                          \
     kprint("[ %s ] %s:%u > ", level_str, func, line);                          \
     kprintln(fmt, ##__VA_ARGS__);                                              \
+    unlock(&klog_lock);                                                        \
   } while (0)
 
 #define KLOG(level, fmt, ...)                                                  \
@@ -63,11 +66,14 @@ extern const char* debug_level_str[7];
 #define KERROR(fmt, ...) KLOG(LOGLEVEL_ERROR fmt, ##__VA_ARGS__)
 #endif
 
-#define KPANIC(msg, ...)                                                       \
+#define KPANIC(fmt, ...)                                                       \
   do {                                                                         \
     intr_set_status(false);                                                    \
-    KLOG(LOGLEVEL_PANIC, msg, ##__VA_ARGS__);                                  \
+    KLOG(LOGLEVEL_PANIC, fmt, ##__VA_ARGS__);                                  \
     while (true) {                                                             \
       hlt();                                                                   \
     }                                                                          \
   } while (0)
+
+void
+init_log(void);

@@ -2,7 +2,6 @@
 #include "kernel/log.h"
 #include "kernel/types.h"
 
-#include "kernel/device/vga.h"
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
@@ -13,7 +12,7 @@ kmain(void);
 static void
 kinit(void)
 {
-  init_vga();
+  init_log();
 
   KINFO("%s STEP 3", KFULLNAME_STR);
 
