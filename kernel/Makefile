@@ -8,7 +8,7 @@ utils_targets := print.o string.o bitmap.o list_head.o
 
 memory_targets := page.o memory.o
 
-kernel_targets := entry.o types.o log.o
+kernel_targets := entry.o types.o
 
 kernel_targets += $(patsubst %.o, interrupt/%.o,$(interrupt_targets))
 kernel_targets += $(patsubst %.o, device/%.o,$(device_targets))

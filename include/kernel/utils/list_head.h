@@ -2,12 +2,16 @@
 
 #include "kernel/types.h"
 
+/**
+ * @brief List head structure, almost like Linux kernel list head.
+ */
 struct list_head
 {
   struct list_head *next, *prev;
 };
 
 #define LIST_ENTRY(ptr, type, member) CONTAINER_OF(ptr, type, member)
+
 #define LIST_FOR_EACH(entry, head)                                             \
   for (entry = (head)->next; entry != (head); entry = entry->next)
 

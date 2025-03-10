@@ -1,9 +1,12 @@
 #include "kernel/utils/print.h"
 #include "kernel/config/utils.h"
 #include "kernel/device/vga.h"
+#include "kernel/task/sync.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/string.h"
+
+static struct lock_t __plock;
 
 static u16
 __kputchar(u8 c, u16 cursor)
@@ -36,6 +39,14 @@ __kputbs(u16 cursor)
 }
 
 void
+init_print(void)
+{
+  init_vga();
+
+  lock_init(&__plock);
+}
+
+void
 kscrscroll(size_t rows)
 {
   if (rows == 0) {
@@ -56,9 +67,13 @@ kscrscroll(size_t rows)
 void
 kputs(const char* str)
 {
+  lock(&__plock);
+
   while (*str != '\0') {
     kputchar(*str++);
   }
+
+  unlock(&__plock);
 }
 
 void
@@ -201,8 +216,12 @@ kprintln(const char* str, ...)
   kvsprint(buf, str, args);
   VA_END(args);
 
+  // for thread safe, edit local buffer rather than global buffer
+  AUTO buf_len = kstrlen(buf);
+  buf[buf_len] = '\n';
+  buf[buf_len + 1] = '\0';
+
   kputs(buf);
-  kputs("\n");
 }
 
 void

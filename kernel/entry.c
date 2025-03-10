@@ -5,6 +5,7 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
+#include "kernel/utils/print.h"
 
 void
 kmain(void);
@@ -12,7 +13,7 @@ kmain(void);
 static void
 kinit(void)
 {
-  init_log();
+  init_print();
 
   KINFO("%s STEP 3", KFULLNAME_STR);
 

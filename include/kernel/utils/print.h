@@ -3,6 +3,9 @@
 #include "kernel/types.h"
 
 void
+init_print(void);
+
+void
 kputs(const char* str);
 
 void
