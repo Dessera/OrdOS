@@ -64,11 +64,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1741249299,
-        "narHash": "sha256-EfdbgP2xwRj6kaZNIHJ4jR7ofI+F0mY3xibH4ren3I0=",
+        "lastModified": 1741576569,
+        "narHash": "sha256-787C2XWs1rVfF6yw2Q51+f6qI7jqTE7FF1R49BKkruM=",
         "owner": "Dessera",
         "repo": "nixcode",
-        "rev": "ce0a5a9e3e3c36e32616db35e50741718157c265",
+        "rev": "7dece6dd13e6aa0cff927e1dbdb358aed300c091",
         "type": "github"
       },
       "original": {
