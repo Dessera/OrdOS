@@ -17,10 +17,3 @@
 #define VGA_GET_CURSOR(row, col) ((row) * VGA_BUF_WIDTH + (col))
 
 #define VGA_GET_BUF_SIZE(rows) ((rows) * VGA_BUF_WIDTH * 2)
-
-#ifndef __ASM__
-
-void
-init_vga(void);
-
-#endif

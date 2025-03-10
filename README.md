@@ -18,8 +18,8 @@ For now, there is only a bootsector in this repository.
 6. [x] Task management (kernel thread only)
 
    - [x] lock
+   - [x] thread safe kprint
    - [ ] thread safe list_head
-   - [ ] thread safe kprint
 
 7. [ ] Shell
 

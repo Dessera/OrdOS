@@ -9,7 +9,63 @@
 static struct lock_t __plock;
 
 static u16
-__kputchar(u8 c, u16 cursor)
+__kget_cursor(void)
+{
+  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
+  u8 cursor_hb = inb(VGA_PORT_DATA);
+
+  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
+  u8 cursor_lb = inb(VGA_PORT_DATA);
+
+  return ((u16)cursor_hb << 8) | (u16)cursor_lb;
+}
+
+static void
+__kset_cursor(u16 cur)
+{
+  if (cur >= VGA_DP_SIZE) {
+    return;
+  }
+  u8 cursor_hb = (cur >> 8);
+  u8 cursor_lb = (cur & 0xff);
+  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
+  outb(VGA_PORT_DATA, cursor_hb);
+  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
+  outb(VGA_PORT_DATA, cursor_lb);
+}
+
+static void
+__kscrclear(void)
+{
+  u16* cursor = (u16*)0;
+  for (size_t i = 0; i < VGA_DP_SIZE; i++) {
+    cursor = (u16*)VGA_GET_ADDR(i);
+    *cursor = 0x0720;
+  }
+
+  __kset_cursor(0);
+}
+
+static void
+__kscrscroll(size_t rows)
+{
+  if (rows == 0) {
+    return;
+  } else if (rows >= VGA_BUF_HEIGHT) {
+    __kscrclear();
+    return;
+  }
+
+  kmemcpy((void*)VGA_GET_ADDR(0),
+          (void*)VGA_GET_ADDR(VGA_GET_CURSOR(rows, 0)),
+          VGA_GET_BUF_SIZE(VGA_BUF_HEIGHT - rows));
+  kmemset((void*)VGA_GET_ADDR(VGA_GET_CURSOR(VGA_BUF_HEIGHT - rows, 0)),
+          0,
+          VGA_GET_BUF_SIZE(rows));
+}
+
+static u16
+__kputdefault(u8 c, u16 cursor)
 {
   u16 payload = (u16)c | (0x07 << 8);
   u16* addr = (u16*)VGA_GET_ADDR(cursor);
@@ -38,59 +94,10 @@ __kputbs(u16 cursor)
   return cursor - 1;
 }
 
-void
-init_print(void)
+static void
+__kputchar(char c)
 {
-  init_vga();
-
-  lock_init(&__plock);
-}
-
-void
-kscrscroll(size_t rows)
-{
-  if (rows == 0) {
-    return;
-  } else if (rows >= VGA_BUF_HEIGHT) {
-    kscrclear();
-    return;
-  }
-
-  kmemcpy((void*)VGA_GET_ADDR(0),
-          (void*)VGA_GET_ADDR(VGA_GET_CURSOR(rows, 0)),
-          VGA_GET_BUF_SIZE(VGA_BUF_HEIGHT - rows));
-  kmemset((void*)VGA_GET_ADDR(VGA_GET_CURSOR(VGA_BUF_HEIGHT - rows, 0)),
-          0,
-          VGA_GET_BUF_SIZE(rows));
-}
-
-void
-kputs(const char* str)
-{
-  lock(&__plock);
-
-  while (*str != '\0') {
-    kputchar(*str++);
-  }
-
-  unlock(&__plock);
-}
-
-void
-kput_u32(u32 num)
-{
-  if (num < 10) {
-    kputchar(num + '0');
-  } else {
-    kput_u32(num / 10);
-    kputchar(num % 10 + '0');
-  }
-}
-
-void
-kputchar(char c)
-{
-  u16 cursor = kget_cursor();
+  u16 cursor = __kget_cursor();
   switch (c) {
     case '\n':
       cursor = __kputlf(cursor);
@@ -102,56 +109,38 @@ kputchar(char c)
       cursor = __kputbs(cursor);
       break;
     default:
-      cursor = __kputchar(c, cursor);
+      cursor = __kputdefault(c, cursor);
   }
 
   // check if cursor is at the end of the screen
   if (cursor >= VGA_DP_SIZE) {
     // scroll screen
-    kscrscroll(1);
+    __kscrscroll(1);
     // set cursor to the beginning of the last line
     cursor = VGA_GET_CURSOR(VGA_BUF_HEIGHT - 1, 0);
   }
 
-  kset_cursor(cursor);
+  __kset_cursor(cursor);
 }
 
 void
-kscrclear(void)
+init_print(void)
 {
-  u16* cursor = (u16*)0;
-  for (size_t i = 0; i < VGA_DP_SIZE; i++) {
-    cursor = (u16*)VGA_GET_ADDR(i);
-    *cursor = 0x0720;
-  }
+  lock_init(&__plock);
 
-  kset_cursor(0);
-}
-
-u16
-kget_cursor(void)
-{
-  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
-  u8 cursor_hb = inb(VGA_PORT_DATA);
-
-  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
-  u8 cursor_lb = inb(VGA_PORT_DATA);
-
-  return ((u16)cursor_hb << 8) | (u16)cursor_lb;
+  __kscrclear();
 }
 
 void
-kset_cursor(u16 cur)
+kputs(const char* str)
 {
-  if (cur >= VGA_DP_SIZE) {
-    return;
+  lock(&__plock);
+
+  while (*str != '\0') {
+    __kputchar(*str++);
   }
-  u8 cursor_hb = (cur >> 8);
-  u8 cursor_lb = (cur & 0xff);
-  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
-  outb(VGA_PORT_DATA, cursor_hb);
-  outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
-  outb(VGA_PORT_DATA, cursor_lb);
+
+  unlock(&__plock);
 }
 
 static void
