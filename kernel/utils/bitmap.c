@@ -1,5 +1,6 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
+#include "kernel/task/sync.h"
 #include "kernel/types.h"
 #include "kernel/utils/string.h"
 
@@ -64,5 +65,50 @@ bitmap_alloc(struct bitmap* bitmap, size_t size)
     }
   }
 
+  return index;
+}
+
+void
+atomic_bitmap_init(struct atomic_bitmap* bitmap, void* data, size_t size)
+{
+  bitmap_init(&bitmap->bitmap, data, size);
+  mutex_lock_init(&bitmap->lock);
+}
+
+void
+atomic_bitmap_set(struct atomic_bitmap* bitmap, size_t index, bool value)
+{
+  mutex_lock(&bitmap->lock);
+  bitmap_set(&bitmap->bitmap, index, value);
+  mutex_unlock(&bitmap->lock);
+}
+
+bool
+atomic_bitmap_get(struct atomic_bitmap* bitmap, size_t index)
+{
+  bool value;
+  mutex_lock(&bitmap->lock);
+  value = bitmap_get(&bitmap->bitmap, index);
+  mutex_unlock(&bitmap->lock);
+  return value;
+}
+
+ssize_t
+atomic_bitmap_alloc(struct atomic_bitmap* bitmap, size_t size)
+{
+  ssize_t index;
+  mutex_lock(&bitmap->lock);
+  index = bitmap_alloc(&bitmap->bitmap, size);
+  mutex_unlock(&bitmap->lock);
+  return index;
+}
+
+ssize_t
+atomic_bitmap_find(struct atomic_bitmap* bitmap, size_t size, bool value)
+{
+  ssize_t index;
+  mutex_lock(&bitmap->lock);
+  index = bitmap_find(&bitmap->bitmap, size, value);
+  mutex_unlock(&bitmap->lock);
   return index;
 }

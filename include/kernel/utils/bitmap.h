@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel/task/sync.h"
 #include "kernel/types.h"
 
 /**
@@ -67,3 +68,24 @@ bitmap_find(struct bitmap* bitmap, size_t size, bool value);
  */
 ssize_t
 bitmap_alloc(struct bitmap* bitmap, size_t size);
+
+struct atomic_bitmap
+{
+  struct bitmap bitmap;
+  struct mutex_lock lock;
+};
+
+void
+atomic_bitmap_init(struct atomic_bitmap* bitmap, void* data, size_t size);
+
+void
+atomic_bitmap_set(struct atomic_bitmap* bitmap, size_t index, bool value);
+
+bool
+atomic_bitmap_get(struct atomic_bitmap* bitmap, size_t index);
+
+ssize_t
+atomic_bitmap_find(struct atomic_bitmap* bitmap, size_t size, bool value);
+
+ssize_t
+atomic_bitmap_alloc(struct atomic_bitmap* bitmap, size_t size);

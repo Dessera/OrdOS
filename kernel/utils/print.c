@@ -235,6 +235,7 @@ kvsprint(char* buf, const char* fmt, VA_LIST args)
         case 'u':
           __kvsprint_u32(&buf, &fmt, VA_ARG(args, u32), 10);
           break;
+        case 'p':
         case 'X':
         case 'x':
           __kvsprint_u32(&buf, &fmt, VA_ARG(args, u32), 16);

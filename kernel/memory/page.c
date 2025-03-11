@@ -7,15 +7,15 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/string.h"
 
-struct vmem_map
+struct vmemmap
 {
-  struct bitmap vmmap;
+  struct atomic_bitmap vmmap;
   u32 vstart;
 };
 
 struct pmempool
 {
-  struct bitmap pmmap;
+  struct atomic_bitmap pmmap;
   u32 pstart;
   size_t size;
 };
@@ -24,7 +24,7 @@ extern u32 _asm_mem_bytes;
 
 static struct pmempool kmem_pool;
 static struct pmempool umem_pool;
-static struct vmem_map kvmmap;
+static struct vmemmap kvmmap;
 
 void
 init_page(void)
@@ -45,24 +45,24 @@ init_page(void)
 
   kmem_pool.size = kmem_pages * MEM_PAGE_SIZE;
   kmem_pool.pstart = kmem_start;
-  bitmap_init(&kmem_pool.pmmap, (void*)PAGE_BITMAP_VSTART, kbitmap_size);
+  atomic_bitmap_init(&kmem_pool.pmmap, (void*)PAGE_BITMAP_VSTART, kbitmap_size);
 
   umem_pool.size = umem_pages * MEM_PAGE_SIZE;
   umem_pool.pstart = umem_start;
-  bitmap_init(
+  atomic_bitmap_init(
     &umem_pool.pmmap, (void*)(PAGE_BITMAP_VSTART + kbitmap_size), ubitmap_size);
 
   kvmmap.vstart = PAGE_KERNEL_HEAP_VSTART;
-  bitmap_init(&kvmmap.vmmap,
-              (void*)(PAGE_BITMAP_VSTART + kbitmap_size + ubitmap_size),
-              kbitmap_size);
+  atomic_bitmap_init(&kvmmap.vmmap,
+                     (void*)(PAGE_BITMAP_VSTART + kbitmap_size + ubitmap_size),
+                     kbitmap_size);
 }
 
 static void*
 __alloc_vmem_page(size_t size)
 {
-  ssize_t index = bitmap_alloc(&kvmmap.vmmap, size);
-  if (index == -1) {
+  ssize_t index = atomic_bitmap_alloc(&kvmmap.vmmap, size);
+  if (index == NPOS) {
     return NULL;
   }
   return (void*)(kvmmap.vstart + index * MEM_PAGE_SIZE);
@@ -73,15 +73,15 @@ __free_vmem_page(void* vaddr, size_t size)
 {
   size_t index = ((u32)vaddr - kvmmap.vstart) / MEM_PAGE_SIZE;
   for (size_t i = 0; i < size; i++) {
-    bitmap_set(&kvmmap.vmmap, index + i, false);
+    atomic_bitmap_set(&kvmmap.vmmap, index + i, false);
   }
 }
 
 static void*
 __alloc_pmem_page(struct pmempool* pool)
 {
-  ssize_t index = bitmap_alloc(&pool->pmmap, true);
-  if (index == -1) {
+  ssize_t index = atomic_bitmap_alloc(&pool->pmmap, true);
+  if (index == NPOS) {
     return NULL;
   }
   return (void*)(pool->pstart + index * MEM_PAGE_SIZE);
@@ -91,7 +91,7 @@ static void
 __free_pmem_page(struct pmempool* pool, void* paddr)
 {
   size_t index = ((u32)paddr - pool->pstart) / MEM_PAGE_SIZE;
-  bitmap_set(&pool->pmmap, index, false);
+  atomic_bitmap_set(&pool->pmmap, index, false);
 }
 
 static void
@@ -139,10 +139,14 @@ alloc_page(size_t size)
   }
 
   void* vmaddr_start = vm_addr;
+  size_t alloc_size = size;
   while (size > 0) {
     void* pm_addr = __alloc_pmem_page(&kmem_pool);
     if (pm_addr == NULL) {
-      // TODO: revert all allocations
+      // * NOTE: code below is not tested
+      KWARNING("failed to allocate physical memory, related vm_addr: %p",
+               vm_addr);
+      free_page(vmaddr_start, alloc_size - size);
       return NULL;
     }
 
@@ -159,11 +163,14 @@ void
 free_page(void* vaddr, size_t size)
 {
   KASSERT(
-    ((u32)vaddr & MEM_PAGE_SIZE) == 0, "vaddr %x is not page aligned", vaddr);
+    ((u32)vaddr & MEM_PAGE_SIZE) == 0, "vaddr %p is not page aligned", vaddr);
+
   void* paddr = PAGE_VADDR_TO_PADDR(vaddr);
-  KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
-            (u32)paddr >= KMEMMB(1) + KMEMKB(1),
-          "cannot free paddr %x outside of memory pool",
+
+  KASSERT(
+    ((u32)paddr & MEM_PAGE_SIZE) == 0, "paddr %p is not page aligned", paddr);
+  KASSERT((u32)paddr >= KMEMMB(1) + KMEMKB(1),
+          "cannot free paddr %p outside of memory pool",
           paddr);
 
   void* vaddr_start = vaddr;
@@ -172,9 +179,11 @@ free_page(void* vaddr, size_t size)
   } else {
     for (size_t i = 0; i < size; i++) {
       paddr = PAGE_VADDR_TO_PADDR(vaddr);
-      KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0 &&
-                (u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart,
-              "paddr %x is not kernel memory, but treated as such",
+      KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0,
+              "paddr %p is not page aligned",
+              paddr);
+      KASSERT((u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart,
+              "paddr %p is not kernel memory, but treated as such",
               paddr);
 
       __free_pmem_page(&kmem_pool, paddr);

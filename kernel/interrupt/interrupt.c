@@ -5,7 +5,6 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/utils/asm.h"
-#include "kernel/utils/print.h"
 
 #define INTR_STATUS_MASK 0x200
 
@@ -44,7 +43,7 @@ intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
           "invalid interrupt id, received %x but max is %x",
           interrupt_number,
           INTR_IDT_SIZE);
-  if (interrupt_handlers[interrupt_number]) {
+  if (interrupt_handlers[interrupt_number] != NULL) {
     KWARNING("overwriting existing interrupt handler at %x", interrupt_number);
   }
   interrupt_handlers[interrupt_number] = handler;
@@ -89,7 +88,9 @@ intr_common_handler(u32 irq)
           irq,
           INTR_IDT_SIZE);
 
-  if (interrupt_handlers[irq]) {
+  if (interrupt_handlers[irq] != NULL) {
     interrupt_handlers[irq](irq);
+  } else {
+    KWARNING("unhandled interrupt %x occurred", irq);
   }
 }
