@@ -3,31 +3,31 @@
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
 
-struct spin_lock_t
+struct spin_lock
 {
   u8 flag;
 };
 
 void
-spin_lock_init(struct spin_lock_t* lock);
+spin_lock_init(struct spin_lock* lock);
 void
-spin_lock(struct spin_lock_t* lock);
+spin_lock(struct spin_lock* lock);
 void
-spin_unlock(struct spin_lock_t* lock);
+spin_unlock(struct spin_lock* lock);
 
-struct lock_t
+struct mutex_lock
 {
   u8 flag;
-  struct spin_lock_t guard;
+  struct spin_lock guard;
   struct list_head wait_queue;
 };
 
 void
-lock_init(struct lock_t* lck);
+mutex_lock_init(struct mutex_lock* lck);
 void
-lock(struct lock_t* lck);
+mutex_lock(struct mutex_lock* lck);
 void
-unlock(struct lock_t* lck);
+mutex_unlock(struct mutex_lock* lck);
 
 bool
 intr_lock(void);

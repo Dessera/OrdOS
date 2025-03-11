@@ -6,7 +6,7 @@
 #include "kernel/utils/asm.h"
 #include "kernel/utils/string.h"
 
-static struct lock_t __plock;
+static struct mutex_lock __plock;
 
 static u16
 __kget_cursor(void)
@@ -126,7 +126,7 @@ __kputchar(char c)
 void
 init_print(void)
 {
-  lock_init(&__plock);
+  mutex_lock_init(&__plock);
 
   __kscrclear();
 }
@@ -134,13 +134,13 @@ init_print(void)
 void
 kputs(const char* str)
 {
-  lock(&__plock);
+  mutex_lock(&__plock);
 
   while (*str != '\0') {
     __kputchar(*str++);
   }
 
-  unlock(&__plock);
+  mutex_unlock(&__plock);
 }
 
 static void

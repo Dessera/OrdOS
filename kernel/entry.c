@@ -1,5 +1,6 @@
 #include "kernel/info.h"
 #include "kernel/log.h"
+#include "kernel/task/thread.h"
 #include "kernel/types.h"
 
 #include "kernel/interrupt/interrupt.h"
@@ -24,10 +25,22 @@ kinit(void)
   intr_set_status(true);
 }
 
+static void
+kthread(void* arg)
+{
+  char* msg = (char*)arg;
+  while (true) {
+    kprintln("%s", msg);
+  }
+}
+
 void
 kmain(void)
 {
   kinit();
+
+  thread_run("Ath", 31, kthread, "Hello, World!");
+  thread_run("Bth", 16, kthread, "Goodbye, World!");
 
   while (true)
     ;

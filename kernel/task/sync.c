@@ -6,26 +6,26 @@
 #include "kernel/utils/list_head.h"
 
 void
-spin_lock_init(struct spin_lock_t* lock)
+spin_lock_init(struct spin_lock* lock)
 {
   lock->flag = 0;
 }
 
 void
-spin_lock(struct spin_lock_t* lock)
+spin_lock(struct spin_lock* lock)
 {
   while (atomic_cmpexchange(&lock->flag, 0, 1) == 1)
     ;
 }
 
 void
-spin_unlock(struct spin_lock_t* lock)
+spin_unlock(struct spin_lock* lock)
 {
   lock->flag = 0;
 }
 
 void
-lock_init(struct lock_t* lck)
+mutex_lock_init(struct mutex_lock* lck)
 {
   lck->flag = 0;
   spin_lock_init(&lck->guard);
@@ -33,7 +33,7 @@ lock_init(struct lock_t* lck)
 }
 
 void
-lock(struct lock_t* lck)
+mutex_lock(struct mutex_lock* lck)
 {
   spin_lock(&lck->guard);
   if (lck->flag == 0) {
@@ -48,7 +48,7 @@ lock(struct lock_t* lck)
 }
 
 void
-unlock(struct lock_t* lck)
+mutex_unlock(struct mutex_lock* lck)
 {
   spin_lock(&lck->guard);
 

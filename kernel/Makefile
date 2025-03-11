@@ -4,7 +4,7 @@ device_targets := pci.o sys_clk.o
 
 task_targets := thread.o switch.o task.o sync.o
 
-utils_targets := print.o string.o bitmap.o list_head.o
+utils_targets := print.o string.o bitmap.o list_head.o queue.o
 
 memory_targets := page.o memory.o
 

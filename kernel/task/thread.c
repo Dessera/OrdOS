@@ -9,6 +9,7 @@
 #include "kernel/task/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
+#include "kernel/utils/queue.h"
 #include "kernel/utils/string.h"
 
 extern void
@@ -16,8 +17,8 @@ _asm_thread_switch_to(struct task_t* curr, struct task_t* next);
 
 static struct task_t* main_thread;
 static struct list_head* thread_running;
-static struct list_head thread_ready_list;
-static struct list_head thread_all_list;
+static struct atomic_queue_no_intr thread_ready_list;
+static struct atomic_queue thread_all_list;
 
 static void
 __kernel_thread(task_function_t function, void* arg)
@@ -78,8 +79,8 @@ __thread_init_stack(struct task_t* task, task_function_t function, void* arg)
 static void
 __init_thread_queue(void)
 {
-  list_init(&thread_ready_list);
-  list_init(&thread_all_list);
+  atomic_queue_no_intr_init(&thread_ready_list);
+  atomic_queue_init(&thread_all_list);
 }
 
 static void
@@ -89,7 +90,7 @@ __init_main_thread(void)
   __thread_init_task(main_thread, "kmain", 31);
   main_thread->status = TASK_STATUS_RUNNING;
 
-  list_add_tail(&main_thread->global_node, &thread_all_list);
+  atomic_queue_push(&thread_all_list, &main_thread->global_node);
   thread_running = &main_thread->node;
 }
 
@@ -109,8 +110,8 @@ thread_run(char* name, u8 priority, task_function_t function, void* arg)
   __thread_init_task(task, name, priority);
   __thread_init_stack(task, function, arg);
 
-  list_add_tail(&task->global_node, &thread_all_list);
-  list_add_tail(&task->node, &thread_ready_list);
+  atomic_queue_no_intr_push(&thread_ready_list, &task->node);
+  atomic_queue_push(&thread_all_list, &task->global_node);
 
   return task;
 }
@@ -130,13 +131,13 @@ thread_schedule(void)
 
   struct task_t* curr = thread_current();
   if (curr->status == TASK_STATUS_RUNNING) {
-    list_add_tail(&curr->node, &thread_ready_list);
+    atomic_queue_no_intr_push(&thread_ready_list, &curr->node);
     curr->ticks = curr->priority;
     curr->status = TASK_STATUS_READY;
   }
 
-  KASSERT(!list_empty(&thread_ready_list), "no ready thread to schedule");
-  thread_running = list_pop(&thread_ready_list);
+  KASSERT(!list_empty(&thread_ready_list.head), "no ready thread to schedule");
+  thread_running = atomic_queue_no_intr_pop(&thread_ready_list);
   struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
   next->status = TASK_STATUS_RUNNING;
 
@@ -150,10 +151,10 @@ thread_yield(void)
 
   struct task_t* curr = thread_current();
 
-  KASSERT(!list_find(&thread_ready_list, &curr->node),
+  KASSERT(!list_find(&thread_ready_list.head, &curr->node),
           "thread %s cannot yield because it is not running",
           curr->name);
-  list_add_tail(&curr->node, &thread_ready_list);
+  atomic_queue_no_intr_push(&thread_ready_list, &curr->node);
   curr->status = TASK_STATUS_READY;
 
   thread_schedule();
@@ -189,11 +190,11 @@ thread_unpark(struct task_t* task)
   //   return;
   // }
 
-  KASSERT(list_find(&thread_ready_list, &task->node) == -1,
+  KASSERT(list_find(&thread_ready_list.head, &task->node) == -1,
           "task %x is already in ready list",
           task);
 
-  list_add_tail(&task->node, &thread_ready_list);
+  atomic_queue_no_intr_push(&thread_ready_list, &task->node);
   task->status = TASK_STATUS_READY;
 
   intr_unlock(old_intr_status);
