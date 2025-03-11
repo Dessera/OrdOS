@@ -1,8 +1,6 @@
 #include "kernel/device/keyboard.h"
 #include "kernel/info.h"
 #include "kernel/log.h"
-#include "kernel/task/thread.h"
-#include "kernel/types.h"
 
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/memory.h"

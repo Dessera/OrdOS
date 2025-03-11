@@ -14,13 +14,13 @@
 #define NULL ((void*)0)
 #endif
 
-#ifndef true
-#define true (1)
-#endif
+// #ifndef true
+// #define true (1)
+// #endif
 
-#ifndef false
-#define false (0)
-#endif
+// #ifndef false
+// #define false (0)
+// #endif
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -42,7 +42,7 @@ typedef i32 ssize_t;
 #define MAX_SSIZE_T ((ssize_t)0x7FFFFFFF)
 #define MIN_SSIZE_T ((ssize_t)0x80000000)
 
-typedef _Bool bool;
+// typedef _Bool bool;
 
 #define AUTO __auto_type
 

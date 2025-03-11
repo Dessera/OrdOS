@@ -13,9 +13,9 @@
 #include "kernel/utils/string.h"
 
 extern void
-_asm_thread_switch_to(struct task_t* curr, struct task_t* next);
+_asm_thread_switch_to(struct task* curr, struct task* next);
 
-static struct task_t* main_thread;
+static struct task* main_thread;
 static struct list_head* thread_running;
 static struct atomic_queue_nint thread_ready_list;
 static struct atomic_queue thread_all_list;
@@ -32,7 +32,7 @@ __thread_schedule_handler(u32 irq)
 {
   (void)irq;
 
-  struct task_t* task = thread_current();
+  struct task* task = thread_current();
 
   KASSERT(task->tmagic == TASK_MAGIC, "invalid task object at %x", task);
 
@@ -46,9 +46,9 @@ __thread_schedule_handler(u32 irq)
 }
 
 static void
-__thread_init_task(struct task_t* task, char* name, u8 priority)
+__thread_init_task(struct task* task, char* name, u8 priority)
 {
-  kmemset(task, 0, sizeof(struct task_t));
+  kmemset(task, 0, sizeof(struct task));
   kstrcpy(task->name, name);
   task->status = TASK_STATUS_READY;
   task->priority = priority;
@@ -60,12 +60,12 @@ __thread_init_task(struct task_t* task, char* name, u8 priority)
 }
 
 static void
-__thread_init_stack(struct task_t* task, task_function_t function, void* arg)
+__thread_init_stack(struct task* task, task_function_t function, void* arg)
 {
-  task->kstack -= sizeof(struct intr_context_t);
-  task->kstack -= sizeof(struct thread_context_t);
+  task->kstack -= sizeof(struct intr_context);
+  task->kstack -= sizeof(struct thread_context);
 
-  struct thread_context_t* ctx = (struct thread_context_t*)task->kstack;
+  struct thread_context* ctx = (struct thread_context*)task->kstack;
   ctx->func = function;
   ctx->arg = arg;
   ctx->eip = __kernel_thread;
@@ -103,10 +103,10 @@ init_thread(void)
   intr_register_handler(0x20, __thread_schedule_handler);
 }
 
-struct task_t*
+struct task*
 thread_run(char* name, u8 priority, task_function_t function, void* arg)
 {
-  struct task_t* task = alloc_page(TASK_PCB_PAGE_SIZE);
+  struct task* task = alloc_page(TASK_PCB_PAGE_SIZE);
   __thread_init_task(task, name, priority);
   __thread_init_stack(task, function, arg);
 
@@ -116,12 +116,12 @@ thread_run(char* name, u8 priority, task_function_t function, void* arg)
   return task;
 }
 
-struct task_t*
+struct task*
 thread_current(void)
 {
   u32 esp;
   __asm__ __volatile__("movl %%esp, %0" : "=g"(esp));
-  return (struct task_t*)(esp & PAGE_SELECTOR_MASK);
+  return (struct task*)(esp & PAGE_SELECTOR_MASK);
 }
 
 void
@@ -129,7 +129,7 @@ thread_schedule(void)
 {
   KASSERT(intr_get_status() == false, "interrupt is enabled when scheduling");
 
-  struct task_t* curr = thread_current();
+  struct task* curr = thread_current();
   if (curr->status == TASK_STATUS_RUNNING) {
     atomic_queue_nint_push(&thread_ready_list, &curr->node);
     curr->ticks = curr->priority;
@@ -138,7 +138,7 @@ thread_schedule(void)
 
   KASSERT(!list_empty(&thread_ready_list.head), "no ready thread to schedule");
   thread_running = atomic_queue_nint_pop(&thread_ready_list);
-  struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
+  struct task* next = LIST_ENTRY(thread_running, struct task, node);
   next->status = TASK_STATUS_RUNNING;
 
   _asm_thread_switch_to(curr, next);
@@ -149,7 +149,7 @@ thread_yield(void)
 {
   bool intr_status = intr_lock();
 
-  struct task_t* curr = thread_current();
+  struct task* curr = thread_current();
 
   KASSERT(!list_find(&thread_ready_list.head, &curr->node),
           "thread %s cannot yield because it is not running",
@@ -167,7 +167,7 @@ thread_park(void)
 {
   bool intr_status = intr_lock();
 
-  struct task_t* task = thread_current();
+  struct task* task = thread_current();
   task->status = TASK_STATUS_BLOCKED;
 
   thread_schedule();
@@ -176,7 +176,7 @@ thread_park(void)
 }
 
 void
-thread_unpark(struct task_t* task)
+thread_unpark(struct task* task)
 {
   bool old_intr_status = intr_lock();
 

@@ -2,7 +2,7 @@
 
 #include "kernel/task/task.h"
 #include "kernel/types.h"
-struct intr_context_t
+struct intr_context
 {
   u32 index;
   u32 edi;
@@ -28,7 +28,7 @@ struct intr_context_t
   u32 ss;
 };
 
-struct thread_context_t
+struct thread_context
 {
   u32 ebp;
   u32 ebx;

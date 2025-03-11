@@ -20,7 +20,7 @@ TESTER =
 
 INCFLAGS = -I$(INCLUDE_DIR)
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -std=c11		\
+CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -std=c23		\
 					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
 					-nostdinc -nostdlib -m32 $(INCFLAGS) 																\
 					-D KVERSION=$(VERSION) -D KNAME=$(NAME) -D LOGLEVEL=$(LOGLEVEL)

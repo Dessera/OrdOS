@@ -3,7 +3,7 @@
 #include "kernel/config/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
-enum task_status_t
+enum task_status
 {
   TASK_STATUS_RUNNING,
   TASK_STATUS_READY,
@@ -15,10 +15,10 @@ enum task_status_t
 
 typedef void (*task_function_t)(void*);
 
-struct task_t
+struct task
 {
   u32* kstack;
-  enum task_status_t status;
+  enum task_status status;
   char name[TASK_NAME_SIZE];
 
   u8 priority;

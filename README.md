@@ -22,10 +22,11 @@ For now, there is only a bootsector in this repository.
    - [ ] thread safe list_head
 
 7. [ ] Shell
+8. [ ] Support more gcc versions and std versions
 
 ## Build
 
-> The project uses gcc14 (with c11 support) to build.
+> The project uses gcc14 (with c23 support) to build.
 
 Build commands:
 
