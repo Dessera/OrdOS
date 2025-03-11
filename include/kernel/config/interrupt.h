@@ -1,3 +1,3 @@
 #pragma once
 
-#define INTR_IDT_SIZE 0x21
+#define INTR_IDT_SIZE 0x30

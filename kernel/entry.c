@@ -1,3 +1,4 @@
+#include "kernel/device/keyboard.h"
 #include "kernel/info.h"
 #include "kernel/log.h"
 #include "kernel/task/thread.h"
@@ -22,25 +23,15 @@ kinit(void)
   init_mm();
   init_task();
 
-  intr_set_status(true);
-}
+  init_keyboard();
 
-static void
-kthread(void* arg)
-{
-  char* msg = (char*)arg;
-  while (true) {
-    kprintln("%s", msg);
-  }
+  intr_set_status(true);
 }
 
 void
 kmain(void)
 {
   kinit();
-
-  thread_run("Ath", 31, kthread, "Hello, World!");
-  thread_run("Bth", 16, kthread, "Goodbye, World!");
 
   while (true)
     ;

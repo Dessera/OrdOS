@@ -17,7 +17,7 @@ _asm_thread_switch_to(struct task_t* curr, struct task_t* next);
 
 static struct task_t* main_thread;
 static struct list_head* thread_running;
-static struct atomic_queue_no_intr thread_ready_list;
+static struct atomic_queue_nint thread_ready_list;
 static struct atomic_queue thread_all_list;
 
 static void
@@ -79,7 +79,7 @@ __thread_init_stack(struct task_t* task, task_function_t function, void* arg)
 static void
 __init_thread_queue(void)
 {
-  atomic_queue_no_intr_init(&thread_ready_list);
+  atomic_queue_nint_init(&thread_ready_list);
   atomic_queue_init(&thread_all_list);
 }
 
@@ -110,7 +110,7 @@ thread_run(char* name, u8 priority, task_function_t function, void* arg)
   __thread_init_task(task, name, priority);
   __thread_init_stack(task, function, arg);
 
-  atomic_queue_no_intr_push(&thread_ready_list, &task->node);
+  atomic_queue_nint_push(&thread_ready_list, &task->node);
   atomic_queue_push(&thread_all_list, &task->global_node);
 
   return task;
@@ -131,13 +131,13 @@ thread_schedule(void)
 
   struct task_t* curr = thread_current();
   if (curr->status == TASK_STATUS_RUNNING) {
-    atomic_queue_no_intr_push(&thread_ready_list, &curr->node);
+    atomic_queue_nint_push(&thread_ready_list, &curr->node);
     curr->ticks = curr->priority;
     curr->status = TASK_STATUS_READY;
   }
 
   KASSERT(!list_empty(&thread_ready_list.head), "no ready thread to schedule");
-  thread_running = atomic_queue_no_intr_pop(&thread_ready_list);
+  thread_running = atomic_queue_nint_pop(&thread_ready_list);
   struct task_t* next = LIST_ENTRY(thread_running, struct task_t, node);
   next->status = TASK_STATUS_RUNNING;
 
@@ -154,7 +154,7 @@ thread_yield(void)
   KASSERT(!list_find(&thread_ready_list.head, &curr->node),
           "thread %s cannot yield because it is not running",
           curr->name);
-  atomic_queue_no_intr_push(&thread_ready_list, &curr->node);
+  atomic_queue_nint_push(&thread_ready_list, &curr->node);
   curr->status = TASK_STATUS_READY;
 
   thread_schedule();
@@ -194,7 +194,7 @@ thread_unpark(struct task_t* task)
           "task %x is already in ready list",
           task);
 
-  atomic_queue_no_intr_push(&thread_ready_list, &task->node);
+  atomic_queue_nint_push(&thread_ready_list, &task->node);
   task->status = TASK_STATUS_READY;
 
   intr_unlock(old_intr_status);

@@ -18,17 +18,20 @@ atomic_queue_push(struct atomic_queue* q, struct list_head* item);
 struct list_head*
 atomic_queue_pop(struct atomic_queue* q);
 
-struct atomic_queue_no_intr
+/**
+ * @brief Queue which blocks interrupts while accessing it, used for resources
+ * used both outside and inside the interrupt context.
+ */
+struct atomic_queue_nint
 {
   struct list_head head;
 };
 
 void
-atomic_queue_no_intr_init(struct atomic_queue_no_intr* q);
+atomic_queue_nint_init(struct atomic_queue_nint* q);
 
 void
-atomic_queue_no_intr_push(struct atomic_queue_no_intr* q,
-                          struct list_head* item);
+atomic_queue_nint_push(struct atomic_queue_nint* q, struct list_head* item);
 
 struct list_head*
-atomic_queue_no_intr_pop(struct atomic_queue_no_intr* q);
+atomic_queue_nint_pop(struct atomic_queue_nint* q);

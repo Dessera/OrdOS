@@ -38,14 +38,13 @@ atomic_queue_pop_exit:
 }
 
 void
-atomic_queue_no_intr_init(struct atomic_queue_no_intr* q)
+atomic_queue_nint_init(struct atomic_queue_nint* q)
 {
   list_init(&q->head);
 }
 
 void
-atomic_queue_no_intr_push(struct atomic_queue_no_intr* q,
-                          struct list_head* item)
+atomic_queue_nint_push(struct atomic_queue_nint* q, struct list_head* item)
 {
   bool intr_status = intr_lock();
 
@@ -55,19 +54,19 @@ atomic_queue_no_intr_push(struct atomic_queue_no_intr* q,
 }
 
 struct list_head*
-atomic_queue_no_intr_pop(struct atomic_queue_no_intr* q)
+atomic_queue_nint_pop(struct atomic_queue_nint* q)
 {
   struct list_head* item = NULL;
   bool intr_status = intr_lock();
 
   if (list_empty(&q->head)) {
-    goto atomic_queue_no_intr_pop_exit;
+    goto atomic_queue_nint_pop_exit;
   } else {
     item = q->head.next;
     list_del(item);
   }
 
-atomic_queue_no_intr_pop_exit:
+atomic_queue_nint_pop_exit:
   intr_unlock(intr_status);
   return item;
 }

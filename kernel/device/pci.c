@@ -14,7 +14,7 @@ __init_pic(void)
   outb(PIC_SLAVE_DATA, 0x02);
   outb(PIC_SLAVE_DATA, 0x01);
 
-  outb(PIC_MASTER_DATA, 0xfe);
+  outb(PIC_MASTER_DATA, 0xfd);
   outb(PIC_SLAVE_DATA, 0xff);
 }
 
