@@ -49,7 +49,7 @@ __init_idt_desc(void)
 {
   for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
     __idt_desc_init(&idt[i],
-                    GDT_CODE_SELECTOR,
+                    GDT_KCODE_SELECTOR,
                     (u32)_asm_intr_vecs[i],
                     IDT_DESC_ATTR(1, IDT_DPL_KERNEL, IDT_TYPE_INTR));
   }

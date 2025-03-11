@@ -5,6 +5,7 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
+#include "kernel/task/tss.h"
 #include "kernel/utils/print.h"
 
 void
@@ -22,6 +23,7 @@ kinit(void)
   init_task();
 
   init_keyboard();
+  init_user_tss();
 
   intr_set_status(true);
 }

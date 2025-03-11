@@ -7,6 +7,7 @@ BOOT_DIR = boot
 KERNEL_DIR = kernel
 INCLUDE_DIR = include
 TEST_DIR = test
+USER_DIR = user
 
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
@@ -60,6 +61,12 @@ targets += $(patsubst %.o, $(BOOT_DIR)/%.o,$(boot_targets))
 include kernel/Makefile
 
 targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
+# 	-----------------------------------------------
+
+# 	-------------------- USER -------------------
+include user/Makefile
+
+targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- FINAL --------------------

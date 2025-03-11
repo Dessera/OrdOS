@@ -18,18 +18,20 @@
 .code16
 .section ".ldrtext", "ax"
   // gdt table
-_gdt_table:
+.globl _asm_gdt_table
+_asm_gdt_table:
   GDT_DESC_NULL()
-  GDT_DESC_CODE()
-  GDT_DESC_DATA()
+  GDT_DESC_KCODE()
+  GDT_DESC_KDATA()
   GDT_DESC_VIDEO()
-_gdt_end:
+_asm_gdt_end:
 
-_gdt_size:
-  .word _gdt_end - _gdt_table
-_gdt_table_ptr:
-  .word _gdt_end - _gdt_table - 1
-  .long _gdt_table
+.globl _asm_gdt_size
+_asm_gdt_size:
+  .word (_asm_gdt_end - _asm_gdt_table) / 8
+_asm_gdt_table_ptr:
+  .word _asm_gdt_end - _asm_gdt_table - 1
+  .long _asm_gdt_table
 
   // ards buffer 244 bytes
 _asm_mem_zone:
@@ -88,7 +90,7 @@ _ldr_mem_ok:
   outb %al, $0x92
 
   // load gdt
-  lgdt _gdt_table_ptr
+  lgdt _asm_gdt_table_ptr
 
   // enable protected mode
   movl %cr0, %eax
@@ -96,7 +98,7 @@ _ldr_mem_ok:
   movl %eax, %cr0
 
   // jump to _start_protected
-  ljmp $GDT_CODE_SELECTOR, $_start_protected
+  ljmp $GDT_KCODE_SELECTOR, $_start_protected
 
 _ldr_error_hlt:
   hlt
@@ -125,7 +127,7 @@ _lprint_done:
 
 .code32
 _start_protected:
-  movw $GDT_DATA_SELECTOR, %ax
+  movw $GDT_KDATA_SELECTOR, %ax
   movw %ax, %ds
   movw %ax, %es
   movw %ax, %ss
@@ -177,12 +179,12 @@ _prot_kernel_mem_loop:
   jne _prot_kernel_mem_loop
 
   // update gdt
-  sgdt _gdt_table_ptr
+  sgdt _asm_gdt_table_ptr
 
-  movl (_gdt_table_ptr + 2), %ebx
+  movl (_asm_gdt_table_ptr + 2), %ebx
   orl $MEM_KERNEL_VSTART, GDT_VIDEO_SELECTOR + 4(%ebx)
 
-  addl $MEM_KERNEL_VSTART, (_gdt_table_ptr + 2)
+  addl $MEM_KERNEL_VSTART, (_asm_gdt_table_ptr + 2)
   addl $MEM_KERNEL_VSTART, %esp
 
   // load page table
@@ -193,7 +195,7 @@ _prot_kernel_mem_loop:
   orl $0x80000000, %eax
   movl %eax, %cr0
 
-  lgdt _gdt_table_ptr
+  lgdt _asm_gdt_table_ptr
 
   // load kernel
   PPRINT($0x02, $_pb_kernel_indicator)
