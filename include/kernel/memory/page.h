@@ -43,6 +43,8 @@
   ((void*)((*PAGE_GET_PTE(vaddr) & PAGE_PDE_VSTART) +                          \
            ((u32)vaddr & PAGE_ADDR_MASK)))
 
+#define PAGE_ENTRIES (MEM_PAGE_SIZE / PAGE_PDE_DESC_SIZE)
+
 #define PAGE_INITIAL_ENTRIES                                                   \
   ((MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET) / PAGE_PDE_DESC_SIZE)
 

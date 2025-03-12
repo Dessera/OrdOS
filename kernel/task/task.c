@@ -134,6 +134,22 @@ task_init_vmmap(struct task* task)
 }
 
 void
+task_init_page_table(struct task* task)
+{
+  task->page_table = alloc_page(1, true);
+  if (task->page_table == NULL) {
+    KPANIC("failed to allocate page table for task %s", task->name);
+  }
+
+  kmemcpy(task->page_table + PAGE_PDE_KERNEL_OFFSET,
+          (u32*)(PAGE_PDE_VSTART + PAGE_PDE_KERNEL_OFFSET),
+          MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET);
+
+  void* paddr = PAGE_VADDR_TO_PADDR(task->page_table);
+  task->page_table[PAGE_ENTRIES - 1] = PAGE_PDE_DESC((u32)paddr, 1, 1, 1);
+}
+
+void
 task_yield(void)
 {
   bool intr_status = intr_lock();

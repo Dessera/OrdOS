@@ -12,7 +12,7 @@ __init_main_thread(void)
 {
   main_thread = task_current();
 
-  task_init(main_thread, TASK_KTHREAD_MAIN_NAME, TASK_KTHREAD_MAIN_PRIORITY);
+  task_init(main_thread, TASK_KTHREAD_MAIN_NAME, TASK_DEFAULT_PRIORITY);
   main_thread->status = TASK_STATUS_RUNNING;
 
   atomic_queue_push(&task_all_list, &main_thread->global_node);

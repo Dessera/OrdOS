@@ -90,6 +90,14 @@ void
 task_init_vmmap(struct task* task);
 
 /**
+ * @brief Init task's page table for user space
+ *
+ * @param task Task to init
+ */
+void
+task_init_page_table(struct task* task);
+
+/**
  * @brief Switch to another task
  */
 void
