@@ -37,7 +37,7 @@
   ((u32*)(PAGE_PDE_INDEX(vaddr) * 4 + PAGE_PDE_VSTART))
 #define PAGE_GET_PTE(vaddr)                                                    \
   ((u32*)(PAGE_PTE_INDEX(vaddr) * 4 + PAGE_PTE_VSTART +                        \
-          (((u32)vaddr & PAGE_PDE_MASK) >> 10)))
+          (((u32)(vaddr) & PAGE_PDE_MASK) >> 10)))
 
 #define PAGE_VADDR_TO_PADDR(vaddr)                                             \
   ((void*)((*PAGE_GET_PTE(vaddr) & PAGE_PDE_VSTART) +                          \
@@ -68,6 +68,9 @@ init_page(void);
 
 void*
 alloc_page(size_t size, bool kernel);
+
+void*
+link_page(void* vaddr, bool kernel);
 
 void
 free_page(void* addr, size_t size);

@@ -86,6 +86,8 @@ _asm_intr_common_handler:
   // call c handler with intr index
   call intr_common_handler
 
+.globl _asm_intr_common_handler_exit
+_asm_intr_common_handler_exit:
   // pop index
   addl $0x04, %esp
   

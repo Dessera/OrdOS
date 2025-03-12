@@ -88,3 +88,5 @@ struct gdt_desc
 #define GDT_VIDEO_SELECTOR 0x18
 
 #define GDT_TSS_SELECTOR 0x20
+#define GDT_UCODE_SELECTOR 0x2b
+#define GDT_UDATA_SELECTOR 0x33

@@ -6,6 +6,7 @@
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"
 #include "kernel/task/kthread.h"
+#include "kernel/task/tss.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/queue.h"
 #include "kernel/utils/string.h"
@@ -41,14 +42,21 @@ __task_schedule(void)
   struct task* next = LIST_ENTRY(task_running, struct task, node);
   next->status = TASK_STATUS_RUNNING;
 
+  void* page_table = next->page_table != NULL
+                       ? PAGE_VADDR_TO_PADDR(next->page_table)
+                       : (void*)MEM_PAGE_TABLE_START;
+  __asm__ __volatile__("movl %0, %%cr3" : : "r"(page_table) : "memory");
+
+  if (next->page_table != NULL) {
+    tss_update_esp(next);
+  }
+
   _asm_thread_switch_to(curr, next);
 }
 
 static void
-__task_schedule_handler(u32 irq)
+__task_schedule_handler(u32 /* irq */)
 {
-  (void)irq;
-
   struct task* task = task_current();
 
   KASSERT(task->tmagic == TASK_MAGIC, "invalid task object at %x", task);
@@ -78,6 +86,8 @@ init_task(void)
 
   __init_task_queue();
   init_kthread();
+
+  init_user_tss();
 
   intr_register_handler(0x20, __task_schedule_handler);
 }
@@ -141,8 +151,8 @@ task_init_page_table(struct task* task)
     KPANIC("failed to allocate page table for task %s", task->name);
   }
 
-  kmemcpy(task->page_table + PAGE_PDE_KERNEL_OFFSET,
-          (u32*)(PAGE_PDE_VSTART + PAGE_PDE_KERNEL_OFFSET),
+  kmemcpy((void*)((u32)task->page_table + PAGE_PDE_KERNEL_OFFSET),
+          (void*)(PAGE_PDE_VSTART + PAGE_PDE_KERNEL_OFFSET),
           MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET);
 
   void* paddr = PAGE_VADDR_TO_PADDR(task->page_table);

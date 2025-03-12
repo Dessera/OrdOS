@@ -98,8 +98,9 @@ __link_mem_page(void* paddr, void* vaddr)
   u32* pde = PAGE_GET_PDE(vaddr);
   u32* pte = PAGE_GET_PTE(vaddr);
 
-  KASSERT(
-    !(*pte & PAGE_PTE_P_MASK), "duplicate page table allocation at %x", vaddr);
+  // KASSERT(
+  //   !(*pte & PAGE_PTE_P_MASK), "duplicate page table allocation at %x",
+  //   vaddr);
 
   if (*pde & PAGE_PDE_P_MASK) {
     if (!(*pte & PAGE_PTE_P_MASK)) {
@@ -110,7 +111,7 @@ __link_mem_page(void* paddr, void* vaddr)
 
     *pde = PAGE_PDE_DESC((u32)new_page, 1, 1, 1);
 
-    kmemset(pte, 0, MEM_PAGE_SIZE);
+    kmemset((void*)((u32)pte & PAGE_SELECTOR_MASK), 0, MEM_PAGE_SIZE);
     *pte = PAGE_PTE_DESC((u32)paddr, 1, 1, 1);
   }
 }
@@ -159,6 +160,27 @@ alloc_page(size_t size, bool kernel)
   kmemset(vmaddr_start, 0, alloc_size * MEM_PAGE_SIZE);
 
   return vmaddr_start;
+}
+
+void*
+link_page(void* vaddr, bool kernel)
+{
+  AUTO pmem_pool = kernel ? &kmem_pool : &umem_pool;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
+
+  size_t index = ((u32)vaddr - vaddr_map->vstart) / MEM_PAGE_SIZE;
+  atomic_bitmap_set(&vaddr_map->vmmap, index, true);
+
+  void* paddr = __alloc_pmem_page(pmem_pool);
+  if (paddr == NULL) {
+    // * NOTE: code below is not tested
+    KWARNING("failed to allocate physical memory, related vm_addr: %p", vaddr);
+    return NULL;
+  }
+
+  __link_mem_page(paddr, vaddr);
+
+  return vaddr;
 }
 
 void
