@@ -53,12 +53,19 @@
 #ifndef __ASM__
 
 #include "kernel/types.h"
+#include "kernel/utils/bitmap.h"
+
+struct vmemmap
+{
+  struct atomic_bitmap vmmap;
+  u32 vstart;
+};
 
 void
 init_page(void);
 
 void*
-alloc_page(size_t size);
+alloc_page(size_t size, bool kernel);
 
 void
 free_page(void* addr, size_t size);

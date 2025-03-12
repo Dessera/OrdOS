@@ -106,7 +106,7 @@ init_thread(void)
 struct task*
 thread_run(char* name, u8 priority, task_function_t function, void* arg)
 {
-  struct task* task = alloc_page(TASK_PCB_PAGE_SIZE);
+  struct task* task = alloc_page(TASK_PCB_PAGE_SIZE, true);
   __thread_init_task(task, name, priority);
   __thread_init_stack(task, function, arg);
 

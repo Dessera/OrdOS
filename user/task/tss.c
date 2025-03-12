@@ -1,4 +1,5 @@
 #include "kernel/task/tss.h"
+#include "kernel/config/memory.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/task/context.h"
 #include "kernel/types.h"
@@ -46,4 +47,10 @@ init_user_tss(void)
   u64 gdt_ptr = MK_GDT_PTR(gdt_size, _asm_gdt_table);
   __asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
   __asm__ __volatile__("ltr %w0" : : "r"(GDT_TSS_SELECTOR));
+}
+
+void
+tss_update_esp(struct task* task)
+{
+  __tss_ctx.esp0 = (u32*)(((u32)task) + MEM_PAGE_SIZE);
 }

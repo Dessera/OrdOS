@@ -2,16 +2,11 @@
 #include "kernel/assert.h"
 #include "kernel/common.h"
 #include "kernel/config/memory.h"
+#include "kernel/task/thread.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/string.h"
-
-struct vmemmap
-{
-  struct atomic_bitmap vmmap;
-  u32 vstart;
-};
 
 struct pmempool
 {
@@ -59,21 +54,24 @@ init_page(void)
 }
 
 static void*
-__alloc_vmem_page(size_t size)
+__alloc_vmem_page(size_t size, bool kernel)
 {
-  ssize_t index = atomic_bitmap_alloc(&kvmmap.vmmap, size);
+  AUTO vaddr_map = kernel ? &kvmmap : &thread_current()->user_vaddr;
+
+  ssize_t index = atomic_bitmap_alloc(&vaddr_map->vmmap, size);
   if (index == NPOS) {
     return NULL;
   }
-  return (void*)(kvmmap.vstart + index * MEM_PAGE_SIZE);
+  return (void*)(vaddr_map->vstart + index * MEM_PAGE_SIZE);
 }
 
 static void
-__free_vmem_page(void* vaddr, size_t size)
+__free_vmem_page(void* vaddr, size_t size, bool kernel)
 {
-  size_t index = ((u32)vaddr - kvmmap.vstart) / MEM_PAGE_SIZE;
+  AUTO vaddr_map = kernel ? &kvmmap : &thread_current()->user_vaddr;
+  size_t index = ((u32)vaddr - vaddr_map->vstart) / MEM_PAGE_SIZE;
   for (size_t i = 0; i < size; i++) {
-    atomic_bitmap_set(&kvmmap.vmmap, index + i, false);
+    atomic_bitmap_set(&vaddr_map->vmmap, index + i, false);
   }
 }
 
@@ -126,14 +124,16 @@ __unlink_mem_page(void* vaddr)
 }
 
 void*
-alloc_page(size_t size)
+alloc_page(size_t size, bool kernel)
 {
   KASSERT(size <= MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC,
           "requested too many pages, alloc %u pages, but only %u allowed",
           size,
           MEM_POOL_MAXIMUM_PAGE_SINGLE_ALLOC);
 
-  void* vm_addr = __alloc_vmem_page(size);
+  AUTO pmem_pool = kernel ? &kmem_pool : &umem_pool;
+
+  void* vm_addr = __alloc_vmem_page(size, kernel);
   if (vm_addr == NULL) {
     return NULL;
   }
@@ -141,7 +141,7 @@ alloc_page(size_t size)
   void* vmaddr_start = vm_addr;
   size_t alloc_size = size;
   while (size > 0) {
-    void* pm_addr = __alloc_pmem_page(&kmem_pool);
+    void* pm_addr = __alloc_pmem_page(pmem_pool);
     if (pm_addr == NULL) {
       // * NOTE: code below is not tested
       KWARNING("failed to allocate physical memory, related vm_addr: %p",
@@ -156,6 +156,8 @@ alloc_page(size_t size)
     size--;
   }
 
+  kmemset(vmaddr_start, 0, alloc_size * MEM_PAGE_SIZE);
+
   return vmaddr_start;
 }
 
@@ -166,6 +168,8 @@ free_page(void* vaddr, size_t size)
     ((u32)vaddr & MEM_PAGE_SIZE) == 0, "vaddr %p is not page aligned", vaddr);
 
   void* paddr = PAGE_VADDR_TO_PADDR(vaddr);
+  bool kernel = !((u32)paddr >= umem_pool.pstart);
+  AUTO pmem_pool = kernel ? &kmem_pool : &umem_pool;
 
   KASSERT(
     ((u32)paddr & MEM_PAGE_SIZE) == 0, "paddr %p is not page aligned", paddr);
@@ -174,24 +178,19 @@ free_page(void* vaddr, size_t size)
           paddr);
 
   void* vaddr_start = vaddr;
-  if ((u32)paddr >= umem_pool.pstart) {
-    // TODO: free user memory
-  } else {
-    for (size_t i = 0; i < size; i++) {
-      paddr = PAGE_VADDR_TO_PADDR(vaddr);
-      KASSERT(((u32)paddr & MEM_PAGE_SIZE) == 0,
-              "paddr %p is not page aligned",
-              paddr);
-      KASSERT((u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart,
-              "paddr %p is not kernel memory, but treated as such",
-              paddr);
+  for (size_t i = 0; i < size; i++) {
+    paddr = PAGE_VADDR_TO_PADDR(vaddr);
+    KASSERT(
+      ((u32)paddr & MEM_PAGE_SIZE) == 0, "paddr %p is not page aligned", paddr);
+    // KASSERT((u32)paddr >= kmem_pool.pstart && (u32)paddr < umem_pool.pstart,
+    //         "paddr %p is not kernel memory, but treated as such",
+    //         paddr);
 
-      __free_pmem_page(&kmem_pool, paddr);
-      __unlink_mem_page(vaddr);
+    __free_pmem_page(pmem_pool, paddr);
+    __unlink_mem_page(vaddr);
 
-      vaddr += MEM_PAGE_SIZE;
-    }
-
-    __free_vmem_page(vaddr_start, size);
+    vaddr += MEM_PAGE_SIZE;
   }
+
+  __free_vmem_page(vaddr_start, size, kernel);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/config/task.h"
+#include "kernel/memory/page.h"
 #include "kernel/types.h"
 #include "kernel/utils/list_head.h"
 enum task_status
@@ -29,6 +30,7 @@ struct task
   struct list_head global_node;
 
   u32* page_table;
+  struct vmemmap user_vaddr;
 
   u32 tmagic;
 };
