@@ -1,18 +1,72 @@
 #include "kernel/task/task.h"
+#include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/device/sys_clk.h"
 #include "kernel/log.h"
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"
-#include "kernel/task/thread.h"
+#include "kernel/task/kthread.h"
 #include "kernel/utils/bitmap.h"
+#include "kernel/utils/queue.h"
 #include "kernel/utils/string.h"
 
+extern void
+_asm_thread_switch_to(struct task* curr, struct task* next);
+
+struct atomic_queue_nint task_ready_list;
+struct atomic_queue task_all_list;
+struct list_head* task_running;
+
 static void
-__kernel_task_entry(task_function_t function, void* arg)
+__kernel_task_entry(task_entry_t function, void* arg)
 {
   intr_set_status(true);
   function(arg);
+}
+
+static void
+__task_schedule(void)
+{
+  KASSERT(intr_get_status() == false, "interrupt is enabled when scheduling");
+
+  struct task* curr = task_current();
+  if (curr->status == TASK_STATUS_RUNNING) {
+    atomic_queue_nint_push(&task_ready_list, &curr->node);
+    curr->ticks = curr->priority;
+    curr->status = TASK_STATUS_READY;
+  }
+
+  KASSERT(!list_empty(&task_ready_list.head), "no ready thread to schedule");
+  task_running = atomic_queue_nint_pop(&task_ready_list);
+  struct task* next = LIST_ENTRY(task_running, struct task, node);
+  next->status = TASK_STATUS_RUNNING;
+
+  _asm_thread_switch_to(curr, next);
+}
+
+static void
+__task_schedule_handler(u32 irq)
+{
+  (void)irq;
+
+  struct task* task = task_current();
+
+  KASSERT(task->tmagic == TASK_MAGIC, "invalid task object at %x", task);
+
+  task->elapsed_ticks++;
+
+  if (task->ticks > 0) {
+    task->ticks--;
+  } else {
+    __task_schedule();
+  }
+}
+
+static void
+__init_task_queue(void)
+{
+  atomic_queue_nint_init(&task_ready_list);
+  atomic_queue_init(&task_all_list);
 }
 
 void
@@ -21,7 +75,11 @@ init_task(void)
   KINFO("initializing task management subsystem");
 
   init_sys_clk();
-  init_thread();
+
+  __init_task_queue();
+  init_kthread();
+
+  intr_register_handler(0x20, __task_schedule_handler);
 }
 
 struct task*
@@ -47,7 +105,7 @@ task_init(struct task* task, char* name, u8 priority)
 }
 
 void
-task_init_stack(struct task* task, task_function_t function, void* arg)
+task_init_stack(struct task* task, task_entry_t function, void* arg)
 {
   task->kstack -= sizeof(struct intr_context);
   task->kstack -= sizeof(struct thread_context);
@@ -73,4 +131,53 @@ task_init_vmmap(struct task* task)
   task->user_vaddr.vstart = MEM_USER_VSTART;
   atomic_bitmap_init(
     &task->user_vaddr.vmmap, alloc_page(bitmap_pages, true), bitmap_size);
+}
+
+void
+task_yield(void)
+{
+  bool intr_status = intr_lock();
+
+  struct task* curr = task_current();
+
+  atomic_queue_nint_push(&task_ready_list, &curr->node);
+  curr->status = TASK_STATUS_READY;
+
+  __task_schedule();
+
+  intr_unlock(intr_status);
+}
+
+void
+task_park(void)
+{
+  bool intr_status = intr_lock();
+
+  struct task* task = task_current();
+  task->status = TASK_STATUS_BLOCKED;
+
+  __task_schedule();
+
+  intr_unlock(intr_status);
+}
+
+void
+task_unpark(struct task* task)
+{
+  bool intr_status = intr_lock();
+
+  KASSERT(task->status == TASK_STATUS_BLOCKED ||
+            task->status == TASK_STATUS_WAITING ||
+            task->status == TASK_STATUS_SUSPENDED,
+          "invalid status when resuming, received %u",
+          (u32)(task->status));
+
+  if (task->status == TASK_STATUS_READY) {
+    return;
+  }
+
+  atomic_queue_nint_push(&task_ready_list, &task->node);
+  task->status = TASK_STATUS_READY;
+
+  intr_unlock(intr_status);
 }

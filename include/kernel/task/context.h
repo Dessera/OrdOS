@@ -2,6 +2,7 @@
 
 #include "kernel/task/task.h"
 #include "kernel/types.h"
+
 struct intr_context
 {
   u32 index;
@@ -35,10 +36,10 @@ struct thread_context
   u32 edi;
   u32 esi;
 
-  void (*eip)(task_function_t func, void* arg);
+  void (*eip)(task_entry_t func, void* arg);
 
   void* ret_addr;
-  task_function_t func;
+  task_entry_t func;
   void* arg;
 };
 

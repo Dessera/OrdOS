@@ -3,3 +3,6 @@
 #define TASK_NAME_SIZE 16
 #define TASK_PCB_PAGE_SIZE 1
 #define TASK_MAGIC 0x544342
+
+#define TASK_KTHREAD_MAIN_NAME "kthread_main"
+#define TASK_KTHREAD_MAIN_PRIORITY 31

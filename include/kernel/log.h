@@ -1,8 +1,7 @@
 #pragma once
 
 #include "kernel/interrupt/interrupt.h" // for intr_set_status
-#include "kernel/types.h"
-#include "kernel/utils/print.h" // for kprintln
+#include "kernel/utils/print.h"         // for kprintln
 
 #define LOGLEVEL_NONE 0
 #define LOGLEVEL_ERROR 1

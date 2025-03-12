@@ -1,7 +1,6 @@
 #include "kernel/task/sync.h"
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/task/task.h"
-#include "kernel/task/thread.h"
 #include "kernel/utils/list_head.h"
 
 void
@@ -42,7 +41,7 @@ mutex_lock(struct mutex_lock* lck)
     struct task* task = task_current();
     list_add_tail(&task->node, &lck->wait_queue);
     spin_unlock(&lck->guard);
-    thread_park();
+    task_park();
   }
 }
 
@@ -56,7 +55,7 @@ mutex_unlock(struct mutex_lock* lck)
   } else {
     struct task* task =
       LIST_ENTRY(list_pop(&lck->wait_queue), struct task, node);
-    thread_unpark(task);
+    task_unpark(task);
   }
 
   spin_unlock(&lck->guard);

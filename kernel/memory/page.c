@@ -2,7 +2,7 @@
 #include "kernel/assert.h"
 #include "kernel/common.h"
 #include "kernel/config/memory.h"
-#include "kernel/task/thread.h"
+#include "kernel/task/task.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"

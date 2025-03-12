@@ -4,12 +4,17 @@
 #include "kernel/task/context.h"
 #include "kernel/types.h"
 
+#define MK_TSS_DESC(ctx)                                                       \
+  GDT_DESC(                                                                    \
+    sizeof(struct tss_context), (u32)ctx, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0)
+
 #define MK_GDT_PTR(size, addr)                                                 \
   ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(u32)(addr) << 16))
 
 extern struct gdt_desc _asm_gdt_table[];
 
-// only refer to the initial gdt size (invalid when tss is loaded)
+// only refer to the initial gdt size
+// (invalid when tss is loaded)
 extern u16 _asm_gdt_size;
 
 static struct tss_context __tss_ctx = { 0, 0, GDT_KSTACK_SELECTOR,
@@ -27,19 +32,7 @@ init_user_tss(void)
 {
   u16 gdt_size = _asm_gdt_size;
 
-  _asm_gdt_table[gdt_size++] = GDT_DESC(sizeof(struct tss_context),
-                                        (u32)&__tss_ctx,
-                                        1,
-                                        0,
-                                        0,
-                                        1,
-                                        0,
-                                        0,
-                                        1,
-                                        1,
-                                        0,
-                                        0,
-                                        0);
+  _asm_gdt_table[gdt_size++] = MK_TSS_DESC(&__tss_ctx);
 
   _asm_gdt_table[gdt_size++] = GDT_DESC_UCODE();
   _asm_gdt_table[gdt_size++] = GDT_DESC_UDATA();
