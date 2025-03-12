@@ -39,7 +39,7 @@ mutex_lock(struct mutex_lock* lck)
     lck->flag = 1;
     spin_unlock(&lck->guard);
   } else {
-    struct task* task = thread_current();
+    struct task* task = task_current();
     list_add_tail(&task->node, &lck->wait_queue);
     spin_unlock(&lck->guard);
     thread_park();

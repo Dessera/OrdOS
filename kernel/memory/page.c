@@ -56,7 +56,7 @@ init_page(void)
 static void*
 __alloc_vmem_page(size_t size, bool kernel)
 {
-  AUTO vaddr_map = kernel ? &kvmmap : &thread_current()->user_vaddr;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
 
   ssize_t index = atomic_bitmap_alloc(&vaddr_map->vmmap, size);
   if (index == NPOS) {
@@ -68,7 +68,7 @@ __alloc_vmem_page(size_t size, bool kernel)
 static void
 __free_vmem_page(void* vaddr, size_t size, bool kernel)
 {
-  AUTO vaddr_map = kernel ? &kvmmap : &thread_current()->user_vaddr;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
   size_t index = ((u32)vaddr - vaddr_map->vstart) / MEM_PAGE_SIZE;
   for (size_t i = 0; i < size; i++) {
     atomic_bitmap_set(&vaddr_map->vmmap, index + i, false);

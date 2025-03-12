@@ -19,7 +19,8 @@ For now, there is only a bootsector in this repository.
 
    - [x] lock
    - [x] thread safe kprint
-   - [ ] thread safe list_head
+   - [x] thread safe list_head
+   - [ ] task functions refactoring
 
 7. [ ] Shell
 8. [ ] Support more gcc versions and std versions

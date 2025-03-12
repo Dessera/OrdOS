@@ -37,3 +37,15 @@ struct task
 
 void
 init_task(void);
+
+struct task*
+task_current(void);
+
+void
+task_init(struct task* task, char* name, u8 priority);
+
+void
+task_init_stack(struct task* task, task_function_t function, void* arg);
+
+void
+task_init_vmmap(struct task* task);

@@ -8,9 +8,6 @@ init_thread(void);
 struct task*
 thread_run(char* name, u8 priority, task_function_t function, void* arg);
 
-struct task*
-thread_current(void);
-
 void
 thread_schedule(void);
 
