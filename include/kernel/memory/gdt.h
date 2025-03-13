@@ -51,7 +51,7 @@ struct gdt_desc
   u8 attrs;
   u8 limit_h4;
   u8 base_h8;
-};
+} __attribute__((packed));
 
 #define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
   ({                                                                           \

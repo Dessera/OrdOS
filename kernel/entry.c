@@ -23,13 +23,13 @@ uprog(void)
   }
 }
 
-// static void
-// kthread(void*)
-// {
-//   while (true) {
-//     KINFO("cnt = %u", cnt);
-//   }
-// }
+static void
+kthread(void*)
+{
+  while (true) {
+    KINFO("cnt = %u", cnt);
+  }
+}
 
 static void
 kinit(void)
@@ -52,7 +52,7 @@ kmain(void)
 {
   kinit();
 
-  // kthread_run("comsumer", 31, kthread, NULL);
+  kthread_run("comsumer", 31, kthread, NULL);
   uproc_run("generator", uprog);
 
   while (true)

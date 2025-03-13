@@ -9,7 +9,8 @@
     sizeof(struct tss_context), (u32)ctx, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0)
 
 #define MK_GDT_PTR(size, addr)                                                 \
-  ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(u32)(addr) << 16))
+  ((sizeof(struct gdt_desc) * (size) - 1) |                                    \
+   ((u64)((u32)(addr) + MEM_KERNEL_VSTART) << 16))
 
 extern struct gdt_desc _asm_gdt_table[];
 
