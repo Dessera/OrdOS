@@ -2,6 +2,8 @@
 
 #include "kernel/types.h"
 
+#define SECTION(name) __attribute__((section(name)))
+
 static FORCE_INLINE void
 outb(u16 port, u8 data)
 {

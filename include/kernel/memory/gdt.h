@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef __ASM__
-#include "kernel/types.h"
-#endif
+#include "kernel/config/memory.h"
 
 #define GDT_G(sign) ((sign) << 7)
 #define GDT_G_1B GDT_G(0)
@@ -33,15 +31,29 @@
 #define GDT_BASE_M8(base) (((base) >> 16) & 0xff)
 #define GDT_BASE_H8(base) (((base) >> 24) & 0xff)
 
-#ifdef __ASM__
-#define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
-  .word GDT_LIMIT_L16(limit);                                                  \
-  .word GDT_BASE_L16(base);                                                    \
-  .byte GDT_BASE_M8(base);                                                     \
-  .byte GDT_P(p) + GDT_DPL(dpl) + GDT_S(s) + GDT_TYPE(x, r, c, a);             \
-  .byte GDT_G(g) + GDT_D(d) + GDT_L(l) + GDT_AVL(avl) + GDT_LIMIT_H4(limit);   \
-  .byte GDT_BASE_H8(base)
-#else
+#define GDT_GET_SELECTOR(index, dpl) (((index) << 3) | (dpl))
+
+#define GDT_NULL_INDEX 0
+#define GDT_KCODE_INDEX 1
+#define GDT_KDATA_INDEX 2
+#define GDT_VIDEO_INDEX 3
+#define GDT_TSS_INDEX 4
+#define GDT_UCODE_INDEX 5
+#define GDT_UDATA_INDEX 6
+
+#define GDT_KCODE_SELECTOR GDT_GET_SELECTOR(GDT_KCODE_INDEX, 0)
+#define GDT_KDATA_SELECTOR GDT_GET_SELECTOR(GDT_KDATA_INDEX, 0)
+#define GDT_KSTACK_SELECTOR GDT_KDATA_SELECTOR
+
+#define GDT_VIDEO_SELECTOR GDT_GET_SELECTOR(GDT_VIDEO_INDEX, 0)
+
+#define GDT_TSS_SELECTOR GDT_GET_SELECTOR(GDT_TSS_INDEX, 0)
+#define GDT_UCODE_SELECTOR GDT_GET_SELECTOR(GDT_UCODE_INDEX, 3)
+#define GDT_UDATA_SELECTOR GDT_GET_SELECTOR(GDT_UDATA_INDEX, 3)
+
+#ifndef __ASM__
+
+#include "kernel/types.h"
 
 struct gdt_desc
 {
@@ -51,22 +63,17 @@ struct gdt_desc
   u8 attrs;
   u8 limit_h4;
   u8 base_h8;
-} __attribute__((packed));
+};
+
+extern struct gdt_desc gdt[MEM_GDT_MAX_ENTRIES];
 
 #define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
-  ({                                                                           \
-    struct gdt_desc desc = { GDT_LIMIT_L16(limit),                             \
-                             GDT_BASE_L16(base),                               \
-                             GDT_BASE_M8(base),                                \
-                             GDT_P(p) + GDT_DPL(dpl) + GDT_S(s) +              \
-                               GDT_TYPE(x, r, c, a),                           \
-                             (u8)(GDT_G(g) + GDT_D(d) + GDT_L(l) +             \
-                                  GDT_AVL(avl) + GDT_LIMIT_H4(limit)),         \
-                             GDT_BASE_H8(base) };                              \
-    desc;                                                                      \
-  })
-
-#endif
+  { GDT_LIMIT_L16(limit),                                                      \
+    GDT_BASE_L16(base),                                                        \
+    GDT_BASE_M8(base),                                                         \
+    GDT_P(p) + GDT_DPL(dpl) + GDT_S(s) + GDT_TYPE(x, r, c, a),                 \
+    (u8)(GDT_G(g) + GDT_D(d) + GDT_L(l) + GDT_AVL(avl) + GDT_LIMIT_H4(limit)), \
+    GDT_BASE_H8(base) }
 
 #define GDT_DESC_NULL() GDT_DESC(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -81,12 +88,7 @@ struct gdt_desc
 #define GDT_DESC_VIDEO()                                                       \
   GDT_DESC(0x07, 0xb8000, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
-#define GDT_KCODE_SELECTOR 0x08
-#define GDT_KDATA_SELECTOR 0x10
-#define GDT_KSTACK_SELECTOR GDT_KDATA_SELECTOR
+#define GDT_GET_PTR(size, addr)                                                \
+  ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(u32)(addr) << 16))
 
-#define GDT_VIDEO_SELECTOR 0x18
-
-#define GDT_TSS_SELECTOR 0x20
-#define GDT_UCODE_SELECTOR 0x2b
-#define GDT_UDATA_SELECTOR 0x33
+#endif

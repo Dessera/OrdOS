@@ -5,9 +5,6 @@
 
 #define BOOT_SEC_SIZE 0x200
 
-// Real address of the LDR entry
-#define BOOT_LDR_ENTRY_START (BOOT_LDR_START + BOOT_LDR_ENTRY_OFFSET)
-
 // Real address of the kernel entry
 #define BOOT_KERNEL_ENTRY_START (MEM_KERNEL_VSTART + BOOT_KERNEL_START)
 

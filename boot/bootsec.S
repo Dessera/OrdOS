@@ -35,7 +35,7 @@ _bs_load_ldr_error:
   BPRINT($_bsd_retry_indicator)
   jmp _bs_load_ldr_retry
 _bs_load_ldr_done:
-  ljmp $0x00, $BOOT_LDR_ENTRY_START
+  jmp _start
 
 /*
  * Print string to screen

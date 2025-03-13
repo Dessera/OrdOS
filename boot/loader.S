@@ -17,32 +17,7 @@
 
 .code16
 .section ".ldrtext", "ax"
-  // gdt table
-.globl _asm_gdt_table
-_asm_gdt_table:
-  GDT_DESC_NULL()
-  GDT_DESC_KCODE()
-  GDT_DESC_KDATA()
-  GDT_DESC_VIDEO()
-_asm_gdt_end:
 
-.globl _asm_gdt_size
-_asm_gdt_size:
-  .word (_asm_gdt_end - _asm_gdt_table) / 8
-_asm_gdt_table_ptr:
-  .word _asm_gdt_end - _asm_gdt_table - 1
-  .long _asm_gdt_table
-
-  // ards buffer 244 bytes
-_asm_mem_zone:
-  .space 0xf4
-_asm_mem_nr:
-  .word 0
-.globl _asm_mem_bytes
-_asm_mem_bytes:
-  .long 0
-
-.org BOOT_LDR_ENTRY_OFFSET
 .globl _start
 _start:
   // check memory
@@ -90,7 +65,7 @@ _ldr_mem_ok:
   outb %al, $0x92
 
   // load gdt
-  lgdt _asm_gdt_table_ptr
+  lgdt _lb_gdt_ptr
 
   // enable protected mode
   movl %cr0, %eax
@@ -179,12 +154,12 @@ _prot_kernel_mem_loop:
   jne _prot_kernel_mem_loop
 
   // update gdt
-  sgdt _asm_gdt_table_ptr
+  sgdt _lb_gdt_ptr
 
-  movl (_asm_gdt_table_ptr + 2), %ebx
+  movl (_lb_gdt_ptr + 2), %ebx
   orl $MEM_KERNEL_VSTART, GDT_VIDEO_SELECTOR + 4(%ebx)
 
-  addl $MEM_KERNEL_VSTART, (_asm_gdt_table_ptr + 2)
+  addl $MEM_KERNEL_VSTART, (_lb_gdt_ptr + 2)
   addl $MEM_KERNEL_VSTART, %esp
 
   // load page table
@@ -195,7 +170,7 @@ _prot_kernel_mem_loop:
   orl $0x80000000, %eax
   movl %eax, %cr0
 
-  lgdt _asm_gdt_table_ptr
+  lgdt _lb_gdt_ptr
 
   // load kernel
   PPRINT($0x02, $_pb_kernel_indicator)
@@ -340,10 +315,23 @@ _prot_disk_wait_loop:
   ret
 
 .section ".ldrdata", "a"
+_lb_gdt_ptr:
+  .word (MEM_GDT_MAX_ENTRIES * 8) - 1
+  .long gdt
 _lb_mem_indicator:
   .asciz "Fetching memory info\n\r"
 _lb_mem_error:
   .asciz "Failed to fetch memory info\n\r"
+
+  // ards buffer 244 bytes
+_asm_mem_zone:
+  .space 0xf4
+_asm_mem_nr:
+  .word 0
+.globl _asm_mem_bytes
+_asm_mem_bytes:
+  .long 0
+
 _pb_welcome:
   .ascii KFULLNAME_STR, " STEP 2\0"
 _pb_page_indicator:

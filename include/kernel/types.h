@@ -10,9 +10,9 @@
 #define VA_END __builtin_va_end
 #define VA_ARG __builtin_va_arg
 
-#ifndef NULL
+// #ifndef NULL
 #define NULL ((void*)0)
-#endif
+// #endif
 
 typedef unsigned char u8;
 typedef unsigned short u16;

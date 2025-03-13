@@ -1,5 +1,7 @@
 #pragma once
 
+#define MEM_GDT_MAX_ENTRIES 7
+
 #define MEM_PAGE_SIZE 0x1000
 #define MEM_PAGE_TABLE_START 0x100000
 
