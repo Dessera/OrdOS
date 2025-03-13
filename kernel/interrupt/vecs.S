@@ -79,6 +79,9 @@ _asm_intr_common_handler:
   // get index and repush it for later
   movl 0x30(%esp), %eax
   pushl %eax
+  // restore old eax (for syscall)
+  movl 0x20(%esp), %eax
+
   movb $PIC_EOI, %al
   outb %al, $PIC_MASTER_CMD
   outb %al, $PIC_SLAVE_CMD
