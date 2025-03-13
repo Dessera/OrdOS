@@ -6,24 +6,11 @@ For now, there is only a bootsector in this repository.
 
 ## TODOS
 
-1. [x] `bootsec.S` refactoring
-2. [x] Interupts (no devices support yet)
-3. [x] Kernel library (partial)
-4. [x] Memory management (page only)
-
-   - [x] page management
-   - [ ] a simple memory allocator
-
-5. [ ] File system
-6. [x] Task management (kernel thread only)
-
-   - [x] lock
-   - [x] thread safe kprint
-   - [x] thread safe list_head
-   - [ ] task functions refactoring
-
-7. [ ] Shell
-8. [ ] Support more gcc versions and std versions
+1. [ ] User space
+2. [ ] Memory allocation
+3. [ ] File system
+4. [ ] Shell
+5. [ ] Support more gcc versions and std versions
 
 ## Build
 
@@ -48,4 +35,4 @@ make TESTER=<name> qemu_test  # Build and run a tester
 
 ## Thanks
 
-- [WIP] A os development tutorial from Charliechen114514: [CCOperateSystem](https://github.com/Charliechen114514/CCOperateSystem)
+- A os development tutorial from Charliechen114514: [CCOperateSystem](https://github.com/Charliechen114514/CCOperateSystem)

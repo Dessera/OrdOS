@@ -8,5 +8,8 @@
 
 #define IDT_DESC_ATTR(p, dpl, type) ((p << 7) | (dpl << 5) | (type))
 
+/**
+ * @brief Initializes the IDT
+ */
 void
 init_idt(void);

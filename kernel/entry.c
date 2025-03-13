@@ -12,24 +12,24 @@
 void
 kmain(void);
 
-static u32 cnt = 0;
+// static u32 cnt = 0;
 
-static void
-uprog(void)
-{
-  while (true) {
-    // safe add cnt
-    cnt++;
-  }
-}
+// static void
+// uprog(void)
+// {
+//   while (true) {
+//     // safe add cnt
+//     cnt++;
+//   }
+// }
 
-static void
-kthread(void*)
-{
-  while (true) {
-    KINFO("cnt = %u", cnt);
-  }
-}
+// static void
+// kthread(void*)
+// {
+//   while (true) {
+//     KINFO("cnt = %u", cnt);
+//   }
+// }
 
 static void
 kinit(void)
@@ -52,8 +52,8 @@ kmain(void)
 {
   kinit();
 
-  kthread_run("comsumer", 31, kthread, NULL);
-  uproc_run("generator", uprog);
+  // kthread_run("comsumer", 31, kthread, NULL);
+  // uproc_run("generator", uprog);
 
   while (true)
     ;

@@ -7,17 +7,18 @@
 #include "kernel/utils/asm.h"
 
 #define INTR_STATUS_MASK 0x200
+#define INTR_RESERVE_SIZE 0x20
 
 static interrupt_handler_t interrupt_handlers[INTR_IDT_SIZE] = { 0 };
 
 static void
-__default_nop_handler(u32 irq)
+__default_nop_handler(u32 /* irq */)
 {
-  (void)irq;
 }
 
+// * For prettier display in the panic message
 static void
-__default_exception_handler(u32 irq)
+intr_exception_handler(u32 irq)
 {
   KPANIC("unhandled exception %x occurred", irq);
 }
@@ -28,10 +29,11 @@ __init_exception_handlers(void)
   for (u32 i = 0; i < INTR_RESERVE_SIZE; i++) {
     switch (i) {
       case 0x0d:
+        // Page Fault
         intr_register_handler(i, __default_nop_handler);
         break;
       default:
-        intr_register_handler(i, __default_exception_handler);
+        intr_register_handler(i, intr_exception_handler);
     }
   }
 }
