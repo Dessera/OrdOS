@@ -1,4 +1,5 @@
 #include "kernel/device/pci.h"
+#include "kernel/common.h"
 
 #define INTR_ERR nop
 #define INTR_NOERR pushl $0
@@ -68,8 +69,14 @@ INTR_VEC_ENTRY(0x2d, INTR_NOERR)
 INTR_VEC_ENTRY(0x2e, INTR_NOERR)
 INTR_VEC_ENTRY(0x2f, INTR_NOERR)
 
-.section ".text"
+// skip to 0x80 (0x50 * 4)
+.section ".data"
+.fill 0x50 * 4
 
+// syscall
+INTR_VEC_ENTRY(0x80, INTR_NOERR)
+
+.section ".text"
 _asm_intr_common_handler:
   pushl %ds
   pushl %es
@@ -79,15 +86,19 @@ _asm_intr_common_handler:
   // get index and repush it for later
   movl 0x30(%esp), %eax
   pushl %eax
-  // restore old eax (for syscall)
-  movl 0x20(%esp), %eax
 
   movb $PIC_EOI, %al
   outb %al, $PIC_MASTER_CMD
   outb %al, $PIC_SLAVE_CMD
 
-  // call c handler with intr index
+  movl (%esp), %eax
+  cmpl $0x80, %eax
+  je _asm_syscall_handler
   call intr_common_handler
+  jmp _asm_intr_common_handler_exit
+_asm_syscall_handler:
+  call syscall_common_handler
+  movl %eax, 0x20(%esp)
 
 .globl _asm_intr_common_handler_exit
 _asm_intr_common_handler_exit:

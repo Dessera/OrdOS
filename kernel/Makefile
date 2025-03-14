@@ -1,4 +1,4 @@
-interrupt_targets := idt.o interrupt.o vecs.o
+interrupt_targets := idt.o interrupt.o vecs.o syscall.o
 
 device_targets := pci.o sys_clk.o keyboard.o
 

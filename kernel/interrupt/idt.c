@@ -1,6 +1,5 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/config/interrupt.h"
-#include "kernel/log.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/types.h"
 #include "kernel/utils/asm.h"
@@ -40,6 +39,10 @@ __init_idt_desc(void)
                     (u32)_asm_intr_vecs[i],
                     IDT_DESC_ATTR(1, IDT_DPL_KERNEL, IDT_TYPE_INTR));
   }
+  __idt_desc_init(&idt[0x80],
+                  GDT_KCODE_SELECTOR,
+                  (u32)_asm_intr_vecs[0x80],
+                  IDT_DESC_ATTR(1, IDT_DPL_USER, IDT_TYPE_INTR));
 }
 
 void
@@ -49,6 +52,4 @@ init_idt(void)
 
   u64 idt_ptr = MK_IDT_PTR(idt);
   lidt(idt_ptr);
-
-  KDEBUG("idt: %x", idt_ptr);
 }
