@@ -1,6 +1,6 @@
 #include "kernel/utils/string.h"
 #include "kernel/assert.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 char*
 kstrcpy(char* dest, const char* src)

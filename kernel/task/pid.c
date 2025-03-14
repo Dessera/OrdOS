@@ -1,8 +1,8 @@
 #include "kernel/task/pid.h"
 #include "kernel/config/task.h"
-#include "kernel/types.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/string.h"
+#include "lib/types.h"
 
 void
 pidpool_init(struct pidpool* pool)

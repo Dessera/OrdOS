@@ -1,6 +1,6 @@
 #include "kernel/config/task.h"
-#include "kernel/types.h"
 #include "kernel/utils/bitmap.h"
+#include "lib/types.h"
 
 struct pidpool
 {

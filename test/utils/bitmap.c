@@ -1,6 +1,6 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 void
 ktester(void);

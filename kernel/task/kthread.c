@@ -2,8 +2,8 @@
 #include "kernel/config/task.h"
 #include "kernel/memory/page.h"
 #include "kernel/task/task.h"
-#include "kernel/types.h"
 #include "kernel/utils/queue.h"
+#include "lib/types.h"
 
 static struct task* main_thread;
 

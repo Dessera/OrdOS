@@ -2,9 +2,9 @@
 #include "kernel/config/utils.h"
 #include "kernel/device/vga.h"
 #include "kernel/task/sync.h"
-#include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/string.h"
+#include "lib/types.h"
 
 static struct mutex_lock __plock;
 

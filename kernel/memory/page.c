@@ -3,10 +3,10 @@
 #include "kernel/common.h"
 #include "kernel/config/memory.h"
 #include "kernel/task/task.h"
-#include "kernel/types.h"
 #include "kernel/utils/asm.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/string.h"
+#include "lib/types.h"
 
 struct pmempool
 {

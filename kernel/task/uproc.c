@@ -9,10 +9,7 @@
 
 extern void (*_asm_intr_common_handler_exit)(void);
 
-void
-__uproc_entry(void* arg);
-
-void
+static void
 __uproc_entry(void* arg)
 {
   uproc_entry_t entry = (uproc_entry_t)arg;

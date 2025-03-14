@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "lib/types.h"
 
 /**
  * @brief List head structure, almost like Linux kernel list head.

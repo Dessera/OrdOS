@@ -97,7 +97,13 @@ _asm_intr_common_handler:
   call intr_common_handler
   jmp _asm_intr_common_handler_exit
 _asm_syscall_handler:
+  movl 0x20(%esp), %eax
+  pushl %edx
+  pushl %ecx
+  pushl %ebx
+  pushl %eax
   call syscall_common_handler
+  addl $0x10, %esp
   movl %eax, 0x20(%esp)
 
 .globl _asm_intr_common_handler_exit

@@ -1,8 +1,8 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/config/interrupt.h"
 #include "kernel/memory/gdt.h"
-#include "kernel/types.h"
 #include "kernel/utils/asm.h"
+#include "lib/types.h"
 
 #define MK_IDT_PTR(idt_addr)                                                   \
   (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))

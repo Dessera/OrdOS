@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "lib/types.h"
 
 /**
  * @brief Interrupt handler function pointer type

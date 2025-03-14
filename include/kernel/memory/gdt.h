@@ -53,7 +53,7 @@
 
 #ifndef __ASM__
 
-#include "kernel/types.h"
+#include "lib/types.h"
 
 struct gdt_desc
 {

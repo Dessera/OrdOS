@@ -2,8 +2,8 @@
 
 #include "kernel/config/task.h"
 #include "kernel/memory/page.h"
-#include "kernel/types.h"
 #include "kernel/utils/list_head.h"
+#include "lib/types.h"
 
 /**
  * @brief Task status enumeration

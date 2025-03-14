@@ -1,5 +1,5 @@
 #include "kernel/utils/list_head.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 void
 list_init(struct list_head* head)

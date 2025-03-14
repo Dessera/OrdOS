@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/types.h"
+#include "lib/types.h"
 
 /**
  * @brief Initialize the print subsystem

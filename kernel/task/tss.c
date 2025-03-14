@@ -2,7 +2,7 @@
 #include "kernel/config/memory.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/task/context.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 #define MK_TSS_DESC(ctx)                                                       \
   GDT_DESC(                                                                    \

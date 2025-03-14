@@ -8,6 +8,7 @@ KERNEL_DIR = kernel
 INCLUDE_DIR = include
 TEST_DIR = test
 USER_DIR = user
+LIB_DIR = lib
 
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
@@ -55,6 +56,12 @@ all: $(TARGET)
 include boot/Makefile
 
 targets += $(patsubst %.o, $(BOOT_DIR)/%.o,$(boot_targets))
+# 	-----------------------------------------------
+
+# 	-------------------- LIB ----------------------
+include lib/Makefile
+
+targets += $(patsubst %.o, $(LIB_DIR)/%.o,$(lib_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- KERNEL -------------------

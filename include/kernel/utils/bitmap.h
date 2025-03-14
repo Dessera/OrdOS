@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/task/sync.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 /**
  * @brief Bitmap data structure

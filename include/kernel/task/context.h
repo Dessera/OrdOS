@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/task/task.h"
-#include "kernel/types.h"
+#include "lib/types.h"
 
 struct intr_context
 {

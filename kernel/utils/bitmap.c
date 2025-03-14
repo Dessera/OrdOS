@@ -1,8 +1,8 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
 #include "kernel/task/sync.h"
-#include "kernel/types.h"
 #include "kernel/utils/string.h"
+#include "lib/types.h"
 
 void
 bitmap_init(struct bitmap* bitmap, void* data, size_t byte_size)

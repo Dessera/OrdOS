@@ -1,6 +1,6 @@
 
 
-#include "kernel/types.h"
+#include "lib/types.h"
 #include "kernel/assert.h"
 
 static char digits[] = "0123456789abcdef";

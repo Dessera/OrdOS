@@ -3,6 +3,7 @@
 #include "kernel/device/pci.h"
 #include "kernel/interrupt/idt.h"
 #include "kernel/interrupt/interrupt.h"
+#include "kernel/interrupt/syscall.h"
 #include "kernel/log.h"
 #include "kernel/utils/asm.h"
 
@@ -58,6 +59,7 @@ init_intr(void)
   init_idt();
 
   __init_exception_handlers();
+  init_syscall();
 
   init_pci();
 }
