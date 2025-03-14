@@ -2,15 +2,14 @@
 
 My os development demo.
 
-For now, there is only a bootsector in this repository.
-
 ## TODOS
 
 1. [ ] User space
-2. [ ] Memory allocation
-3. [ ] File system
-4. [ ] Shell
-5. [ ] Support more gcc versions and std versions
+2. [ ] More log info
+3. [ ] Memory allocation
+4. [ ] File system
+5. [ ] Shell
+6. [ ] Support more gcc versions and std versions
 
 ## Build
 
