@@ -6,6 +6,7 @@
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"
 #include "kernel/task/kthread.h"
+#include "kernel/task/pid.h"
 #include "kernel/task/tss.h"
 #include "kernel/utils/bitmap.h"
 #include "kernel/utils/queue.h"
@@ -13,6 +14,8 @@
 
 extern void
 _asm_thread_switch_to(struct task* curr, struct task* next);
+
+static struct pidpool __task_pid_pool;
 
 struct atomic_queue_nint task_ready_list;
 struct atomic_queue task_all_list;
@@ -84,9 +87,10 @@ init_task(void)
 
   init_sys_clk();
 
+  pidpool_init(&__task_pid_pool);
   __init_task_queue();
-  init_kthread();
 
+  init_kthread();
   init_user_tss();
 
   intr_register_handler(0x20, __task_schedule_handler);
@@ -105,6 +109,7 @@ task_init(struct task* task, char* name, u8 priority)
 {
   kmemset(task, 0, sizeof(struct task));
   kstrcpy(task->name, name);
+  task->pid = pidpool_alloc(&__task_pid_pool);
   task->status = TASK_STATUS_READY;
   task->priority = priority;
   task->ticks = priority;

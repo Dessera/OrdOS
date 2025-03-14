@@ -6,3 +6,5 @@
 
 #define TASK_KTHREAD_MAIN_NAME "kthread_main"
 #define TASK_DEFAULT_PRIORITY 31
+
+#define TASK_PID_BITMAP_SIZE 128

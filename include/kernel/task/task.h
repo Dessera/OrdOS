@@ -30,6 +30,7 @@ typedef void (*task_entry_t)(void*);
 struct task
 {
   u32* kstack;
+  size_t pid;
   enum task_status status;
   char name[TASK_NAME_SIZE];
 

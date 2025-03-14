@@ -8,12 +8,6 @@
   GDT_DESC(                                                                    \
     sizeof(struct tss_context), (u32)ctx, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0)
 
-// extern struct gdt_desc _asm_gdt_table[];
-
-// only refer to the initial gdt size
-// (invalid when tss is loaded)
-// extern u16 _asm_gdt_size;
-
 static struct tss_context __tss_ctx = { 0, 0, GDT_KSTACK_SELECTOR,
                                         0, 0, 0,
                                         0, 0, 0,

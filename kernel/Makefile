@@ -2,7 +2,7 @@ interrupt_targets := idt.o interrupt.o vecs.o syscall.o
 
 device_targets := pci.o sys_clk.o keyboard.o
 
-task_targets := kthread.o switch.o task.o sync.o tss.o uproc.o
+task_targets := kthread.o switch.o task.o sync.o tss.o uproc.o pid.o
 
 utils_targets := print.o string.o bitmap.o list_head.o queue.o
 
