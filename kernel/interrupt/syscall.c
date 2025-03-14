@@ -1,5 +1,7 @@
 #include "kernel/interrupt/syscall.h"
 #include "kernel/config/interrupt.h"
+#include "kernel/config/memory.h"
+#include "kernel/device/vga.h"
 #include "kernel/log.h"
 #include "kernel/task/task.h"
 #include "kernel/utils/print.h"
@@ -25,7 +27,7 @@ syscall_getpid(void)
 size_t
 syscall_write(char* buf)
 {
-  kputs(buf);
+  kputs_nint(buf);
   return kstrlen(buf);
 }
 
@@ -36,7 +38,7 @@ syscall_common_handler(u32 index, void* arg1, void* arg2, void* arg3)
   if (handler != NULL) {
     return handler(arg1, arg2, arg3);
   } else {
-    KWARNING("unhandled syscall: %u", index);
-    return (void*)NPOS;
+    KWARNING_NINT("unhandled syscall: %u", index);
+    return NULL;
   }
 }

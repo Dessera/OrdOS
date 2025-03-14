@@ -1,4 +1,4 @@
-# KDemo
+# Ordos
 
 My os development demo.
 

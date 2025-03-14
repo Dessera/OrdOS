@@ -1,5 +1,5 @@
 VERSION = 0.0.0
-NAME = KDemo
+NAME = Ordos
 NAMEFILE = $(shell echo $(NAME) | tr 'A-Z' 'a-z')
 
 BUILD_DIR = build

@@ -25,46 +25,60 @@
 #define LOGLEVEL LOGLEVEL_INFO
 #endif
 
-#define KLOG_WITH(level_str, func, line, fmt, ...)                             \
-  kprintln("[ %s ] %s:%u > " fmt, level_str, func, line, ##__VA_ARGS__)
+#define KLOG_WITH(logger, level_str, func, line, fmt, ...)                     \
+  logger("[ %s ] %s:%u > " fmt, level_str, func, line, ##__VA_ARGS__)
 
 #define KLOG(level_str, fmt, ...)                                              \
-  KLOG_WITH(level_str, __func__, __LINE__, fmt, ##__VA_ARGS__)
+  KLOG_WITH(kprintln, level_str, __func__, __LINE__, fmt, ##__VA_ARGS__)
+
+#define KLOG_NINT(level_str, fmt, ...)                                         \
+  KLOG_WITH(kprintln_nint, level_str, __func__, __LINE__, fmt, ##__VA_ARGS__)
 
 #if LOGLEVEL < LOGLEVEL_TRACE
 #define KTRACE(fmt, ...)
+#define KTRACE_NINT(fmt, ...)
 #else
 #define KTRACE(fmt, ...) KLOG(LOGLEVEL_STR_TRACE, fmt, ##__VA_ARGS__)
+#define KTRACE_NINT(fmt, ...) KLOG_NINT(LOGLEVEL_STR_TRACE, fmt, ##__VA_ARGS__)
 #endif
 
 #if LOGLEVEL < LOGLEVEL_DEBUG
 #define KDEBUG(fmt, ...)
+#define KDEBUG_NINT(fmt, ...)
 #else
 #define KDEBUG(fmt, ...) KLOG(LOGLEVEL_STR_DEBUG, fmt, ##__VA_ARGS__)
+#define KDEBUG_NINT(fmt, ...) KLOG_NINT(LOGLEVEL_STR_DEBUG, fmt, ##__VA_ARGS__)
 #endif
 
 #if LOGLEVEL < LOGLEVEL_INFO
 #define KINFO(fmt, ...)
+#define KINFO_NINT(fmt, ...)
 #else
 #define KINFO(fmt, ...) KLOG(LOGLEVEL_STR_INFO, fmt, ##__VA_ARGS__)
+#define KINFO_NINT(fmt, ...) KLOG_NINT(LOGLEVEL_STR_INFO, fmt, ##__VA_ARGS__)
 #endif
 
 #if LOGLEVEL < LOGLEVEL_WARNING
 #define KWARNING(fmt, ...)
+#define KWARNING_NINT(fmt, ...)
 #else
 #define KWARNING(fmt, ...) KLOG(LOGLEVEL_STR_WARNING, fmt, ##__VA_ARGS__)
+#define KWARNING_NINT(fmt, ...)                                                \
+  KLOG_NINT(LOGLEVEL_STR_WARNING, fmt, ##__VA_ARGS__)
 #endif
 
 #if LOGLEVEL < LOGLEVEL_ERROR
 #define KERROR(fmt, ...)
+#define KERROR_NINT(fmt, ...)
 #else
 #define KERROR(fmt, ...) KLOG(LOGLEVEL_STR_ERROR fmt, ##__VA_ARGS__)
+#define KERROR_NINT(fmt, ...) KLOG_NINT(LOGLEVEL_STR_ERROR, fmt, ##__VA_ARGS__)
 #endif
 
 #define KPANIC(fmt, ...)                                                       \
   do {                                                                         \
     intr_set_status(false);                                                    \
-    KLOG(LOGLEVEL_STR_PANIC, fmt, ##__VA_ARGS__);                              \
+    KLOG_NINT(LOGLEVEL_STR_PANIC, fmt, ##__VA_ARGS__);                         \
     while (true)                                                               \
       ;                                                                        \
   } while (0)

@@ -16,6 +16,9 @@ init_print(void);
 void
 kputs(const char* str);
 
+void
+kputs_nint(const char* str);
+
 /**
  * @brief Print a formatted string to the screen (thread safe)
  *
@@ -26,6 +29,9 @@ kputs(const char* str);
  */
 void
 kprint(const char* str, ...);
+
+void
+kprint_nint(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the screen, with `\n` at the end (thread
@@ -38,6 +44,9 @@ kprint(const char* str, ...);
  */
 void
 kprintln(const char* str, ...);
+
+void
+kprintln_nint(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the buffer

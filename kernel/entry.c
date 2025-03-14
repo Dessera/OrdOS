@@ -9,27 +9,23 @@
 #include "kernel/task/uproc.h"
 #include "kernel/utils/print.h"
 #include "lib/syscall.h"
-
-size_t pid = 42;
+#include "lib/types.h"
 
 void
 kmain(void);
 
 static void
-kthread_entry(void*)
-{
-  while (true) {
-    kprintln("uproc: %u", pid);
-  }
-}
-
-static void
 uproc_entry(void)
 {
-  pid = getpid();
+  size_t pid = getpid();
 
-  while (true)
-    ;
+  char buf[50] = { 0 };
+  utoa(buf, pid, 16);
+  buf[1] = '\n';
+
+  while (true) {
+    write(buf);
+  }
 }
 
 static void
@@ -53,7 +49,6 @@ kmain(void)
 {
   kinit();
 
-  kthread_run("hello_p", 31, kthread_entry, NULL);
   uproc_run("hello", uproc_entry);
 
   while (true)

@@ -95,6 +95,6 @@ intr_common_handler(u32 irq)
   if (interrupt_handlers[irq] != NULL) {
     interrupt_handlers[irq](irq);
   } else {
-    KWARNING("unhandled interrupt %x occurred", irq);
+    KWARNING_NINT("unhandled interrupt %x occurred", irq);
   }
 }

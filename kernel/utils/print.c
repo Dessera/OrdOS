@@ -1,12 +1,33 @@
 #include "kernel/utils/print.h"
 #include "kernel/config/utils.h"
 #include "kernel/device/vga.h"
+#include "kernel/memory/gdt.h"
 #include "kernel/task/sync.h"
 #include "kernel/utils/string.h"
 #include "lib/asm.h"
 #include "lib/types.h"
 
+#define SET_VGA_SEGMENT() ASM("movl %0, %%gs" : : "r"(GDT_VIDEO_SELECTOR))
+
 static struct mutex_lock __plock;
+
+static FORCE_INLINE void
+__kfill_buf(u16 cursor, u16 value)
+{
+  SET_VGA_SEGMENT();
+  // move value to %gs:(cursor)
+  ASM("movw %0, %%gs:(%1)" : : "r"(value), "r"(cursor * 2));
+}
+
+static FORCE_INLINE u16
+__kget_buf(u16 cursor)
+{
+  SET_VGA_SEGMENT();
+  // get value from %gs:(cursor)
+  u16 value;
+  ASM("movw %%gs:(%%eax), %0" : "=a"(value) : "r"(cursor * 2));
+  return value;
+}
 
 static u16
 __kget_cursor(void)
@@ -37,10 +58,8 @@ __kset_cursor(u16 cur)
 static void
 __kscrclear(void)
 {
-  u16* cursor = (u16*)0;
   for (size_t i = 0; i < VGA_DP_SIZE; i++) {
-    cursor = (u16*)VGA_GET_ADDR(i);
-    *cursor = 0x0720;
+    __kfill_buf(i, 0x0720);
   }
 
   __kset_cursor(0);
@@ -56,20 +75,21 @@ __kscrscroll(size_t rows)
     return;
   }
 
-  kmemcpy((void*)VGA_GET_ADDR(0),
-          (void*)VGA_GET_ADDR(VGA_GET_CURSOR(rows, 0)),
-          VGA_GET_BUF_SIZE(VGA_BUF_HEIGHT - rows));
-  kmemset((void*)VGA_GET_ADDR(VGA_GET_CURSOR(VGA_BUF_HEIGHT - rows, 0)),
-          0,
-          VGA_GET_BUF_SIZE(rows));
+  for (size_t i = 0; i < (VGA_BUF_HEIGHT - rows) * VGA_BUF_WIDTH; i++) {
+    __kfill_buf(i, __kget_buf(i + rows * VGA_BUF_WIDTH));
+  }
+
+  for (size_t i = (VGA_BUF_HEIGHT - rows) * VGA_BUF_WIDTH; i < VGA_DP_SIZE;
+       i++) {
+    __kfill_buf(i, 0x0720);
+  }
 }
 
 static u16
 __kputdefault(u8 c, u16 cursor)
 {
   u16 payload = (u16)c | (0x07 << 8);
-  u16* addr = (u16*)VGA_GET_ADDR(cursor);
-  *addr = payload;
+  __kfill_buf(cursor, payload);
 
   return cursor + 1;
 }
@@ -143,6 +163,18 @@ kputs(const char* str)
   mutex_unlock(&__plock);
 }
 
+void
+kputs_nint(const char* str)
+{
+  bool intr_status = intr_lock();
+
+  while (*str != '\0') {
+    __kputchar(*str++);
+  }
+
+  intr_unlock(intr_status);
+}
+
 static void
 __kvsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)
 {
@@ -197,6 +229,18 @@ kprint(const char* str, ...)
 }
 
 void
+kprint_nint(const char* str, ...)
+{
+  char buf[UTILS_PRINT_BUFSIZE] = { 0 };
+  VA_LIST args;
+  VA_START(args, str);
+  kvsprint(buf, str, args);
+  VA_END(args);
+
+  kputs_nint(buf);
+}
+
+void
 kprintln(const char* str, ...)
 {
   char buf[UTILS_PRINT_BUFSIZE] = { 0 };
@@ -211,6 +255,23 @@ kprintln(const char* str, ...)
   buf[buf_len + 1] = '\0';
 
   kputs(buf);
+}
+
+void
+kprintln_nint(const char* str, ...)
+{
+  char buf[UTILS_PRINT_BUFSIZE] = { 0 };
+  VA_LIST args;
+  VA_START(args, str);
+  kvsprint(buf, str, args);
+  VA_END(args);
+
+  // for thread safe, edit local buffer rather than global buffer
+  AUTO buf_len = kstrlen(buf);
+  buf[buf_len] = '\n';
+  buf[buf_len + 1] = '\0';
+
+  kputs_nint(buf);
 }
 
 void

@@ -25,14 +25,11 @@ atomic_queue_pop(struct atomic_queue* q)
   struct list_head* item = NULL;
   mutex_lock(&q->lock);
 
-  if (list_empty(&q->head)) {
-    goto atomic_queue_pop_exit;
-  } else {
+  if (!list_empty(&q->head)) {
     item = q->head.next;
     list_del(item);
   }
 
-atomic_queue_pop_exit:
   mutex_unlock(&q->lock);
   return item;
 }
@@ -59,14 +56,11 @@ atomic_queue_nint_pop(struct atomic_queue_nint* q)
   struct list_head* item = NULL;
   bool intr_status = intr_lock();
 
-  if (list_empty(&q->head)) {
-    goto atomic_queue_nint_pop_exit;
-  } else {
+  if (!list_empty(&q->head)) {
     item = q->head.next;
     list_del(item);
   }
 
-atomic_queue_nint_pop_exit:
   intr_unlock(intr_status);
   return item;
 }
