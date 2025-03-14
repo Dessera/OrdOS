@@ -3,7 +3,6 @@ NAME = KDemo
 NAMEFILE = $(shell echo $(NAME) | tr 'A-Z' 'a-z')
 
 BUILD_DIR = build
-BOOT_DIR = boot
 KERNEL_DIR = kernel
 INCLUDE_DIR = include
 TEST_DIR = test
@@ -51,12 +50,6 @@ endif
 .PHONY: all clean qemu rebuild
 
 all: $(TARGET)
-
-# 	-------------------- BOOT ---------------------
-include boot/Makefile
-
-targets += $(patsubst %.o, $(BOOT_DIR)/%.o,$(boot_targets))
-# 	-----------------------------------------------
 
 # 	-------------------- LIB ----------------------
 include lib/Makefile

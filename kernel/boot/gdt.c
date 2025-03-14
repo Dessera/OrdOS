@@ -1,7 +1,7 @@
 
 #include "kernel/memory/gdt.h"
 #include "kernel/config/memory.h"
-#include "kernel/utils/asm.h"
+#include "lib/asm.h"
 
 SECTION(".ldrdata")
 struct gdt_desc gdt[MEM_GDT_MAX_ENTRIES] = {

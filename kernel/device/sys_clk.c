@@ -1,5 +1,5 @@
 #include "kernel/device/sys_clk.h"
-#include "kernel/utils/asm.h"
+#include "lib/asm.h"
 
 #define MK_SYS_CLK_CMD(index, rw, mode) ((u8)(index << 6 | rw << 4 | mode << 1))
 #define MK_SYS_CLK_LB(cnt) ((u8)(cnt & 0xff))

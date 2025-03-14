@@ -5,7 +5,7 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/interrupt/syscall.h"
 #include "kernel/log.h"
-#include "kernel/utils/asm.h"
+#include "lib/asm.h"
 
 #define INTR_STATUS_MASK 0x200
 #define INTR_RESERVE_SIZE 0x20

@@ -2,8 +2,10 @@
 #include "kernel/config/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/task/task.h"
+#include "kernel/utils/print.h"
+#include "kernel/utils/string.h"
+#include "lib/syscall.h"
 #include "lib/types.h"
-#include "user/syscall.h"
 
 static void* __sysall_table[INTR_SYSCALL_SIZE] = { 0 };
 
@@ -11,12 +13,20 @@ void
 init_syscall(void)
 {
   __sysall_table[SYSCALL_GETPID] = syscall_getpid;
+  __sysall_table[SYSCALL_WRITE] = syscall_write;
 }
 
 size_t
 syscall_getpid(void)
 {
   return task_current()->pid;
+}
+
+size_t
+syscall_write(char* buf)
+{
+  kputs(buf);
+  return kstrlen(buf);
 }
 
 void*

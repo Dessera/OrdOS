@@ -1,5 +1,5 @@
 #include "kernel/device/pci.h"
-#include "kernel/utils/asm.h"
+#include "lib/asm.h"
 
 static void
 __init_pic(void)

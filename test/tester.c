@@ -1,6 +1,6 @@
 #include "kernel/device/vga.h"
-#include "kernel/utils/asm.h"
 #include "kernel/utils/print.h"
+#include "lib/asm.h"
 
 void
 kmain(void);

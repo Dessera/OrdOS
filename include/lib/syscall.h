@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/utils/asm.h"
+#include "lib/asm.h"
 #include "lib/types.h"
 
 #define SYSCALL_INDEX(syscall) ((u32)(syscall))
@@ -23,7 +23,12 @@
 enum syscall_enumerate
 {
   SYSCALL_GETPID,
+  SYSCALL_WRITE
 };
 
 size_t
 getpid(void);
+
+// temporary write syscall
+size_t
+write(char* buf);
