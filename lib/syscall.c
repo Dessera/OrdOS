@@ -9,10 +9,10 @@ getpid(void)
   return ret;
 }
 
-size_t
-write(char* buf)
+ssize_t
+write(size_t fd, char* buf, size_t len)
 {
-  size_t ret;
-  SYSCALL_A1(SYSCALL_WRITE, ret, buf);
+  ssize_t ret;
+  SYSCALL_A3(SYSCALL_WRITE, ret, fd, buf, len);
   return ret;
 }

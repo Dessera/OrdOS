@@ -1,11 +1,12 @@
 #include "kernel/memory/page.h"
 #include "kernel/assert.h"
-#include "kernel/common.h"
 #include "kernel/config/memory.h"
 #include "kernel/task/task.h"
 #include "kernel/utils/bitmap.h"
+#include "kernel/utils/print.h"
 #include "kernel/utils/string.h"
 #include "lib/asm.h"
+#include "lib/common.h"
 #include "lib/types.h"
 
 struct pmempool
@@ -25,7 +26,7 @@ void
 init_page(void)
 {
   size_t mem_used = MEM_PAGE_SIZE * PAGE_INITIAL_ENTRIES +
-                    KMEMMB(1); // 256 pages for kernel + 1mb low mem
+                    MEMMB(1); // 256 pages for kernel + 1mb low mem
   size_t free_mem = _asm_mem_bytes - mem_used;
   size_t free_pages = free_mem / MEM_PAGE_SIZE;
 
@@ -56,7 +57,7 @@ init_page(void)
 static void*
 __alloc_vmem_page(size_t size, bool kernel)
 {
-  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->vmmap;
 
   ssize_t index = atomic_bitmap_alloc(&vaddr_map->vmmap, size);
   if (index == NPOS) {
@@ -68,7 +69,7 @@ __alloc_vmem_page(size_t size, bool kernel)
 static void
 __free_vmem_page(void* vaddr, size_t size, bool kernel)
 {
-  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->vmmap;
   size_t index = ((u32)vaddr - vaddr_map->vstart) / MEM_PAGE_SIZE;
   for (size_t i = 0; i < size; i++) {
     atomic_bitmap_set(&vaddr_map->vmmap, index + i, false);
@@ -145,7 +146,7 @@ alloc_page(size_t size, bool kernel)
     void* pm_addr = __alloc_pmem_page(pmem_pool);
     if (pm_addr == NULL) {
       // * NOTE: code below is not tested
-      KWARNING("failed to allocate physical memory, related vm_addr: %p",
+      KWARNING("failed to allocate physical memory, related vaddr: %p",
                vm_addr);
       free_page(vmaddr_start, alloc_size - size);
       return NULL;
@@ -166,15 +167,14 @@ void*
 link_page(void* vaddr, bool kernel)
 {
   AUTO pmem_pool = kernel ? &kmem_pool : &umem_pool;
-  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->user_vaddr;
+  AUTO vaddr_map = kernel ? &kvmmap : &task_current()->vmmap;
 
   size_t index = ((u32)vaddr - vaddr_map->vstart) / MEM_PAGE_SIZE;
   atomic_bitmap_set(&vaddr_map->vmmap, index, true);
 
   void* paddr = __alloc_pmem_page(pmem_pool);
   if (paddr == NULL) {
-    // * NOTE: code below is not tested
-    KWARNING("failed to allocate physical memory, related vm_addr: %p", vaddr);
+    KWARNING("failed to allocate physical memory, related vaddr: %p", vaddr);
     return NULL;
   }
 
@@ -195,7 +195,7 @@ free_page(void* vaddr, size_t size)
 
   KASSERT(
     ((u32)paddr & MEM_PAGE_SIZE) == 0, "paddr %p is not page aligned", paddr);
-  KASSERT((u32)paddr >= KMEMMB(1) + KMEMKB(1),
+  KASSERT((u32)paddr >= MEMMB(1) + MEMKB(1),
           "cannot free paddr %p outside of memory pool",
           paddr);
 

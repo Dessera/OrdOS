@@ -19,7 +19,7 @@ static struct tss_context __tss_ctx = { 0, 0, GDT_KSTACK_SELECTOR,
                                         0, 0, sizeof(struct tss_context) };
 
 void
-init_user_tss(void)
+init_tss(void)
 {
   struct gdt_desc tss_desc = MK_TSS_DESC(&__tss_ctx);
   gdt[GDT_TSS_INDEX] = tss_desc;

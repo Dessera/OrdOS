@@ -24,7 +24,7 @@ uproc_entry(void)
   buf[1] = '\n';
 
   while (true) {
-    write(buf);
+    write(0, buf, 1);
   }
 }
 
@@ -50,6 +50,9 @@ kmain(void)
   kinit();
 
   uproc_run("hello", uproc_entry);
+  uproc_run("hello2", uproc_entry);
+  uproc_run("hello3", uproc_entry);
+  uproc_run("hello4", uproc_entry);
 
   while (true)
     ;

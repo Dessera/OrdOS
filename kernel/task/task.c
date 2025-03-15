@@ -91,7 +91,7 @@ init_task(void)
   __init_task_queue();
 
   init_kthread();
-  init_user_tss();
+  init_tss();
 
   intr_register_handler(0x20, __task_schedule_handler);
 }
@@ -143,9 +143,9 @@ task_init_vmmap(struct task* task)
     (MEM_KERNEL_VSTART - MEM_USER_VSTART) / MEM_PAGE_SIZE / 8;
   size_t bitmap_pages = (bitmap_size + MEM_PAGE_SIZE - 1) / MEM_PAGE_SIZE;
 
-  task->user_vaddr.vstart = MEM_USER_VSTART;
+  task->vmmap.vstart = MEM_USER_VSTART;
   atomic_bitmap_init(
-    &task->user_vaddr.vmmap, alloc_page(bitmap_pages, true), bitmap_size);
+    &task->vmmap.vmmap, alloc_page(bitmap_pages, true), bitmap_size);
 }
 
 void

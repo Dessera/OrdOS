@@ -33,12 +33,15 @@ __idt_desc_init(struct idt_desc_t* idt_desc, u16 sel, u32 offs, u8 attr)
 static void
 __init_idt_desc(void)
 {
+  // other interrupts
   for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
     __idt_desc_init(&idt[i],
                     GDT_KCODE_SELECTOR,
                     (u32)_asm_intr_vecs[i],
                     IDT_DESC_ATTR(1, IDT_DPL_KERNEL, IDT_TYPE_INTR));
   }
+
+  // syscall
   __idt_desc_init(&idt[0x80],
                   GDT_KCODE_SELECTOR,
                   (u32)_asm_intr_vecs[0x80],

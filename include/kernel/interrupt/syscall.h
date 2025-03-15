@@ -7,12 +7,6 @@ typedef void* (*syscall_handler_t)(void*, void*, void*);
 void
 init_syscall(void);
 
-size_t
-syscall_getpid(void);
-
-size_t
-syscall_write(char* buf);
-
 /**
  * @brief Syscall entry point
  *

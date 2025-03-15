@@ -16,6 +16,11 @@ init_print(void);
 void
 kputs(const char* str);
 
+/**
+ * @brief Print a string to the screen (disable interrupts)
+ *
+ * @param str The string to print
+ */
 void
 kputs_nint(const char* str);
 
@@ -30,6 +35,12 @@ kputs_nint(const char* str);
 void
 kprint(const char* str, ...);
 
+/**
+ * @brief Print a formatted string to the screen (disable interrupts)
+ *
+ * @param str The format string
+ * @param ... The arguments
+ */
 void
 kprint_nint(const char* str, ...);
 
@@ -45,6 +56,13 @@ kprint_nint(const char* str, ...);
 void
 kprintln(const char* str, ...);
 
+/**
+ * @brief Print a formatted string to the screen, with `\n` at the end (disable
+ * interrupts)
+ *
+ * @param str The format string
+ * @param ... The arguments
+ */
 void
 kprintln_nint(const char* str, ...);
 

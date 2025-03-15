@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kernel/common.h"
 #include "kernel/config/memory.h"
+#include "lib/common.h"
 
 #define PAGE_PDE_DESC_SIZE 4
 #define PAGE_PTE_DESC_SIZE PAGE_PDE_DESC_SIZE
@@ -49,7 +49,7 @@
   ((MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET) / PAGE_PDE_DESC_SIZE)
 
 #define PAGE_BITMAP_VSTART (MEM_KERNEL_VSTART + MEM_POOL_BITMAP_OFFSET)
-#define PAGE_KERNEL_HEAP_VSTART (MEM_KERNEL_VSTART + KMEMMB(1))
+#define PAGE_KERNEL_HEAP_VSTART (MEM_KERNEL_VSTART + MEMMB(1))
 #define PAGE_KERNEL_STACK_VSTART (MEM_KERNEL_VSTART + MEM_KERNEL_STACK_OFFSET)
 
 #ifndef __ASM__

@@ -1,5 +1,4 @@
 #include "kernel/device/pci.h"
-#include "kernel/common.h"
 
 #define INTR_ERR nop
 #define INTR_NOERR pushl $0

@@ -1,12 +1,19 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
+#include "kernel/log.h"
 #include "kernel/task/sync.h"
+#include "kernel/utils/print.h"
 #include "kernel/utils/string.h"
 #include "lib/types.h"
 
 void
 bitmap_init(struct bitmap* bitmap, void* data, size_t byte_size)
 {
+  KASSERT(data != NULL, "bitmap init with invalid data pointer");
+  KASSERT_WARN(byte_size < MAX_SSIZE_T / 8,
+               "bitmap init with too large size: %u",
+               byte_size);
+
   bitmap->size = byte_size;
   bitmap->data = data;
   kmemset(bitmap->data, 0, byte_size);
@@ -40,11 +47,14 @@ bitmap_find(struct bitmap* bitmap, size_t size, bool value)
       end++;
 
       if (end - start == size) {
-        KASSERT(end - 1 <= MAX_SSIZE_T || start <= MAX_SSIZE_T,
-                "bitmap find index out of range, start=%u, end=%u, max=%d",
-                start,
-                end,
-                MAX_SSIZE_T);
+        KASSERT_WARN(end - 1 <= MAX_SSIZE_T || start <= MAX_SSIZE_T,
+                     "bitmap find index out of range, start=%u, end=%u, max=%d",
+                     start,
+                     end,
+                     MAX_SSIZE_T);
+        if (end - 1 > MAX_SSIZE_T || start > MAX_SSIZE_T) {
+          return NPOS;
+        }
         return start;
       }
     }
@@ -52,14 +62,14 @@ bitmap_find(struct bitmap* bitmap, size_t size, bool value)
     start = end + 1;
   }
 
-  return -1;
+  return NPOS;
 }
 
 ssize_t
 bitmap_alloc(struct bitmap* bitmap, size_t size)
 {
   ssize_t index = bitmap_find(bitmap, size, false);
-  if (index != -1) {
+  if (index != NPOS) {
     for (size_t i = 0; i < size; i++) {
       bitmap_set(bitmap, index + i, true);
     }

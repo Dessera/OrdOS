@@ -30,5 +30,5 @@ size_t
 getpid(void);
 
 // temporary write syscall
-size_t
-write(char* buf);
+ssize_t
+write(size_t fd, char* buf, size_t len);

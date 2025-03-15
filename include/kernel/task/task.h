@@ -42,7 +42,7 @@ struct task
   struct list_head global_node;
 
   u32* page_table;
-  struct vmemmap user_vaddr;
+  struct vmemmap vmmap;
 
   u32 tmagic;
 };

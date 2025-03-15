@@ -33,17 +33,3 @@ bool
 intr_lock(void);
 void
 intr_unlock(bool flag);
-
-static FORCE_INLINE u8
-atomic_cmpexchange(u8* ptr, u8 old, u8 new)
-{
-  u8 ret;
-
-  __asm__ __volatile__("lock;"
-                       "cmpxchgb %2, %1;"
-                       "sete %0"
-                       : "=q"(ret), "=m"(*ptr)
-                       : "r"(new), "m"(ptr), "a"(old)
-                       : "memory");
-  return ret;
-}

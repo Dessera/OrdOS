@@ -1,6 +1,7 @@
 #include "kernel/task/uproc.h"
 #include "kernel/config/memory.h"
 #include "kernel/config/task.h"
+#include "kernel/log.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/memory/page.h"
 #include "kernel/task/context.h"

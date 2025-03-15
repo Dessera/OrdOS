@@ -1,7 +1,7 @@
 #pragma once
-#include "kernel/common.h"
+#include "lib/common.h"
 
-// if no KVERSION and KNAME are defined, use defaults
+// if no KVERSION and KNAME are defined, use default
 #ifndef KVERSION
 #define KVERSION Unknown
 #endif
@@ -12,4 +12,4 @@
 
 // full version string
 #define KFULLNAME KNAME KVERSION
-#define KFULLNAME_STR KSTRINGIFY(KFULLNAME)
+#define KFULLNAME_STR STRINGIFY(KFULLNAME)
