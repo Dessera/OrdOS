@@ -2,9 +2,6 @@
 #include "kernel/boot.h"
 #include "kernel/info.h"
 
-// print before protected mode
-#define BPRINT(str) movw str, %si; call _bprint
-
 .code16
 .section ".bstext", "ax"
 _bootsec_start:
@@ -18,8 +15,11 @@ _bootsec_start:
   // disable interrupts because they're not ready
   cli
 
-  BPRINT($_bsd_welcome)
-  BPRINT($_bsd_loading_indicator)
+  movw $_bsd_welcome, %si
+  call _bprint
+
+  movw $_bsd_loading_indicator, %si
+  call _bprint
 
   // read loader to mem
 _bs_load_ldr:
@@ -32,10 +32,11 @@ _bs_load_ldr_retry:
   int $0x13
   jnc _bs_load_ldr_done
 _bs_load_ldr_error:
-  BPRINT($_bsd_retry_indicator)
+  movw $_bsd_retry_indicator, %si
+  call _bprint
   jmp _bs_load_ldr_retry
 _bs_load_ldr_done:
-  jmp _start
+  jmp _ldr_start
 
 /*
  * Print string to screen
@@ -43,6 +44,7 @@ _bs_load_ldr_done:
  * Parameters:
  *    %si = string addr
  */
+  .globl _bprint
 _bprint:
   pusha
   cld
@@ -58,10 +60,6 @@ _bprint_done:
   popa
   ret
 
-.org 0x180
-
-.section ".bsdata", "a"
-
 _bsd_welcome:
   .ascii KFULLNAME_STR, " STEP 1\n\r\0"
 _bsd_loading_indicator:
@@ -69,6 +67,6 @@ _bsd_loading_indicator:
 _bsd_retry_indicator:
   .asciz "Failed to load STEP 2, retrying...\n\r"
 
-.org 0x7e
+.org BOOT_SEC_SIZE - 2
 boot_flag: .word 0xaa55
 

@@ -11,6 +11,3 @@
 #define MEMKB(x) ((x) * 1024)
 #define MEMMB(x) (MEMKB(x) * 1024)
 #define MEMGB(x) (MEMMB(x) * 1024)
-
-#define ALIGN_UP(x, a) (((x) + (a) - 1) & ~((a) - 1))
-#define ALIGN_DOWN(x, a) ((x) & ~((a) - 1))

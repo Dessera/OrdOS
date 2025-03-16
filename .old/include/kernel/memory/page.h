@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/config/memory.h"
+#include "lib/common.h"
 
 #define PAGE_PDE_DESC_SIZE 4
 #define PAGE_PTE_DESC_SIZE PAGE_PDE_DESC_SIZE
@@ -25,7 +26,12 @@
   ((base) | PAGE_PDE_P(p) | PAGE_PDE_RW(w) | PAGE_PDE_US(u))
 #define PAGE_PTE_DESC(base, p, w, u) PAGE_PDE_DESC(base, p, w, u)
 
+#define PAGE_TABLE_INDEX(index) ((index) * MEM_PAGE_SIZE + MEM_PAGE_TABLE_START)
+
 #define PAGE_PDE_KERNEL_OFFSET (MEM_KERNEL_VSTART >> 20)
+
+#define PAGE_PDE_INDEX(vaddr) (((u32)(vaddr) & PAGE_PDE_MASK) >> 22)
+#define PAGE_PTE_INDEX(vaddr) (((u32)(vaddr) & PAGE_PTE_MASK) >> 12)
 
 #define PAGE_GET_PDE(vaddr)                                                    \
   ((u32*)(PAGE_PDE_INDEX(vaddr) * 4 + PAGE_PDE_VSTART))
@@ -39,5 +45,34 @@
 
 #define PAGE_ENTRIES (MEM_PAGE_SIZE / PAGE_PDE_DESC_SIZE)
 
+#define PAGE_INITIAL_ENTRIES                                                   \
+  ((MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET) / PAGE_PDE_DESC_SIZE)
+
+#define PAGE_BITMAP_VSTART (MEM_KERNEL_VSTART + MEM_POOL_BITMAP_OFFSET)
+#define PAGE_KERNEL_HEAP_VSTART (MEM_KERNEL_VSTART + MEMMB(1))
+#define PAGE_KERNEL_STACK_VSTART (MEM_KERNEL_VSTART + MEM_KERNEL_STACK_OFFSET)
+
+#ifndef __ASM__
+
+#include "kernel/utils/bitmap.h"
+#include "lib/types.h"
+
+struct vmemmap
+{
+  struct atomic_bitmap vmmap;
+  u32 vstart;
+};
+
 void
 init_page(void);
+
+void*
+alloc_page(size_t size, bool kernel);
+
+void*
+link_page(void* vaddr, bool kernel);
+
+void
+free_page(void* addr, size_t size);
+
+#endif

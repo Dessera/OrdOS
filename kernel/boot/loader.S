@@ -1,241 +1,117 @@
 #include "kernel/config/boot.h"
+#include "kernel/config/memory.h"
 #include "kernel/boot.h"
 #include "kernel/info.h"
 #include "kernel/memory/gdt.h"
-#include "kernel/memory/page.h"
 #include "kernel/device/disk.h"
-#include "kernel/device/vga.h"
 
 #define E820MAGIC 0x534d4150
 #define E820FUNC 0xe820
 
-// print before protected mode
-#define LPRINT(str) movw str, %si; call _lprint
-
-// print after protected mode
-#define PPRINT(line, str) movl line, %eax; movl str, %esi; call _pprint
-
 .code16
 .section ".ldrtext", "ax"
 
-.globl _start
-_start:
-  // check memory
-
-  LPRINT($_lb_mem_indicator)
-
+  .globl _ldr_start
+_ldr_start:
   xorl %ebx, %ebx
+
+  movw $_ld_welcome, %si
+  call _bprint
+
+  movw $_ld_mem_indicator, %si
+  call _bprint
+
+  // fetch memory info
   movl $E820MAGIC, %edx
   movw $_asm_mem_zone, %di
 _ldr_fetch_ards:
   movl $E820FUNC, %eax
   movl $0x14, %ecx
   int $0x15
+
   jc _ldr_mem_error
   addw %cx, %di
   incw _asm_mem_nr
   cmpl $0x00, %ebx
   jnz _ldr_fetch_ards
-
-  movw (_asm_mem_nr), %cx
-  movl $_asm_mem_zone, %ebx
-  xorl %edx, %edx
-_ldr_find_mem:
-  movl (%ebx), %eax
-  addl 8(%ebx), %eax
-  addl $0x14, %ebx
-  cmpl %eax, %edx
-  jge _ldr_next_mem
-  movl %eax, %edx
-_ldr_next_mem:
-  loop _ldr_find_mem
   jmp _ldr_mem_ok
 
 _ldr_mem_error:
 
-  LPRINT($_lb_mem_error)
+  movw $_ld_mem_error, %si
+  call _bprint
 
   jmp _ldr_error_hlt
+
 _ldr_mem_ok:
-  movl %edx, _asm_mem_bytes
+
+  movw $_ld_kernel_indicator, %si
+  call _bprint
 
   // enable A20
   inb $0x92, %al
   orb $0x02, %al
   outb %al, $0x92
 
-  // load gdt
-  lgdt _lb_gdt_ptr
+  // load boot gdt
+  lgdt _ld_gdt_ptr
 
   // enable protected mode
   movl %cr0, %eax
   orl $0x01, %eax
   movl %eax, %cr0
 
-  // jump to _start_protected
-  ljmp $GDT_KCODE_SELECTOR, $_start_protected
+  ljmp $GDT_KCODE_SELECTOR, $_prot_start
 
 _ldr_error_hlt:
   hlt
   jmp _ldr_error_hlt
 
-/*
- * Print string to screen
- *
- * Parameters:
- *    %si = string addr
- */
-_lprint:
-  pusha
-  cld
-  movw $0x07, %bx
-_lprint_loop:
-  lodsb
-  andb %al, %al
-  jz _lprint_done
-  movb $0x0e, %ah
-  int $0x10
-  jmp _lprint_loop
-_lprint_done:
-  popa
-  ret
+.globl _asm_mem_zone
+_asm_mem_zone:
+  .space MEM_E820_SIZE * 0x14
+
+.globl _asm_mem_nr
+_asm_mem_nr:
+  .word 0
+
+_ld_gdt_ptr:
+  .word MEM_BOOT_GDT_SIZE * 8 - 1
+  .long boot_gdt
+
+_ld_welcome:
+  .ascii KFULLNAME_STR, " STEP 2\n\r\0"
+_ld_mem_indicator:
+  .asciz "Fetching memory info...\n\r"
+_ld_mem_error:
+  .asciz "Failed to fetch memory info\n\r"
+_ld_kernel_indicator:
+  .asciz "Loading kernel...\n\r"
 
 .code32
-_start_protected:
+_prot_start:
   movw $GDT_KDATA_SELECTOR, %ax
   movw %ax, %ds
   movw %ax, %es
+  movw %ax, %fs
+  movw %ax, %gs
   movw %ax, %ss
-  movl $BOOT_LDR_START, %esp
 
-  call _pclear
-
-  PPRINT($0x00, $_pb_welcome)
-
-  PPRINT($0x01, $_pb_page_indicator)
-
-_prot_page_setup:
-  // clear page table
-  movl $MEM_PAGE_TABLE_START, %edi
-  movl $MEM_PAGE_SIZE, %ecx
-  movb $0x00, %al
-  
-  cld
-  rep stosb
-
-_prot_page_init:
-  // map first 4MB
-  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(1), 1, 1, 1), (MEM_PAGE_TABLE_START)
-  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(1), 1, 1, 1), (MEM_PAGE_TABLE_START + PAGE_PDE_KERNEL_OFFSET)
-
-  // map page table itself
-  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(0), 1, 1, 1), (MEM_PAGE_TABLE_START + MEM_PAGE_SIZE - 0x04)
-
-  // map kernel storage
-_prot_kernel_page_init:
-  movl $0x100, %ecx
-  movl $PAGE_PDE_DESC(0, 1, 1, 1), %eax
-  movl $PAGE_TABLE_INDEX(1), %edi
-_prot_kernel_page_loop:
-  movl %eax, (%edi)
-  addl $MEM_PAGE_SIZE, %eax
-  addl $0x04, %edi
-  loop _prot_kernel_page_loop
-
-  // map kernel memory
-_prot_kernel_mem_init:
-  movl $PAGE_PDE_DESC(PAGE_TABLE_INDEX(2), 1, 1, 1), %eax
-  movl $MEM_PAGE_TABLE_START + PAGE_PDE_KERNEL_OFFSET + 0x04, %edi
-_prot_kernel_mem_loop:
-  movl %eax, (%edi)
-  addl $MEM_PAGE_SIZE, %eax
-  addl $0x04, %edi
-  cmpl $MEM_PAGE_TABLE_START + MEM_PAGE_SIZE - 0x04, %edi
-  jne _prot_kernel_mem_loop
-
-  // update gdt
-  sgdt _lb_gdt_ptr
-
-  movl (_lb_gdt_ptr + 2), %ebx
-  orl $MEM_KERNEL_VSTART, GDT_VIDEO_SELECTOR + 4(%ebx)
-
-  addl $MEM_KERNEL_VSTART, (_lb_gdt_ptr + 2)
-  addl $MEM_KERNEL_VSTART, %esp
-
-  // load page table
-  movl $MEM_PAGE_TABLE_START, %eax
-  movl %eax, %cr3
-
-  movl %cr0, %eax
-  orl $0x80000000, %eax
-  movl %eax, %cr0
-
-  lgdt _lb_gdt_ptr
+  // reset stack pointer
+  movl $BOOT_MBR_START, %esp
 
   // load kernel
-  PPRINT($0x02, $_pb_kernel_indicator)
   movl $BOOT_KERNEL_SIZE, %ecx
   movl $BOOT_KERNEL_SEC_START, %eax
-  movl $BOOT_KERNEL_ENTRY_START, %edi
+  movl $BOOT_KERNEL_START, %edi
   call _prot_load_kernel
 
-  // jump to kernel
-  movl $PAGE_KERNEL_STACK_VSTART, %esp
-  call kmain
+  // get real addr of kernel entry (because page table is not set up yet)
+  call _start - MEM_KERNEL_VSTART
 
 _prot_error_hlt:
   hlt
   jmp _prot_error_hlt
-
-/*
- * Clear screen
- */
-_pclear:
-  pushl %eax
-  pushw %es
-  movw $GDT_VIDEO_SELECTOR, %ax
-  movw %ax, %es
-  movl $0x0, %edi
-  movl $VGA_BUF_WIDTH * VGA_BUF_HEIGHT, %ecx
-  movw $0x0720, %ax
-
-  cld
-  rep stosw
-
-  popw %ax
-  movw %ax, %es
-  popl %eax
-  ret
-
-/*
- * Print string to screen
- *
- * Parameters:
- *    %esi = string addr
- *    %eax = line number
- */
-_pprint:
-  pushal
-  cld
-
-  movl $VGA_BUF_WIDTH * 2, %ecx
-  mull %ecx
-  movl %eax, %edx
-  movw $GDT_VIDEO_SELECTOR, %ax
-  movw %ax, %gs
-
-  movl $0x0, %ecx
-_pprint_loop:
-  lodsb
-  andb %al, %al
-  jz _pprint_done
-  movb $0x0f, %ah
-  movw %ax, %gs:(%edx, %ecx, 2)
-  incl %ecx
-  jmp _pprint_loop
-_pprint_done:
-  popal
-  ret
 
 /*
  * Load sectors from disk
@@ -313,28 +189,3 @@ _prot_disk_wait_loop:
   popw %ax
   popw %dx
   ret
-
-.section ".ldrdata", "a"
-_lb_gdt_ptr:
-  .word (MEM_GDT_MAX_ENTRIES * 8) - 1
-  .long gdt
-_lb_mem_indicator:
-  .asciz "Fetching memory info\n\r"
-_lb_mem_error:
-  .asciz "Failed to fetch memory info\n\r"
-
-  // ards buffer 244 bytes
-_asm_mem_zone:
-  .space 0xf4
-_asm_mem_nr:
-  .word 0
-.globl _asm_mem_bytes
-_asm_mem_bytes:
-  .long 0
-
-_pb_welcome:
-  .ascii KFULLNAME_STR, " STEP 2\0"
-_pb_page_indicator:
-  .asciz "Setup page table"
-_pb_kernel_indicator:
-  .asciz "Loading kernel"

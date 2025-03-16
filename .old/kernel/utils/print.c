@@ -2,14 +2,14 @@
 #include "kernel/config/utils.h"
 #include "kernel/device/vga.h"
 #include "kernel/memory/gdt.h"
-// #include "kernel/task/sync.h"
+#include "kernel/task/sync.h"
 #include "kernel/utils/string.h"
 #include "lib/asm.h"
 #include "lib/types.h"
 
 #define SET_VGA_SEGMENT() ASM("movl %0, %%gs" : : "r"(GDT_VIDEO_SELECTOR))
 
-// static struct mutex_lock __plock;
+static struct mutex_lock __plock;
 
 static FORCE_INLINE void
 __kfill_buf(u16 cursor, u16 value)
@@ -146,7 +146,7 @@ __kputchar(char c)
 void
 init_print(void)
 {
-  // mutex_lock_init(&__plock);
+  mutex_lock_init(&__plock);
 
   __kscrclear();
 }
@@ -154,25 +154,25 @@ init_print(void)
 void
 kputs(const char* str)
 {
-  // mutex_lock(&__plock);
+  mutex_lock(&__plock);
 
   while (*str != '\0') {
     __kputchar(*str++);
   }
 
-  // mutex_unlock(&__plock);
+  mutex_unlock(&__plock);
 }
 
 void
 kputs_nint(const char* str)
 {
-  // bool intr_status = intr_lock();
+  bool intr_status = intr_lock();
 
   while (*str != '\0') {
     __kputchar(*str++);
   }
 
-  // intr_unlock(intr_status);
+  intr_unlock(intr_status);
 }
 
 static void

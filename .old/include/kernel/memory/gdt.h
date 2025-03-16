@@ -60,10 +60,12 @@ struct gdt_desc
   u16 limit_l16;
   u16 base_l16;
   u8 base_m8;
-  u8 attr;
-  u8 attr_limit_h4;
+  u8 attrs;
+  u8 limit_h4;
   u8 base_h8;
 };
+
+extern struct gdt_desc gdt[MEM_GDT_MAX_ENTRIES];
 
 #define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
   { GDT_LIMIT_L16(limit),                                                      \
@@ -74,12 +76,6 @@ struct gdt_desc
     GDT_BASE_H8(base) }
 
 #define GDT_DESC_NULL() GDT_DESC(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-#define GDT_DESC_TCODE()                                                       \
-  GDT_DESC(0xfffff, -MEM_KERNEL_VSTART, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0)
-
-#define GDT_DESC_TDATA()                                                       \
-  GDT_DESC(0xfffff, -MEM_KERNEL_VSTART, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
 #define GDT_DESC_KCODE() GDT_DESC(0xfffff, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0)
 

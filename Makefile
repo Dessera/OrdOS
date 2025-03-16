@@ -64,9 +64,9 @@ targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- USER -------------------
-include user/Makefile
+# include user/Makefile
 
-targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
+# targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- FINAL --------------------

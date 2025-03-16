@@ -1,6 +1,8 @@
 #include "kernel/config/boot.h"
 #include "kernel/boot.h"
 
+#include "lib/common.h"
+
 OUTPUT_FORMAT("binary")
 OUTPUT_ARCH(i386)
 ENTRY(_start)
@@ -8,18 +10,35 @@ ENTRY(_start)
 
 SECTIONS
 {
-  .bstext BOOT_MBR_START : AT(0x00) { *(.bstext) }
-  .bsdata : { *(.bsdata) }
+  .bstext BOOT_MBR_START : AT(0x00) { 
+    *(.bstext) 
+  }
+  _bs_end = .;
 
-  .ldrtext BOOT_LDR_START : AT(BOOT_SEC_SIZE * BOOT_LDR_SEC_START) { *(.ldrtext) }
-  .ldrdata : { *(.ldrdata) }
+  .ldrtext BOOT_LDR_START : AT(BOOT_SEC_SIZE * BOOT_LDR_SEC_START) { 
+    *(.ldrtext) 
+  }
+  _ldr_end = .;
 
-  .text BOOT_KERNEL_ENTRY_START : AT(BOOT_SEC_SIZE * BOOT_KERNEL_SEC_START) { *(.text*) }
-  .data : { *(.data*) }
-  .rodata : { *(.rodata*) }
-  .bss : { *(.bss*) }
+  .text BOOT_KERNEL_ENTRY_START : AT(BOOT_SEC_SIZE * BOOT_KERNEL_SEC_START) {
+    *(.text*) 
+  }
+  .data : { 
+    *(.data*) 
+  }
+  .rodata : { 
+    *(.rodata*) 
+  }
+  .bss : { 
+    *(.bss*) 
+  }
+  _kernel_end = .;
 
   /DISCARD/ : {
     *(.note*)
   }
+
+  . = ASSERT(_bs_end - BOOT_MBR_START <= BOOT_SEC_SIZE, "boot sector too big");
+  . = ASSERT(_ldr_end - BOOT_LDR_START <= BOOT_SEC_SIZE * BOOT_LDR_SIZE, "boot loader too big");
+  . = ASSERT(_kernel_end - BOOT_KERNEL_ENTRY_START <= BOOT_SEC_SIZE * BOOT_KERNEL_SIZE, "kernel too big");
 }
