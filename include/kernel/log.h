@@ -24,14 +24,14 @@
 #define LOGLEVEL LOGLEVEL_INFO
 #endif
 
-#define KLOG_WITH(logger, level_str, func, line, fmt, ...)                     \
-  logger("[ %s ] %s:%u > " fmt, level_str, func, line, ##__VA_ARGS__)
+#define KLOG_WITH(logger, level_str, fmt, ...)                                 \
+  logger("[ %s ] " fmt, level_str, ##__VA_ARGS__)
 
 #define KLOG(level_str, fmt, ...)                                              \
-  KLOG_WITH(kprintln, level_str, __func__, __LINE__, fmt, ##__VA_ARGS__)
+  KLOG_WITH(kprintln, level_str, fmt, ##__VA_ARGS__)
 
 #define KLOG_NINT(level_str, fmt, ...)                                         \
-  KLOG_WITH(kprintln_nint, level_str, __func__, __LINE__, fmt, ##__VA_ARGS__)
+  KLOG_WITH(kprintln_nint, level_str, fmt, ##__VA_ARGS__)
 
 #if LOGLEVEL < LOGLEVEL_TRACE
 #define KTRACE(fmt, ...)

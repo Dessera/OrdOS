@@ -2,11 +2,9 @@
 
 #include "kernel/config/memory.h"
 
-#define PAGE_PDE_DESC_SIZE 4
-#define PAGE_PTE_DESC_SIZE PAGE_PDE_DESC_SIZE
+#define PAGE_DESC_SIZE 4
 
-#define PAGE_PDE_VSTART 0xfffff000
-#define PAGE_PTE_VSTART 0xffc00000
+#define PAGE_ENTRIES (MEM_PAGE_SIZE / PAGE_DESC_SIZE)
 
 #define PAGE_SELECTOR_MASK 0xfffff000
 
@@ -25,19 +23,10 @@
   ((base) | PAGE_PDE_P(p) | PAGE_PDE_RW(w) | PAGE_PDE_US(u))
 #define PAGE_PTE_DESC(base, p, w, u) PAGE_PDE_DESC(base, p, w, u)
 
-#define PAGE_PDE_KERNEL_OFFSET (MEM_KERNEL_VSTART >> 20)
+#define PAGE_PDE_INDEX(addr) (((addr) & PAGE_PDE_MASK) >> 22)
+#define PAGE_PTE_INDEX(addr) (((addr) & PAGE_PTE_MASK) >> 12)
 
-#define PAGE_GET_PDE(vaddr)                                                    \
-  ((u32*)(PAGE_PDE_INDEX(vaddr) * 4 + PAGE_PDE_VSTART))
-#define PAGE_GET_PTE(vaddr)                                                    \
-  ((u32*)(PAGE_PTE_INDEX(vaddr) * 4 + PAGE_PTE_VSTART +                        \
-          (((u32)(vaddr) & PAGE_PDE_MASK) >> 10)))
-
-#define PAGE_VADDR_TO_PADDR(vaddr)                                             \
-  ((void*)((*PAGE_GET_PTE(vaddr) & PAGE_PDE_VSTART) +                          \
-           ((u32)vaddr & PAGE_ADDR_MASK)))
-
-#define PAGE_ENTRIES (MEM_PAGE_SIZE / PAGE_PDE_DESC_SIZE)
+#define PAGE_PDE_KERNEL_OFFSET PAGE_PDE_INDEX(MEM_KERNEL_VSTART)
 
 void
 init_page(void);

@@ -1,10 +1,11 @@
 #include "kernel/config/memory.h"
+#include "kernel/memory/memory.h"
 #include "kernel/memory/gdt.h"
 
 .section ".text"
 .globl _start
 _start:
-    lgdt _gdt_ptr - MEM_KERNEL_VSTART
+    lgdt MEM_KERNEL_PADDR(_gdt_ptr)
 
     movw $GDT_KDATA_SELECTOR, %ax
     movw %ax, %ds
@@ -20,4 +21,4 @@ _start:
 
 _gdt_ptr:
   .word MEM_GDT_SIZE * 8 - 1
-  .long gdt - MEM_KERNEL_VSTART
+  .long MEM_KERNEL_PADDR(gdt)

@@ -1,9 +1,0 @@
-#pragma once
-
-#define BOOT_MBR_START 0x7c00
-
-#define BOOT_LDR_START 0x900
-#define BOOT_LDR_SIZE 0x04
-
-#define BOOT_KERNEL_START 0x8000
-#define BOOT_KERNEL_SIZE 0x30

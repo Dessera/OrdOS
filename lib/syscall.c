@@ -1,9 +1,5 @@
-#pragma once
-
-#include "lib/asm.h"
+#include "lib/syscall.h"
 #include "lib/types.h"
-
-#define SYSCALL_INDEX(syscall) ((u32)(syscall))
 
 #define SYSCALL_A0(syscall, ret)                                               \
   ASM("int $0x80" : "=a"(ret) : "a"(syscall) : "memory")
@@ -20,15 +16,18 @@
       "c"(arg2),                                                               \
       "d"(arg3) : "memory")
 
-enum syscall_enumerate
-{
-  SYSCALL_GETPID,
-  SYSCALL_WRITE
-};
-
 size_t
-getpid(void);
+getpid(void)
+{
+  size_t ret;
+  SYSCALL_A0(SYSCALL_GETPID, ret);
+  return ret;
+}
 
-// temporary write syscall
 ssize_t
-write(size_t fd, char* buf, size_t len);
+write(size_t fd, char* buf, size_t len)
+{
+  ssize_t ret;
+  SYSCALL_A3(SYSCALL_WRITE, ret, fd, buf, len);
+  return ret;
+}

@@ -27,6 +27,9 @@ typedef signed long long i64;
 typedef u32 size_t;
 typedef i32 ssize_t;
 
+typedef u32 uintptr_t;
+typedef i32 intptr_t;
+
 #define NPOS ((ssize_t) - 1)
 
 #define MAX_SIZE_T ((size_t)-1)

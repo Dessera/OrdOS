@@ -14,3 +14,9 @@
 
 #define ALIGN_UP(x, a) (((x) + (a) - 1) & ~((a) - 1))
 #define ALIGN_DOWN(x, a) ((x) & ~((a) - 1))
+
+#define DIV_UP(x, y) (((x) + (y) - 1) / (y))
+#define DIV_DOWN(x, y) ((x) / (y))
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))

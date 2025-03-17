@@ -65,6 +65,14 @@ struct gdt_desc
   u8 base_h8;
 };
 
+struct gdt_ptr
+{
+  u16 limit;
+  u32 base;
+};
+
+extern struct gdt_desc gdt[MEM_GDT_SIZE];
+
 #define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
   { GDT_LIMIT_L16(limit),                                                      \
     GDT_BASE_L16(base),                                                        \
@@ -89,8 +97,11 @@ struct gdt_desc
 
 #define GDT_DESC_UDATA() GDT_DESC(0xfffff, 0, 1, 3, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
-#define GDT_DESC_VIDEO()                                                       \
+#define GDT_DESC_TVIDEO()                                                      \
   GDT_DESC(0x07, 0xb8000, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
+
+#define GDT_DESC_VIDEO()                                                       \
+  GDT_DESC(0x07, 0xb8000 + MEM_KERNEL_VSTART, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
 #define GDT_GET_PTR(size, addr)                                                \
   ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(u32)(addr) << 16))

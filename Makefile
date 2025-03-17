@@ -83,13 +83,11 @@ $(TARGET): $(final_objs) $(LDSCRIPT)
 # 	-----------------------------------------------
 
 # 	-------------------- UTILS --------------------
-ifneq ($(DEBUG),)
-qemu: $(TARGET)
+qemu_debug: $(TARGET)
 	qemu-system-i386 -s -S -drive format=raw,file=$(TARGET)
-else
+
 qemu: $(TARGET)
 	qemu-system-i386 -drive format=raw,file=$(TARGET)
-endif
 
 clean:
 	$(hide)rm -rf $(BUILD_DIR)

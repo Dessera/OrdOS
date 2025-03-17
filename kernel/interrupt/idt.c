@@ -1,13 +1,11 @@
 #include "kernel/interrupt/idt.h"
 #include "kernel/config/interrupt.h"
+#include "kernel/log.h"
 #include "kernel/memory/gdt.h"
 #include "lib/asm.h"
 #include "lib/types.h"
 
-#define MK_IDT_PTR(idt_addr)                                                   \
-  (((u64)(u32)idt_addr << 16) | (sizeof(idt_addr) - 1))
-
-struct idt_desc_t
+struct idt_desc
 {
   u16 offs_lb;
   u16 sel;
@@ -18,10 +16,10 @@ struct idt_desc_t
 
 extern void* _asm_intr_vecs[INTR_IDT_SIZE];
 
-static struct idt_desc_t idt[INTR_IDT_SIZE];
+static struct idt_desc idt[INTR_IDT_SIZE];
 
 static void
-__idt_desc_init(struct idt_desc_t* idt_desc, u16 sel, u32 offs, u8 attr)
+__idt_desc_init(struct idt_desc* idt_desc, u16 sel, u32 offs, u8 attr)
 {
   idt_desc->offs_hb = (offs >> 16) & 0xffff;
   idt_desc->offs_lb = offs & 0xffff;
@@ -53,6 +51,8 @@ init_idt(void)
 {
   __init_idt_desc();
 
-  u64 idt_ptr = MK_IDT_PTR(idt);
+  u64 idt_ptr = IDT_GET_PTR(idt);
   lidt(idt_ptr);
+
+  KDEBUG("idt: %p", idt);
 }

@@ -74,3 +74,23 @@ invlpg(void* addr)
 {
   ASM("invlpg %0" : : "m"(addr) : "memory");
 }
+
+static FORCE_INLINE void
+lcr3(void* addr)
+{
+  ASM("movl %0, %%cr3" : : "r"(addr));
+}
+
+static FORCE_INLINE u32
+rcr0(void)
+{
+  u32 cr0;
+  ASM("movl %%cr0, %0" : "=r"(cr0));
+  return cr0;
+}
+
+static FORCE_INLINE void
+lcr0(u32 cr0)
+{
+  ASM("movl %0, %%cr0" : : "r"(cr0));
+}

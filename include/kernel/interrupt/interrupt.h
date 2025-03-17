@@ -1,3 +1,27 @@
+#pragma once
+
+#include "lib/types.h"
+
+/**
+ * @brief Interrupt handler function pointer type
+ */
+typedef void (*interrupt_handler_t)(u32);
+
+/**
+ * @brief Initializes the interrupt subsystem
+ */
+void
+init_intr(void);
+
+/**
+ * @brief Registers a handler for a specific interrupt
+ *
+ * @param interrupt_number The interrupt number to register the handler for
+ * @param handler The handler to register
+ */
+void
+intr_register_handler(u32 interrupt_number, interrupt_handler_t handler);
+
 /**
  * @brief Gets the current interrupt status
  *
@@ -16,3 +40,11 @@ intr_get_status(void);
  */
 bool
 intr_set_status(bool status);
+
+/**
+ * @brief Intrerrupt entry point
+ *
+ * @param irq The interrupt number
+ */
+void
+intr_common_handler(u32 irq);

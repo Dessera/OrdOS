@@ -1,2 +1,2 @@
 
-lib_targets := types.o
+lib_targets := types.o syscall.o

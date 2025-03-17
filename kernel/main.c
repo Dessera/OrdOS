@@ -1,4 +1,5 @@
 #include "kernel/info.h"
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/print.h"
@@ -14,6 +15,7 @@ kinit(void)
 
   KINFO("%s STEP 3", KFULLNAME_STR);
 
+  init_intr();
   init_memory();
 }
 
