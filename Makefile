@@ -1,5 +1,5 @@
 VERSION = 0.0.0
-NAME = Ordos
+NAME = OrdOS
 NAMEFILE = $(shell echo $(NAME) | tr 'A-Z' 'a-z')
 
 BUILD_DIR = build
