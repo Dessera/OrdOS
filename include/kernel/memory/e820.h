@@ -21,3 +21,27 @@ struct e820_entry
 
 const char*
 e820_type_to_string(enum e820_type type);
+
+/**
+ * @brief Get the e820 entries (from loader section)
+ *
+ * @return struct e820_entry* pointer to the entries
+ */
+struct e820_entry*
+e820_get_entries(void);
+
+/**
+ * @brief Get the number of e820 entries
+ *
+ * @return size_t number of entries (u16 max)
+ */
+size_t
+e820_get_entries_cnt(void);
+
+/**
+ * @brief Get the total memory size
+ *
+ * @return uintptr_t total memory size
+ */
+uintptr_t
+e820_get_memory_size(void);

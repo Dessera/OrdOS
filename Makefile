@@ -14,7 +14,7 @@ TARGET = $(BUILD_DIR)/$(NAMEFILE)
 TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 
 DEBUG = 1
-LOGLEVEL = 5		# 0: none, 1: error, 2: warning, 3: info, 4: debug 5: trace
+LOGLEVEL = 4		# 0: none, 1: error, 2: warning, 3: info, 4: debug 5: trace
 BUILD_TRACE =
 
 TESTER =

@@ -3,7 +3,6 @@
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/print.h"
-#include "lib/asm.h"
 
 void
 kmain(void);
@@ -24,7 +23,6 @@ kmain(void)
 {
   kinit();
 
-  while (true) {
-    hlt();
-  }
+  while (true)
+    ;
 }
