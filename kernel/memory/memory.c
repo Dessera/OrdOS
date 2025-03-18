@@ -2,6 +2,7 @@
 
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
+#include "kernel/memory/buddy.h"
 #include "kernel/memory/page.h"
 
 void
@@ -16,4 +17,5 @@ init_memory(void)
   init_page();
 
   // initialize buddy
+  init_buddy();
 }

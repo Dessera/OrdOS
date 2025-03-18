@@ -41,6 +41,8 @@
 
 #ifndef __ASSEMBLER__
 
+#define MEM_ZONE_SIZE 3
+
 /**
  * @brief Memory zone type
  */

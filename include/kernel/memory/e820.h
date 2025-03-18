@@ -5,6 +5,7 @@
 
 #ifndef __ASSEMBLER__
 
+#include "kernel/memory/buddy.h"
 #include "lib/types.h"
 
 /**
@@ -62,5 +63,14 @@ e820_get_entries_cnt(void);
  */
 uintptr_t
 e820_get_memory_size(void);
+
+/**
+ * @brief Pre initialize the pages for reserved memory
+ *
+ * @param pages pointer to the pages
+ * @param pages_cnt number of pages
+ */
+void
+e820_pre_init_pages(struct page* pages, size_t pages_cnt);
 
 #endif // __ASSEMBLER__

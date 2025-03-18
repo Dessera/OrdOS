@@ -1,4 +1,5 @@
 #include "kernel/memory/e820.h"
+#include "kernel/config/memory.h"
 #include "kernel/memory/memory.h"
 #include "lib/types.h"
 
@@ -57,4 +58,27 @@ e820_get_memory_size(void)
   }
 
   return mem_end;
+}
+
+void
+e820_pre_init_pages(struct page* pages, size_t pages_cnt)
+{
+  struct e820_entry* mem_entries = e820_get_entries();
+  size_t mem_cnt = e820_get_entries_cnt();
+
+  for (size_t i = 0; i < mem_cnt; i++) {
+    if (mem_entries[i].type == E820_TYPE_RAM) {
+      continue;
+    }
+
+    for (uintptr_t addr = mem_entries[i].base;
+         addr < mem_entries[i].base + mem_entries[i].length;
+         addr += MEM_PAGE_SIZE) {
+      size_t pg_idx = addr / MEM_PAGE_SIZE;
+      if (pg_idx >= pages_cnt) {
+        break;
+      }
+      pages[pg_idx].reserved = 1;
+    }
+  }
 }

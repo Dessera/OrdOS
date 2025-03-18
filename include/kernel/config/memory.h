@@ -5,6 +5,8 @@
 
 #define MEM_E820_SIZE 64
 
+#define MEM_BUDDY_MAX_ORDER 10
+
 #define MEM_PAGE_SIZE 0x1000
 
 #define MEM_KERNEL_VSTART 0xc0000000

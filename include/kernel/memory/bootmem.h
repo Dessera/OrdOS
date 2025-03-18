@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel/memory/buddy.h"
 #include "lib/types.h"
 
 /**
@@ -24,3 +25,12 @@ bootmem_alloc(size_t size);
  */
 size_t
 bootmem_get_all_pages(void);
+
+/**
+ * @brief Initialize pages (reserve memory that used by bootmem allocator)
+ *
+ * @param pages The pages to initialize
+ * @param page_cnt The number of pages
+ */
+void
+bootmem_pre_init_pages(struct page* pages, size_t page_cnt);

@@ -6,9 +6,9 @@ device_targets := pci.o
 
 # task_targets := kthread.o switch.o task.o sync.o tss.o uproc.o pid.o
 
-utils_targets := print.o string.o compiler.o
+utils_targets := print.o string.o compiler.o list_head.o
 
-memory_targets := memory.o gdt.o e820.o bootmem.o page.o
+memory_targets := memory.o gdt.o e820.o bootmem.o page.o buddy.o
 
 kernel_targets := entry.o main.o
 
