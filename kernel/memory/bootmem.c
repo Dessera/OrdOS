@@ -24,12 +24,12 @@ init_bootmem(void)
   AUTO mem_start = MEM_KERNEL_PADDR(compiler_get_kernel_end());
   AUTO mem_end = e820_get_memory_size();
 
-  KDEBUG("bootmem start: %x", mem_start);
-  KDEBUG("bootmem end: %x", mem_end);
-
   __bootmem.start = mem_start;
   __bootmem.free = mem_start;
   __bootmem.end = mem_end;
+
+  KDEBUG("bootmem start: %x", mem_start);
+  KDEBUG("bootmem end: %x", mem_end);
 }
 
 void*

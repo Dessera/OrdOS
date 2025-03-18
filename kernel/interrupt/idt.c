@@ -28,8 +28,8 @@ __idt_desc_init(struct idt_desc* idt_desc, u16 sel, u32 offs, u8 attr)
   idt_desc->sel = sel;
 }
 
-static void
-__init_idt_desc(void)
+void
+init_idt(void)
 {
   // other interrupts
   for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
@@ -44,12 +44,6 @@ __init_idt_desc(void)
                   GDT_KCODE_SELECTOR,
                   (u32)_asm_intr_vecs[0x80],
                   IDT_DESC_ATTR(1, IDT_DPL_USER, IDT_TYPE_INTR));
-}
-
-void
-init_idt(void)
-{
-  __init_idt_desc();
 
   u64 idt_ptr = IDT_GET_PTR(idt);
   lidt(idt_ptr);

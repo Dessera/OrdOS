@@ -2,9 +2,9 @@
 #include "kernel/config/interrupt.h"
 #include "kernel/log.h"
 // #include "kernel/task/task.h"
-#include "kernel/utils/print.h"
-#include "kernel/utils/string.h"
-#include "lib/syscall.h"
+// #include "kernel/utils/print.h"
+// #include "kernel/utils/string.h"
+// #include "lib/syscall.h"
 #include "lib/types.h"
 
 static void* __sysall_table[INTR_SYSCALL_SIZE] = { 0 };
