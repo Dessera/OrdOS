@@ -34,6 +34,9 @@ init_syscall(void)
 }
 
 void*
+syscall_common_handler(u32 index, void* arg1, void* arg2, void* arg3);
+
+void*
 syscall_common_handler(u32 index, void* arg1, void* arg2, void* arg3)
 {
   syscall_handler_t handler = __sysall_table[index];

@@ -2,7 +2,7 @@
 
 #include "kernel/config/memory.h"
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
 #include "lib/types.h"
 
@@ -39,8 +39,11 @@
 #define MEM_TYPE_NORMAL_START 0x01000000
 #define MEM_TYPE_DMA_START 0x00000000
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
+/**
+ * @brief Memory zone type
+ */
 enum mem_zone_type
 {
   MEM_ZONE_DMA = 0,
@@ -48,6 +51,9 @@ enum mem_zone_type
   MEM_ZONE_HIGH,
 };
 
+/**
+ * @brief Initialize the memory management system
+ */
 void
 init_memory(void);
 

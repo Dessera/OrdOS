@@ -10,9 +10,9 @@
 
 struct bootmem_allocator
 {
-  u32 start;
-  u32 free;
-  u32 end;
+  uintptr_t start;
+  uintptr_t free;
+  uintptr_t end;
 };
 
 static struct bootmem_allocator __bootmem;
@@ -33,11 +33,11 @@ init_bootmem(void)
 }
 
 void*
-bootmem_alloc(u32 size)
+bootmem_alloc(size_t size)
 {
   KASSERT(__bootmem.free != 0, "bootmem is not initialized");
 
-  u32 base = ALIGN_UP(__bootmem.free, size);
+  uintptr_t base = ALIGN_UP(__bootmem.free, size);
   __bootmem.free = base + size;
 
   if (__bootmem.free > __bootmem.end) {
@@ -45,13 +45,6 @@ bootmem_alloc(u32 size)
   }
 
   return (void*)MEM_KERNEL_VADDR(base);
-}
-
-void*
-bootmem_exit(void)
-{
-  u32 base = ALIGN_UP(__bootmem.free, MEM_PAGE_SIZE);
-  return (void*)base;
 }
 
 size_t

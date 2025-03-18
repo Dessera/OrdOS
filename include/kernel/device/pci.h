@@ -7,9 +7,12 @@
 
 #define PIC_EOI 0x20
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
+/**
+ * @brief Initialize the Programmable Interrupt Controller
+ */
 void
-init_pci(void);
+init_pic(void);
 
 #endif

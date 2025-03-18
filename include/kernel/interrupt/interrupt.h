@@ -40,11 +40,3 @@ intr_get_status(void);
  */
 bool
 intr_set_status(bool status);
-
-/**
- * @brief Intrerrupt entry point
- *
- * @param irq The interrupt number
- */
-void
-intr_common_handler(u32 irq);

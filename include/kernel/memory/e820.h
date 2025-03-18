@@ -1,7 +1,15 @@
 #pragma once
 
+#define E820MAGIC 0x534d4150
+#define E820FUNC 0xe820
+
+#ifndef __ASSEMBLER__
+
 #include "lib/types.h"
 
+/**
+ * @brief E820 memory type
+ */
 enum e820_type : u32
 {
   E820_TYPE_RAM = 1,
@@ -12,6 +20,9 @@ enum e820_type : u32
   E820_TYPE_PMEM,
 };
 
+/**
+ * @brief E820 memory entry
+ */
 struct e820_entry
 {
   u64 base;
@@ -19,6 +30,12 @@ struct e820_entry
   enum e820_type type;
 } __attribute__((packed));
 
+/**
+ * @brief Convert e820 type to string
+ *
+ * @param type e820 type
+ * @return const char* e820 type string
+ */
 const char*
 e820_type_to_string(enum e820_type type);
 
@@ -45,3 +62,5 @@ e820_get_entries_cnt(void);
  */
 uintptr_t
 e820_get_memory_size(void);
+
+#endif // __ASSEMBLER__

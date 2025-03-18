@@ -28,5 +28,8 @@
 
 #define PAGE_PDE_KERNEL_OFFSET PAGE_PDE_INDEX(MEM_KERNEL_VSTART)
 
+/**
+ * @brief Initialize the page table and page directory
+ */
 void
 init_page(void);

@@ -38,7 +38,11 @@ SECTIONS
     *(.note*)
   }
 
-  . = ASSERT(_bs_end - BOOT_MBR_START <= BOOT_SEC_SIZE, "boot sector too big");
-  . = ASSERT(_ldr_end - BOOT_LDR_START <= BOOT_SEC_SIZE * BOOT_LDR_SIZE, "boot loader too big");
-  . = ASSERT(_kernel_end - BOOT_KERNEL_ENTRY_START <= BOOT_SEC_SIZE * BOOT_KERNEL_SIZE, "kernel too big");
+  . = ASSERT(_bs_end - BOOT_MBR_START == BOOT_SEC_SIZE, "boot sector size mismatch");
+
+  . = ASSERT(_ldr_end - BOOT_LDR_START <= BOOT_SEC_SIZE * BOOT_LDR_SIZE, "boot loader too big, please increase BOOT_LDR_SIZE");
+  . = ASSERT(_ldr_end - BOOT_LDR_START >= BOOT_SEC_SIZE * (BOOT_LDR_SIZE - BOOT_LDR_SIZE_INTERVAL), "boot loader too small, please decrease BOOT_LDR_SIZE");
+
+  . = ASSERT(_kernel_end - BOOT_KERNEL_ENTRY_START <= BOOT_SEC_SIZE * BOOT_KERNEL_SIZE, "kernel too big, please increase BOOT_KERNEL_SIZE");
+  . = ASSERT(_kernel_end - BOOT_KERNEL_ENTRY_START >= BOOT_SEC_SIZE * (BOOT_KERNEL_SIZE - BOOT_KERNEL_SIZE_INTERVAL), "kernel too small, please decrease BOOT_KERNEL_SIZE");
 }

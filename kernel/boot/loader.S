@@ -1,12 +1,11 @@
 #include "kernel/config/boot.h"
-#include "kernel/config/memory.h"
 #include "kernel/boot.h"
-#include "kernel/info.h"
+#include "kernel/config/memory.h"
+#include "kernel/memory/memory.h"
 #include "kernel/memory/gdt.h"
+#include "kernel/memory/e820.h"
+#include "kernel/info.h"
 #include "kernel/device/disk.h"
-
-#define E820MAGIC 0x534d4150
-#define E820FUNC 0xe820
 
 .code16
 .section ".ldrtext", "ax"
@@ -107,7 +106,7 @@ _prot_start:
   call _prot_load_kernel
 
   // get real addr of kernel entry (because page table is not set up yet)
-  call _start - MEM_KERNEL_VSTART
+  call MEM_KERNEL_PADDR(_start)
 
 _prot_error_hlt:
   hlt

@@ -3,7 +3,7 @@
 #define MEM_BOOT_GDT_SIZE 3
 #define MEM_GDT_SIZE 8
 
-#define MEM_E820_SIZE 128
+#define MEM_E820_SIZE 64
 
 #define MEM_PAGE_SIZE 0x1000
 

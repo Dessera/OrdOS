@@ -51,10 +51,13 @@
 #define GDT_UCODE_SELECTOR GDT_GET_SELECTOR(GDT_UCODE_INDEX, 3)
 #define GDT_UDATA_SELECTOR GDT_GET_SELECTOR(GDT_UDATA_INDEX, 3)
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
 #include "lib/types.h"
 
+/**
+ * @brief GDT descriptor type
+ */
 struct gdt_desc
 {
   u16 limit_l16;
@@ -63,12 +66,6 @@ struct gdt_desc
   u8 attr;
   u8 attr_limit_h4;
   u8 base_h8;
-};
-
-struct gdt_ptr
-{
-  u16 limit;
-  u32 base;
 };
 
 extern struct gdt_desc gdt[MEM_GDT_SIZE];
@@ -104,6 +101,6 @@ extern struct gdt_desc gdt[MEM_GDT_SIZE];
   GDT_DESC(0x07, 0xb8000 + MEM_KERNEL_VSTART, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 
 #define GDT_GET_PTR(size, addr)                                                \
-  ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(u32)(addr) << 16))
+  ((sizeof(struct gdt_desc) * (size) - 1) | ((u64)(uintptr_t)(addr) << 16))
 
 #endif

@@ -13,6 +13,9 @@
 static interrupt_handler_t __interrupt_handlers[INTR_IDT_SIZE] = { 0 };
 
 void
+intr_common_handler(u32 irq);
+
+void
 intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
 {
   KASSERT(interrupt_number < INTR_IDT_SIZE,
@@ -40,8 +43,7 @@ init_intr(void)
   init_syscall();
 
   // enable pic
-  // TODO: Should not be here because it is a device
-  init_pci();
+  init_pic();
 }
 
 bool
