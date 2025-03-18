@@ -45,6 +45,16 @@ typedef i32 intptr_t;
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
+/**
+ * @brief Macro to declare a function with its prototype (some function should
+ * not expose to other files but only used in assembler files, use this to
+ * simplify the declaration)
+ *
+ */
+#define DECLARE_WITH_PROTOTYPE(ret, name, ...)                                 \
+  ret name(__VA_ARGS__);                                                       \
+  ret name(__VA_ARGS__)
+
 void
 itoa(char* buffer, i32 value, u8 base);
 

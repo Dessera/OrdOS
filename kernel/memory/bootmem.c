@@ -1,5 +1,6 @@
 #include "kernel/memory/bootmem.h"
 #include "kernel/assert.h"
+#include "kernel/config/boot.h"
 #include "kernel/config/memory.h"
 #include "kernel/log.h"
 #include "kernel/memory/e820.h"
@@ -49,8 +50,8 @@ bootmem_get_all_pages(void)
 void
 bootmem_pre_init_pages(struct page* pages, size_t page_cnt)
 {
-  uintptr_t bootmem_used = __free_mem;
-  for (uintptr_t addr = 0; addr < bootmem_used; addr += MEM_PAGE_SIZE) {
+  for (uintptr_t addr = BOOT_KERNEL_START; addr < __free_mem;
+       addr += MEM_PAGE_SIZE) {
     size_t pg_idx = addr / MEM_PAGE_SIZE;
     if (pg_idx >= page_cnt) {
       break;

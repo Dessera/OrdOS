@@ -44,6 +44,7 @@ init_exception(void)
 {
   for (int i = 0; i < INTR_RESERVE_SIZE; i++) {
     intr_register_handler(i, __exception_handler);
-    KTRACE("register exception handler for %s", __exception_label[i]);
   }
+
+  KDEBUG("exceptions: %u", INTR_RESERVE_SIZE);
 }

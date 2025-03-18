@@ -126,4 +126,6 @@ init_page(void)
 
   // page table without top mem map
   __init_post_page();
+
+  KDEBUG("page directory: %p", __kernel_pde);
 }

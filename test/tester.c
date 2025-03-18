@@ -11,7 +11,7 @@ ktester(void);
 static void
 kinit(void)
 {
-  init_vga();
+  // init_vga();
 }
 
 void

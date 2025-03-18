@@ -25,6 +25,7 @@
 
 #define PAGE_PDE_INDEX(addr) (((addr) & PAGE_PDE_MASK) >> 22)
 #define PAGE_PTE_INDEX(addr) (((addr) & PAGE_PTE_MASK) >> 12)
+#define PAGE_INDEX(addr) ((addr) >> 12)
 
 #define PAGE_PDE_KERNEL_OFFSET PAGE_PDE_INDEX(MEM_KERNEL_VSTART)
 

@@ -35,13 +35,13 @@
 #define MEM_GET_WITH_KERNEL_NVSTART(item)                                      \
   MEM_GET_WITH_OFFSET(item, -MEM_KERNEL_VSTART)
 
+#define MEM_ZONE_SIZE 3
+
 #define MEM_TYPE_HIGH_START 0x30000000
 #define MEM_TYPE_NORMAL_START 0x01000000
 #define MEM_TYPE_DMA_START 0x00000000
 
 #ifndef __ASSEMBLER__
-
-#define MEM_ZONE_SIZE 3
 
 /**
  * @brief Memory zone type

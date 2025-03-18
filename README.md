@@ -21,8 +21,8 @@ Build commands:
 make all          # Build all
 make clean        # Clean all
 make rebuild      # Clean and build all
-make qemu         # Build and run qemu
-make qemu DEBUG=  # Build and run qemu with no debug flags (-s -S)
+make qemu         # Run qemu
+make qemu_debug   # Run qemu with debug flags
 ```
 
 Testers:

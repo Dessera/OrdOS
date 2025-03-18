@@ -13,22 +13,6 @@
 static interrupt_handler_t __interrupt_handlers[INTR_IDT_SIZE] = { 0 };
 
 void
-intr_common_handler(u32 irq);
-
-void
-intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
-{
-  KASSERT(interrupt_number < INTR_IDT_SIZE,
-          "invalid interrupt id, received %x but max is %x",
-          interrupt_number,
-          INTR_IDT_SIZE);
-  if (__interrupt_handlers[interrupt_number] != NULL) {
-    KWARNING("overwriting existing interrupt handler at %x", interrupt_number);
-  }
-  __interrupt_handlers[interrupt_number] = handler;
-}
-
-void
 init_intr(void)
 {
   KINFO("initializing interrupt subsystem");
@@ -44,6 +28,19 @@ init_intr(void)
 
   // enable pic
   init_pic();
+}
+
+void
+intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
+{
+  KASSERT(interrupt_number < INTR_IDT_SIZE,
+          "invalid interrupt id, received %x but max is %x",
+          interrupt_number,
+          INTR_IDT_SIZE);
+  if (__interrupt_handlers[interrupt_number] != NULL) {
+    KWARNING("overwriting existing interrupt handler at %x", interrupt_number);
+  }
+  __interrupt_handlers[interrupt_number] = handler;
 }
 
 bool
@@ -66,8 +63,7 @@ intr_set_status(bool status)
   return old_status;
 }
 
-void
-intr_common_handler(u32 irq)
+DECLARE_WITH_PROTOTYPE(void, intr_common_handler, u32 irq)
 {
   KASSERT(irq < INTR_IDT_SIZE,
           "invalid interrupt id, received %x but max is %x",

@@ -12,13 +12,13 @@ struct idt_desc
   u8 nargs;
   u8 attr;
   u16 offs_hb;
-} __attribute((packed));
+} __attribute__((packed));
 
 extern void* _asm_intr_vecs[INTR_IDT_SIZE];
 
-static struct idt_desc idt[INTR_IDT_SIZE];
+static struct idt_desc __idt[INTR_IDT_SIZE];
 
-static void
+static FORCE_INLINE void
 __idt_desc_init(struct idt_desc* idt_desc, u16 sel, u32 offs, u8 attr)
 {
   idt_desc->offs_hb = (offs >> 16) & 0xffff;
@@ -33,20 +33,20 @@ init_idt(void)
 {
   // other interrupts
   for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
-    __idt_desc_init(&idt[i],
+    __idt_desc_init(&__idt[i],
                     GDT_KCODE_SELECTOR,
                     (u32)_asm_intr_vecs[i],
                     IDT_DESC_ATTR(1, IDT_DPL_KERNEL, IDT_TYPE_INTR));
   }
 
   // syscall
-  __idt_desc_init(&idt[0x80],
+  __idt_desc_init(&__idt[0x80],
                   GDT_KCODE_SELECTOR,
                   (u32)_asm_intr_vecs[0x80],
                   IDT_DESC_ATTR(1, IDT_DPL_USER, IDT_TYPE_INTR));
 
-  u64 idt_ptr = IDT_GET_PTR(idt);
+  u64 idt_ptr = IDT_GET_PTR(__idt);
   lidt(idt_ptr);
 
-  KDEBUG("idt: %p", idt);
+  KDEBUG("idt: %p", __idt);
 }
