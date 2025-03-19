@@ -83,28 +83,24 @@ init_buddy(void)
               PAGE_INDEX(MEM_TYPE_DMA_START),
               PAGE_INDEX(MEM_TYPE_NORMAL_START) - 1);
   KDEBUG("buddy dma: %uMB, %u pages",
-         __zones[MEM_ZONE_DMA].pg_cnt * MEMKB(4) / MEMMB(1),
-         __zones[MEM_ZONE_DMA].pg_cnt);
+         __zones[MEM_ZONE_DMA].pg_free * MEMKB(4) / MEMMB(1),
+         __zones[MEM_ZONE_DMA].pg_free);
 
   __init_zone(&__zones[MEM_ZONE_NORMAL],
               MEM_ZONE_NORMAL,
               PAGE_INDEX(MEM_TYPE_NORMAL_START),
               PAGE_INDEX(MIN(MEM_TYPE_HIGH_START, mem_size)) - 1);
   KDEBUG("buddy normal: %uMB, %u pages",
-         __zones[MEM_ZONE_NORMAL].pg_cnt * MEMKB(4) / MEMMB(1),
-         __zones[MEM_ZONE_NORMAL].pg_cnt);
+         __zones[MEM_ZONE_NORMAL].pg_free * MEMKB(4) / MEMMB(1),
+         __zones[MEM_ZONE_NORMAL].pg_free);
 
   __init_zone(&__zones[MEM_ZONE_HIGH],
               MEM_ZONE_HIGH,
               PAGE_INDEX(MEM_TYPE_HIGH_START),
               PAGE_INDEX(mem_size) - 1);
   KDEBUG("buddy high: %uMB, %u pages",
-         __zones[MEM_ZONE_HIGH].pg_cnt * MEMKB(4) / MEMMB(1),
-         __zones[MEM_ZONE_HIGH].pg_cnt);
-
-  AUTO p = buddy_alloc_page(MEM_ZONE_NORMAL, 5);
-  KINFO("buddy system initialized, first page: %u", page_get_index(p));
-  buddy_free_page(p, 5);
+         __zones[MEM_ZONE_HIGH].pg_free * MEMKB(4) / MEMMB(1),
+         __zones[MEM_ZONE_HIGH].pg_free);
 }
 
 void
@@ -134,15 +130,9 @@ buddy_free_page(struct page* page, u8 order)
     AUTO buddy_idx = BUDDY_GET_BUDDY_INDEX(idx, order);
     AUTO buddy = page_get(buddy_idx);
 
-    if (!buddy->buddy) {
+    if (!buddy->buddy || buddy->order != order) {
       break;
     }
-
-    // if mismatched order, assume that buddy system is broken
-    KASSERT(buddy->order == order,
-            "broken buddy system, buddy %p is not of order %u",
-            page_get_phys(buddy),
-            order);
 
     __area_delete_page(area, buddy);
 
