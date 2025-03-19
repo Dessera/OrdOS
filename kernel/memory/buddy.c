@@ -101,6 +101,10 @@ init_buddy(void)
   KDEBUG("buddy high: %uMB, %u pages",
          __zones[MEM_ZONE_HIGH].pg_cnt * MEMKB(4) / MEMMB(1),
          __zones[MEM_ZONE_HIGH].pg_cnt);
+
+  AUTO p = buddy_alloc_page(MEM_ZONE_NORMAL, 5);
+  KINFO("buddy system initialized, first page: %u", page_get_index(p));
+  buddy_free_page(p, 5);
 }
 
 void
@@ -125,8 +129,8 @@ buddy_free_page(struct page* page, u8 order)
   AUTO zone = &__zones[page->zone_type];
   zone->pg_free += BUDDY_ORDER_PAGES(order);
 
+  AUTO area = &zone->areas[order];
   while (order < MEM_BUDDY_MAX_ORDER) {
-    AUTO area = &zone->areas[order];
     AUTO buddy_idx = BUDDY_GET_BUDDY_INDEX(idx, order);
     AUTO buddy = page_get(buddy_idx);
 
@@ -144,9 +148,56 @@ buddy_free_page(struct page* page, u8 order)
 
     idx = BUDDY_GET_ASCEND_INDEX(idx, order);
     order++;
+    area = &zone->areas[order];
   }
 
+  page = page_get(idx);
   page->order = order;
-  AUTO area = &zone->areas[order];
   __area_add_page(area, page);
+}
+
+struct page*
+buddy_alloc_page(enum mem_zone_type zone_type, u8 order)
+{
+  KASSERT(order <= MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
+  AUTO zone = &__zones[zone_type];
+
+  struct mem_area* area = &zone->areas[order];
+  size_t alloc_order = order;
+  while (alloc_order <= MEM_BUDDY_MAX_ORDER) {
+    area = &zone->areas[alloc_order];
+    if (area->blocks_free > 0) {
+      break;
+    }
+
+    alloc_order++;
+  }
+
+  if (alloc_order > MEM_BUDDY_MAX_ORDER) {
+    return NULL;
+  }
+
+  AUTO page = LIST_ENTRY(area->mem_blocks.next, struct page, node);
+  KASSERT(page->buddy,
+          "broken buddy system, page %p is not part of a block",
+          page_get_phys(page));
+
+  __area_delete_page(area, page);
+
+  while (alloc_order > order) {
+    alloc_order--;
+    area = &zone->areas[alloc_order];
+
+    __area_add_page(area, page);
+
+    page->order = alloc_order;
+    page += 1 << alloc_order;
+  }
+
+  zone->pg_free -= BUDDY_ORDER_PAGES(order);
+
+  KASSERT(!page->buddy,
+          "broken buddy system, allocated page %p is still part of a block",
+          page_get_phys(page));
+  return page;
 }
