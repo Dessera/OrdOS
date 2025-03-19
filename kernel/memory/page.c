@@ -3,6 +3,7 @@
 #include "kernel/config/memory.h"
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
+#include "kernel/memory/e820.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/compiler.h"
@@ -14,6 +15,7 @@
 extern struct gdt_ptr _asm_gdt_ptr;
 
 static u32* __kernel_pde;
+static struct page* __pages;
 
 static void
 __link_top_kernel_mem(void)
@@ -54,7 +56,7 @@ __init_early_page(void)
   __kernel_pde = bootmem_alloc(MEM_PAGE_SIZE);
   kmemset(__kernel_pde, 0, MEM_PAGE_SIZE);
 
-  AUTO all_pages = bootmem_get_all_pages();
+  AUTO all_pages = e820_get_pages_cnt();
   AUTO kernel_pde_cnt =
     MIN(DIV_UP(all_pages, PAGE_ENTRIES), PAGE_PDE_INDEX(MEM_TYPE_HIGH_START));
 
@@ -76,9 +78,6 @@ __init_early_page(void)
 
   __link_top_kernel_mem();
   lcr3((void*)MEM_KERNEL_PADDR(__kernel_pde));
-
-  // KDEBUG("kernel page directory: %p", __kernel_pde);
-  // KDEBUG("kernel pde entries: %u", kernel_pde_cnt);
 }
 
 static void
@@ -91,12 +90,9 @@ __init_post_page(void)
 static void
 __init_post_gdt(void)
 {
-  struct gdt_desc gdt_kcode = GDT_DESC_KCODE();
-  struct gdt_desc gdt_kdata = GDT_DESC_KDATA();
-  struct gdt_desc gdt_video = GDT_DESC_VIDEO();
-  gdt[GDT_KCODE_INDEX] = gdt_kcode;
-  gdt[GDT_KDATA_INDEX] = gdt_kdata;
-  gdt[GDT_VIDEO_INDEX] = gdt_video;
+  gdt[GDT_KCODE_INDEX] = GDT_DESC_KCODE();
+  gdt[GDT_KDATA_INDEX] = GDT_DESC_KDATA();
+  gdt[GDT_VIDEO_INDEX] = GDT_DESC_VIDEO();
 
   u64 gdt_ptr = GDT_GET_PTR(MEM_GDT_SIZE, gdt);
   __asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
@@ -109,6 +105,20 @@ __init_post_gdt(void)
                        "1:"
                        :
                        : "a"(GDT_KDATA_SELECTOR), "i"(GDT_KCODE_SELECTOR));
+}
+
+static void
+__init_pmem_pool(void)
+{
+  uintptr_t mem_size = e820_get_memory_size();
+  size_t mem_pages = DIV_DOWN(mem_size, MEM_PAGE_SIZE);
+  __pages = bootmem_alloc((sizeof(struct page) * mem_pages));
+  kmemset(__pages, 0, sizeof(struct page) * mem_pages);
+
+  e820_pre_init_pages(__pages, mem_pages);
+  bootmem_pre_init_pages(__pages, mem_pages);
+
+  KDEBUG("physical memory: %uMB, %u pages", mem_size / MEMMB(1), mem_pages);
 }
 
 void
@@ -127,5 +137,24 @@ init_page(void)
   // page table without top mem map
   __init_post_page();
 
-  KDEBUG("page directory: %p", __kernel_pde);
+  // init pmem pool
+  __init_pmem_pool();
+}
+
+size_t
+page_get_index(struct page* page)
+{
+  return page - __pages;
+}
+
+struct page*
+page_get(size_t index)
+{
+  return &__pages[index];
+}
+
+uintptr_t
+page_get_phys(struct page* page)
+{
+  return page_get_index(page) * MEM_PAGE_SIZE;
 }

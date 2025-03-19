@@ -71,12 +71,14 @@ struct gdt_desc
 extern struct gdt_desc gdt[MEM_GDT_SIZE];
 
 #define GDT_DESC(limit, base, p, dpl, s, x, r, c, a, g, d, l, avl)             \
-  { GDT_LIMIT_L16(limit),                                                      \
-    GDT_BASE_L16(base),                                                        \
-    GDT_BASE_M8(base),                                                         \
-    GDT_P(p) + GDT_DPL(dpl) + GDT_S(s) + GDT_TYPE(x, r, c, a),                 \
-    (u8)(GDT_G(g) + GDT_D(d) + GDT_L(l) + GDT_AVL(avl) + GDT_LIMIT_H4(limit)), \
-    GDT_BASE_H8(base) }
+  (struct gdt_desc)                                                            \
+  {                                                                            \
+    GDT_LIMIT_L16(limit), GDT_BASE_L16(base), GDT_BASE_M8(base),               \
+      GDT_P(p) + GDT_DPL(dpl) + GDT_S(s) + GDT_TYPE(x, r, c, a),               \
+      (u8)(GDT_G(g) + GDT_D(d) + GDT_L(l) + GDT_AVL(avl) +                     \
+           GDT_LIMIT_H4(limit)),                                               \
+      GDT_BASE_H8(base)                                                        \
+  }
 
 #define GDT_DESC_NULL() GDT_DESC(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 

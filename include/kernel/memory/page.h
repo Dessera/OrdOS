@@ -1,16 +1,13 @@
 #pragma once
 
 #include "kernel/config/memory.h"
+#include "kernel/memory/memory.h"
+#include "kernel/utils/list_head.h"
+#include "lib/types.h"
 
 #define PAGE_DESC_SIZE 4
 
 #define PAGE_ENTRIES (MEM_PAGE_SIZE / PAGE_DESC_SIZE)
-
-#define PAGE_SELECTOR_MASK 0xfffff000
-
-#define PAGE_PDE_MASK 0xffc00000
-#define PAGE_PTE_MASK 0x003ff000
-#define PAGE_ADDR_MASK 0x00000fff
 
 #define PAGE_PDE_P(sign) (sign)
 #define PAGE_PDE_RW(sign) ((sign) << 1)
@@ -23,14 +20,54 @@
   ((base) | PAGE_PDE_P(p) | PAGE_PDE_RW(w) | PAGE_PDE_US(u))
 #define PAGE_PTE_DESC(base, p, w, u) PAGE_PDE_DESC(base, p, w, u)
 
-#define PAGE_PDE_INDEX(addr) (((addr) & PAGE_PDE_MASK) >> 22)
-#define PAGE_PTE_INDEX(addr) (((addr) & PAGE_PTE_MASK) >> 12)
+#define PAGE_PDE_INDEX(addr) ((addr) >> 22)
 #define PAGE_INDEX(addr) ((addr) >> 12)
 
 #define PAGE_PDE_KERNEL_OFFSET PAGE_PDE_INDEX(MEM_KERNEL_VSTART)
 
 /**
- * @brief Initialize the page table and page directory
+ * @brief Physical memory page abstraction
+ */
+struct page
+{
+  size_t ref_cnt;
+  u8 order;
+  enum mem_zone_type zone_type;
+
+  struct list_head node;
+  bool reserved;
+  bool buddy;
+};
+
+/**
+ * @brief Initialize the virtual address mapping and physical memory management
  */
 void
 init_page(void);
+
+/**
+ * @brief Get the index of the page
+ *
+ * @param page page to get the index of
+ * @return size_t index of the page
+ */
+size_t
+page_get_index(struct page* page);
+
+/**
+ * @brief Get the page from the index
+ *
+ * @param index index of the page
+ * @return struct page* page
+ */
+struct page*
+page_get(size_t index);
+
+/**
+ * @brief Get the physical address of the page
+ *
+ * @param page page to get the physical address of
+ * @return uintptr_t physical address of the page
+ */
+uintptr_t
+page_get_phys(struct page* page);

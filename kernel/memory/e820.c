@@ -6,6 +6,8 @@
 extern u16 _asm_mem_nr;
 extern struct e820_entry _asm_mem_zone;
 
+static uintptr_t __mem_size = 0;
+
 const char*
 e820_type_to_string(enum e820_type type)
 {
@@ -42,6 +44,10 @@ e820_get_entries_cnt(void)
 uintptr_t
 e820_get_memory_size(void)
 {
+  // cache
+  if (__mem_size != 0) {
+    return __mem_size;
+  }
   struct e820_entry* mem_entries = e820_get_entries();
   size_t mem_cnt = e820_get_entries_cnt();
 
@@ -57,7 +63,14 @@ e820_get_memory_size(void)
     }
   }
 
+  __mem_size = mem_end;
   return mem_end;
+}
+
+size_t
+e820_get_pages_cnt(void)
+{
+  return e820_get_memory_size() / MEM_PAGE_SIZE;
 }
 
 void

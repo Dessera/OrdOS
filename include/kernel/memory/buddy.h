@@ -1,18 +1,13 @@
 #pragma once
 
 #include "kernel/memory/memory.h"
-#include "kernel/utils/list_head.h"
+#include "kernel/memory/page.h"
 #include "lib/types.h"
 
-struct page
-{
-  size_t ref_cnt;
-  u8 order;
-  struct list_head node;
-  enum mem_zone_type zone_type;
-  bool reserved;
-  bool buddy;
-};
+#define BUDDY_ALIGN_CHECK(idx, order) (!((idx) & ((1 << (order)) - 1)))
+#define BUDDY_ORDER_PAGES(order) (1 << (order))
+#define BUDDY_GET_BUDDY_INDEX(idx, order) ((idx) ^ (1 << (order)))
+#define BUDDY_GET_ASCEND_INDEX(idx, order) ((idx) & ~(1 << (order)))
 
 void
 init_buddy(void);
@@ -22,9 +17,3 @@ buddy_free_page(struct page* page, u8 order);
 
 struct page*
 buddy_alloc_page(enum mem_zone_type zone_type, u8 order);
-
-size_t
-buddy_get_page_index(struct page* page);
-
-uintptr_t
-buddy_get_page_paddr(struct page* page);

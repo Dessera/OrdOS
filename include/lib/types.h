@@ -55,6 +55,8 @@ typedef i32 intptr_t;
   ret name(__VA_ARGS__);                                                       \
   ret name(__VA_ARGS__)
 
+#define IMMEDIATE(type, value) ((type)(value))
+
 void
 itoa(char* buffer, i32 value, u8 base);
 

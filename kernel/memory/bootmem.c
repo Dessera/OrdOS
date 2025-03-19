@@ -22,8 +22,7 @@ init_bootmem(void)
   __free_mem = mem_start;
   __mem_end = mem_end;
 
-  KDEBUG("bootmem start: %x", mem_start);
-  KDEBUG("bootmem end: %x", mem_end);
+  KDEBUG("bootmem: %x - %x", mem_start, mem_end);
 }
 
 void*
@@ -39,12 +38,6 @@ bootmem_alloc(size_t size)
   }
 
   return (void*)MEM_KERNEL_VADDR(base);
-}
-
-size_t
-bootmem_get_all_pages(void)
-{
-  return __mem_end / MEM_PAGE_SIZE;
 }
 
 void
