@@ -130,6 +130,7 @@ buddy_free_page(struct page* page, u8 order)
     AUTO buddy_idx = BUDDY_GET_BUDDY_INDEX(idx, order);
     AUTO buddy = page_get(buddy_idx);
 
+    // another block is not free or another block is not of the same order
     if (!buddy->buddy || buddy->order != order) {
       break;
     }
@@ -141,8 +142,10 @@ buddy_free_page(struct page* page, u8 order)
     area = &zone->areas[order];
   }
 
+  // final page
   page = page_get(idx);
   page->order = order;
+
   __area_add_page(area, page);
 }
 
@@ -150,10 +153,11 @@ struct page*
 buddy_alloc_page(enum mem_zone_type zone_type, u8 order)
 {
   KASSERT(order <= MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
+
   AUTO zone = &__zones[zone_type];
 
-  struct mem_area* area = &zone->areas[order];
   size_t alloc_order = order;
+  struct mem_area* area;
   while (alloc_order <= MEM_BUDDY_MAX_ORDER) {
     area = &zone->areas[alloc_order];
     if (area->blocks_free > 0) {
