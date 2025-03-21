@@ -5,6 +5,7 @@
 #include "kernel/memory/memory.h"
 #include "kernel/utils/string.h"
 #include "lib/common.h"
+#include "lib/types.h"
 
 static struct page* __pages;
 
@@ -22,37 +23,37 @@ init_page(void)
   KDEBUG("physical memory: %uMB, %u pages", mem_size / MEMMB(1), mem_pages);
 }
 
-size_t
+FORCE_INLINE size_t
 page_get_index(struct page* page)
 {
   return page - __pages;
 }
 
-struct page*
+FORCE_INLINE struct page*
 page_get(size_t index)
 {
   return &__pages[index];
 }
 
-uintptr_t
+FORCE_INLINE uintptr_t
 page_get_phys(struct page* page)
 {
   return page_get_index(page) * MEM_PAGE_SIZE;
 }
 
-struct page*
+FORCE_INLINE struct page*
 page_get_by_phys(uintptr_t phys)
 {
   return page_get(phys / MEM_PAGE_SIZE);
 }
 
-uintptr_t
+FORCE_INLINE uintptr_t
 page_get_virt(struct page* page)
 {
   return MEM_KERNEL_VADDR(page_get_phys(page));
 }
 
-struct page*
+FORCE_INLINE struct page*
 page_get_by_virt(uintptr_t virt)
 {
   return page_get_by_phys(MEM_KERNEL_PADDR(virt));

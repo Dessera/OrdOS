@@ -3,9 +3,7 @@
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/print.h"
-
-void
-kmain(void);
+#include "lib/types.h"
 
 static void
 kinit(void)
@@ -18,8 +16,7 @@ kinit(void)
   init_memory();
 }
 
-void
-kmain(void)
+DECLARE_WITH_PROTOTYPE(void, kmain, void)
 {
   kinit();
 

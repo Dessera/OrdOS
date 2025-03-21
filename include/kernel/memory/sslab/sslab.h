@@ -1,6 +1,5 @@
 #pragma once
 
-#include "kernel/config/memory.h"
 #include "kernel/utils/list_head.h"
 #include "lib/types.h"
 
@@ -31,19 +30,8 @@ sslab_global_alloc(size_t size);
 void
 sslab_global_free(void* obj);
 
-static FORCE_INLINE size_t
-sslab_get_size_by_order(u8 order)
-{
-  return 1 << order;
-}
+size_t
+sslab_order_to_size(u8 order);
 
-static FORCE_INLINE u8
-sslab_get_order_by_size(size_t size)
-{
-  u8 order = 0;
-  while (size >>= 1) {
-    order++;
-  }
-
-  return order;
-}
+u8
+sslab_size_to_order(size_t size);

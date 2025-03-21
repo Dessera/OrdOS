@@ -4,6 +4,8 @@
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/page.h"
+#include "kernel/memory/sslab/sslab.h"
+#include "lib/types.h"
 
 void
 init_memory(void)
@@ -18,6 +20,9 @@ init_memory(void)
 
   // initialize buddy
   init_buddy();
+
+  // initialize sslab
+  init_sslab();
 }
 
 char*
@@ -33,4 +38,16 @@ mem_type_to_string(enum mem_type type)
     default:
       return "UNKNOWN";
   }
+}
+
+FORCE_INLINE void*
+kmalloc(size_t size)
+{
+  return sslab_global_alloc(size);
+}
+
+FORCE_INLINE void
+kfree(void* obj)
+{
+  return sslab_global_free(obj);
 }

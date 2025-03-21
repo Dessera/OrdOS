@@ -111,9 +111,7 @@ init_vpage(void)
   // page table with top mem map
   __init_early_page();
 
-  u32 cr0 = rcr0();
-  cr0 |= 0x80000000;
-  lcr0(cr0);
+  lcr0(rcr0() | 0x80000000);
 
   // reset gdt offset
   __init_post_gdt();

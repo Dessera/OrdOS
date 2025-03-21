@@ -66,4 +66,21 @@ init_memory(void);
 char*
 mem_type_to_string(enum mem_type type);
 
+/**
+ * @brief Allocate a block of memory (sslab wrapper)
+ *
+ * @param size Size of the block to allocate (pass 2 ^ n for best performance)
+ * @return void* Pointer to the block allocated
+ */
+void*
+kmalloc(size_t size);
+
+/**
+ * @brief Free a block of memory (sslab wrapper)
+ *
+ * @param obj Pointer to the block to free
+ */
+void
+kfree(void* obj);
+
 #endif

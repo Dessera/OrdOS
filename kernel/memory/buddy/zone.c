@@ -5,6 +5,7 @@
 #include "kernel/memory/memory.h"
 #include "kernel/memory/page.h"
 #include "lib/common.h"
+#include "lib/types.h"
 
 struct mem_zone __zones[MEM_ZONE_SIZE];
 
@@ -48,7 +49,7 @@ init_zone(void)
               MEM_ZONE_DMA,
               PAGE_INDEX(MEM_TYPE_DMA_START),
               PAGE_INDEX(MEM_TYPE_NORMAL_START) - 1);
-  KDEBUG("buddy dma: %uMB, %u pages",
+  KDEBUG("zone dma: %uMB, %u pages",
          __zones[MEM_ZONE_DMA].pg_cnt * MEMKB(4) / MEMMB(1),
          __zones[MEM_ZONE_DMA].pg_cnt);
 
@@ -56,7 +57,7 @@ init_zone(void)
               MEM_ZONE_NORMAL,
               PAGE_INDEX(MEM_TYPE_NORMAL_START),
               PAGE_INDEX(MIN(MEM_TYPE_HIGH_START, mem_size)) - 1);
-  KDEBUG("buddy normal: %uMB, %u pages",
+  KDEBUG("zone normal: %uMB, %u pages",
          __zones[MEM_ZONE_NORMAL].pg_cnt * MEMKB(4) / MEMMB(1),
          __zones[MEM_ZONE_NORMAL].pg_cnt);
 
@@ -64,18 +65,18 @@ init_zone(void)
               MEM_ZONE_HIGH,
               PAGE_INDEX(MEM_TYPE_HIGH_START),
               PAGE_INDEX(mem_size) - 1);
-  KDEBUG("buddy high: %uMB, %u pages",
+  KDEBUG("zone high: %uMB, %u pages",
          __zones[MEM_ZONE_HIGH].pg_cnt * MEMKB(4) / MEMMB(1),
          __zones[MEM_ZONE_HIGH].pg_cnt);
 }
 
-struct mem_zone*
+FORCE_INLINE struct mem_zone*
 zone_get(enum mem_type type)
 {
   return &__zones[type];
 }
 
-enum mem_type
+FORCE_INLINE enum mem_type
 zone_get_type(struct mem_zone* zone)
 {
   return zone - __zones;

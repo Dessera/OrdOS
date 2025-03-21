@@ -1,6 +1,7 @@
 #include "kernel/memory/sslab/cache.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
+#include "kernel/log.h"
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
@@ -10,8 +11,13 @@
 struct sslab_cache*
 sslab_cache_create(size_t obj_size)
 {
-  struct sslab_cache* cache =
-    (void*)page_get_virt(buddy_alloc_page(MEM_ZONE_NORMAL, 0));
+  AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
+  if (page == NULL) {
+    KWARNING("failed to allocate page for sslab cache");
+    return NULL;
+  }
+
+  struct sslab_cache* cache = (void*)page_get_virt(page);
 
   // get alignment of obj_size and sizeof(struct sslab_cache)
   cache->object = ALIGN_UP(sizeof(struct sslab_cache), obj_size);
@@ -60,4 +66,17 @@ void
 sslab_cache_destroy(struct sslab_cache* cache)
 {
   buddy_free_page(page_get_by_virt((uintptr_t)cache), 0);
+}
+
+FORCE_INLINE bool
+sslab_object_in_cache(struct sslab_object* obj, struct sslab_cache* cache)
+{
+  return ((void*)obj - (void*)cache) < MEM_PAGE_SIZE;
+}
+
+FORCE_INLINE struct sslab_cache*
+sslab_object_to_cache(struct sslab_object* obj)
+{
+  // sslab cache is located at the beginning of the page
+  return (struct sslab_cache*)((uintptr_t)obj & ~(MEM_PAGE_SIZE - 1));
 }

@@ -10,7 +10,7 @@ void
 init_sslab(void)
 {
   for (int i = 0; i <= MEM_SSLAB_MAX_ORDER; i++) {
-    sslab_init(&__sslab[i], sslab_get_size_by_order(i));
+    sslab_init(&__sslab[i], sslab_order_to_size(i));
   }
 }
 
@@ -74,10 +74,8 @@ sslab_free(struct sslab* sslab, void* obj)
 void*
 sslab_global_alloc(size_t size)
 {
-  AUTO order = sslab_get_order_by_size(size);
-  if (order > MEM_SSLAB_MAX_ORDER) {
-    return NULL;
-  }
+  AUTO order = sslab_size_to_order(size);
+  KASSERT(order <= MEM_SSLAB_MAX_ORDER, "too large object to alloc");
 
   return sslab_alloc(&__sslab[order]);
 }
@@ -85,9 +83,27 @@ sslab_global_alloc(size_t size)
 void
 sslab_global_free(void* obj)
 {
-  AUTO cache = sslab_object_cache(obj);
-  AUTO obj_size = cache->obj_size;
-  AUTO order = sslab_get_order_by_size(obj_size);
+  AUTO cache = sslab_object_to_cache(obj);
+
+  AUTO order = sslab_size_to_order(cache->obj_size);
+  KASSERT(order <= MEM_SSLAB_MAX_ORDER, "too large object to free");
 
   sslab_free(&__sslab[order], obj);
+}
+
+FORCE_INLINE size_t
+sslab_order_to_size(u8 order)
+{
+  return 1 << order;
+}
+
+FORCE_INLINE u8
+sslab_size_to_order(size_t size)
+{
+  u8 order = 0;
+  while (size >>= 1) {
+    order++;
+  }
+
+  return order;
 }
