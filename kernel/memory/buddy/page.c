@@ -2,6 +2,7 @@
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/e820.h"
+#include "kernel/memory/memory.h"
 #include "kernel/utils/string.h"
 #include "lib/common.h"
 
@@ -37,4 +38,10 @@ uintptr_t
 page_get_phys(struct page* page)
 {
   return page_get_index(page) * MEM_PAGE_SIZE;
+}
+
+uintptr_t
+page_get_virt(struct page* page)
+{
+  return MEM_KERNEL_VADDR(page_get_phys(page));
 }

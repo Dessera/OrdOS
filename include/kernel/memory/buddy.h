@@ -15,4 +15,4 @@ void
 buddy_free_page(struct page* page, u8 order);
 
 struct page*
-buddy_alloc_page(enum mem_zone_type zone_type, u8 order);
+buddy_alloc_page(enum mem_type zone_type, u8 order);

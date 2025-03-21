@@ -8,7 +8,7 @@ device_targets := pci.o
 
 utils_targets := print.o string.o compiler.o list_head.o
 
-memory_targets := memory.o gdt.o e820.o bootmem.o page.o buddy.o
+include kernel/memory/Makefile
 
 kernel_targets := entry.o main.o
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/memory/buddy/zone.h"
+#include "kernel/memory/memory.h"
 #include "kernel/utils/list_head.h"
 #include "lib/types.h"
 
@@ -10,7 +10,7 @@
 struct page
 {
   u8 order;
-  enum mem_zone_type zone_type;
+  enum mem_type zone_type;
 
   struct list_head node;
   bool reserved;
@@ -46,3 +46,12 @@ page_get(size_t index);
  */
 uintptr_t
 page_get_phys(struct page* page);
+
+/**
+ * @brief Get the virtual address of the page (kernel only)
+ *
+ * @param page page to get the virtual address of
+ * @return uintptr_t virtual address of the page
+ */
+uintptr_t
+page_get_virt(struct page* page);
