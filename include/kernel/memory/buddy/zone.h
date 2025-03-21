@@ -47,6 +47,12 @@ init_zone(void);
 struct mem_zone*
 zone_get(enum mem_type type);
 
+/**
+ * @brief Get the memory type for a given zone
+ *
+ * @param zone Memory zone
+ * @return enum mem_type Memory type
+ */
 enum mem_type
 zone_get_type(struct mem_zone* zone);
 

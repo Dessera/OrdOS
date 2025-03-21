@@ -17,6 +17,9 @@ struct page
   bool buddy;
 };
 
+/**
+ * @brief Initialize the physical memory page abstraction
+ */
 void
 init_page(void);
 
