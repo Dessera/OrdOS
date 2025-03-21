@@ -1,4 +1,6 @@
 
 
-test_entries := memory/buddy.o
+test_entries := \
+	memory/buddy.o \
+	memory/sslab/cache.o
 
