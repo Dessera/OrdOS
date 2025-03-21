@@ -1,4 +1,4 @@
-#include "kernel/memory/buddy.h"
+#include "kernel/memory/buddy/buddy.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/log.h"

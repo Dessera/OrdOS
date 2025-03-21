@@ -106,7 +106,7 @@ __init_post_gdt(void)
 }
 
 void
-init_paging(void)
+init_vpage(void)
 {
   // page table with top mem map
   __init_early_page();

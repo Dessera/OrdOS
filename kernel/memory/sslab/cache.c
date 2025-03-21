@@ -1,7 +1,7 @@
 #include "kernel/memory/sslab/cache.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
-#include "kernel/memory/buddy.h"
+#include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
 #include "lib/common.h"
@@ -26,6 +26,7 @@ sslab_cache_create(size_t obj_size)
 
   cache->obj_cnt = (MEM_PAGE_SIZE - cache->object) / obj_size;
   cache->obj_free = cache->obj_cnt;
+  cache->obj_size = obj_size;
 
   return cache;
 }

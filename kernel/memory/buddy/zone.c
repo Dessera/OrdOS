@@ -1,5 +1,5 @@
 #include "kernel/memory/buddy/zone.h"
-#include "kernel/memory/buddy.h"
+#include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/e820.h"
 #include "kernel/memory/memory.h"

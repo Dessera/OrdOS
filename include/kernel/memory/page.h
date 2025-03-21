@@ -26,4 +26,4 @@
  * @brief Initialize the virtual address mapping
  */
 void
-init_paging(void);
+init_vpage(void);
