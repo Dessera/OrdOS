@@ -1,9 +1,8 @@
-#include "kernel/device/vga.h"
+#include "kernel/interrupt/interrupt.h"
+#include "kernel/log.h"
+#include "kernel/memory/memory.h"
 #include "kernel/utils/print.h"
 #include "lib/asm.h"
-
-void
-kmain(void);
 
 extern void
 ktester(void);
@@ -11,19 +10,20 @@ ktester(void);
 static void
 kinit(void)
 {
-  // init_vga();
+  init_print();
+  init_intr();
+  init_memory();
 }
 
-void
-kmain(void)
+DECLARE_WITH_PROTOTYPE(void, kmain, void)
 {
   kinit();
 
-  kputs("Running tests...\n");
+  KINFO("running tests");
 
   ktester();
 
-  kputs("All tests passed!");
+  KINFO("all tests passed");
 
   while (true) {
     hlt();

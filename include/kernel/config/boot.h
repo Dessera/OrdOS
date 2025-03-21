@@ -9,7 +9,7 @@
 #define BOOT_LDR_SIZE_INTERVAL 0x01
 
 #define BOOT_KERNEL_START 0x1000000
-#define BOOT_KERNEL_SIZE 0x25
+#define BOOT_KERNEL_SIZE 0x28
 
 // interval to control the compile size of the kernel
 #define BOOT_KERNEL_SIZE_INTERVAL 0x08

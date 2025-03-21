@@ -1,7 +1,6 @@
 #include "kernel/memory/page.h"
 #include "kernel/config/boot.h"
 #include "kernel/config/memory.h"
-#include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/e820.h"
 #include "kernel/memory/gdt.h"
@@ -15,7 +14,6 @@
 extern struct gdt_ptr _asm_gdt_ptr;
 
 static u32* __kernel_pde;
-static struct page* __pages;
 
 static void
 __link_top_kernel_mem(void)
@@ -107,22 +105,8 @@ __init_post_gdt(void)
                        : "a"(GDT_KDATA_SELECTOR), "i"(GDT_KCODE_SELECTOR));
 }
 
-static void
-__init_pmem_pool(void)
-{
-  uintptr_t mem_size = e820_get_memory_size();
-  size_t mem_pages = DIV_DOWN(mem_size, MEM_PAGE_SIZE);
-  __pages = bootmem_alloc((sizeof(struct page) * mem_pages));
-  kmemset(__pages, 0, sizeof(struct page) * mem_pages);
-
-  e820_pre_init_pages(__pages, mem_pages);
-  bootmem_pre_init_pages(__pages, mem_pages);
-
-  KDEBUG("physical memory: %uMB, %u pages", mem_size / MEMMB(1), mem_pages);
-}
-
 void
-init_page(void)
+init_paging(void)
 {
   // page table with top mem map
   __init_early_page();
@@ -136,25 +120,4 @@ init_page(void)
 
   // page table without top mem map
   __init_post_page();
-
-  // init pmem pool
-  __init_pmem_pool();
-}
-
-size_t
-page_get_index(struct page* page)
-{
-  return page - __pages;
-}
-
-struct page*
-page_get(size_t index)
-{
-  return &__pages[index];
-}
-
-uintptr_t
-page_get_phys(struct page* page)
-{
-  return page_get_index(page) * MEM_PAGE_SIZE;
 }

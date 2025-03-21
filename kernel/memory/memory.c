@@ -14,8 +14,23 @@ init_memory(void)
   init_bootmem();
 
   // initialize page table
-  init_page();
+  init_paging();
 
   // initialize buddy
   init_buddy();
+}
+
+char*
+mem_type_to_string(enum mem_type type)
+{
+  switch (type) {
+    case MEM_ZONE_DMA:
+      return "DMA";
+    case MEM_ZONE_NORMAL:
+      return "NORMAL";
+    case MEM_ZONE_HIGH:
+      return "HIGHMEM";
+    default:
+      return "UNKNOWN";
+  }
 }

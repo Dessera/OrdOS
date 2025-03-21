@@ -5,7 +5,7 @@
 
 #ifndef __ASSEMBLER__
 
-#include "kernel/memory/page.h"
+#include "kernel/memory/buddy/page.h"
 #include "lib/types.h"
 
 /**

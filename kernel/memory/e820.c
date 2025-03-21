@@ -1,5 +1,6 @@
 #include "kernel/memory/e820.h"
 #include "kernel/config/memory.h"
+#include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
 #include "lib/types.h"
 
