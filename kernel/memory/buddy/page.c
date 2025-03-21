@@ -40,8 +40,20 @@ page_get_phys(struct page* page)
   return page_get_index(page) * MEM_PAGE_SIZE;
 }
 
+struct page*
+page_get_by_phys(uintptr_t phys)
+{
+  return page_get(phys / MEM_PAGE_SIZE);
+}
+
 uintptr_t
 page_get_virt(struct page* page)
 {
   return MEM_KERNEL_VADDR(page_get_phys(page));
+}
+
+struct page*
+page_get_by_virt(uintptr_t virt)
+{
+  return page_get_by_phys(MEM_KERNEL_PADDR(virt));
 }

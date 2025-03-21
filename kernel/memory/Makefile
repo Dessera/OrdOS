@@ -6,4 +6,5 @@ memory_targets := \
 	page.o \
 	buddy.o \
 	buddy/page.o \
-	buddy/zone.o
+	buddy/zone.o \
+	sslab/cache.o

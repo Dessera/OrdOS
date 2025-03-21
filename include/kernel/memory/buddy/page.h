@@ -50,6 +50,9 @@ page_get(size_t index);
 uintptr_t
 page_get_phys(struct page* page);
 
+struct page*
+page_get_by_phys(uintptr_t phys);
+
 /**
  * @brief Get the virtual address of the page (kernel only)
  *
@@ -58,3 +61,6 @@ page_get_phys(struct page* page);
  */
 uintptr_t
 page_get_virt(struct page* page);
+
+struct page*
+page_get_by_virt(uintptr_t virt);
