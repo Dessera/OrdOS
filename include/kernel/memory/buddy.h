@@ -1,7 +1,6 @@
 #pragma once
 
-#include "kernel/memory/memory.h"
-#include "kernel/memory/page.h"
+#include "kernel/memory/buddy/page.h"
 #include "lib/types.h"
 
 #define BUDDY_ALIGN_CHECK(idx, order) (!((idx) & ((1 << (order)) - 1)))

@@ -1,4 +1,4 @@
 
 
-test_entries := 
+test_entries := memory/buddy.o
 

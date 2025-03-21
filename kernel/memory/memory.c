@@ -14,7 +14,7 @@ init_memory(void)
   init_bootmem();
 
   // initialize page table
-  init_page();
+  init_paging();
 
   // initialize buddy
   init_buddy();
