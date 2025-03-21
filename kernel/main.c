@@ -2,6 +2,7 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
+#include "kernel/task/task.h"
 #include "kernel/utils/print.h"
 #include "lib/types.h"
 
@@ -14,6 +15,7 @@ kinit(void)
 
   init_intr();
   init_memory();
+  init_task();
 }
 
 DECLARE_WITH_PROTOTYPE(void, kmain, void)

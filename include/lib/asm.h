@@ -94,3 +94,11 @@ lcr0(u32 cr0)
 {
   ASM("movl %0, %%cr0" : : "r"(cr0));
 }
+
+static FORCE_INLINE u32
+rcr2(void)
+{
+  u32 cr2;
+  ASM("movl %%cr2, %0" : "=r"(cr2));
+  return cr2;
+}

@@ -1,8 +1,10 @@
 #include "kernel/memory/sslab/sslab.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
+#include "kernel/log.h"
 #include "kernel/memory/sslab/cache.h"
 #include "kernel/utils/list_head.h"
+#include "kernel/utils/print.h"
 
 static struct sslab __sslab[MEM_SSLAB_MAX_ORDER + 1];
 
@@ -101,7 +103,9 @@ FORCE_INLINE u8
 sslab_size_to_order(size_t size)
 {
   u8 order = 0;
-  while (size >>= 1) {
+  size_t base = 1;
+  while (base < size) {
+    base <<= 1;
     order++;
   }
 

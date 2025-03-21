@@ -1,8 +1,8 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
+#include "kernel/task/task.h"
 #include "kernel/utils/print.h"
-#include "lib/asm.h"
 
 extern void
 ktester(void);
@@ -13,6 +13,9 @@ kinit(void)
   init_print();
   init_intr();
   init_memory();
+  init_task();
+
+  intr_set_status(true);
 }
 
 DECLARE_WITH_PROTOTYPE(void, kmain, void)
@@ -25,7 +28,6 @@ DECLARE_WITH_PROTOTYPE(void, kmain, void)
 
   KINFO("all tests passed");
 
-  while (true) {
-    hlt();
-  }
+  while (true)
+    ;
 }

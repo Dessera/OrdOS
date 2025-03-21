@@ -5,6 +5,7 @@
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
+#include "kernel/utils/print.h"
 #include "lib/common.h"
 #include "lib/types.h"
 
