@@ -158,3 +158,9 @@ page_get_phys(struct page* page)
 {
   return page_get_index(page) * MEM_PAGE_SIZE;
 }
+
+struct page*
+page_get_by_phys(uintptr_t phys)
+{
+  return page_get(phys / MEM_PAGE_SIZE);
+}

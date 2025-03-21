@@ -106,10 +106,6 @@ init_buddy(void)
 void
 buddy_free_page(struct page* page, u8 order)
 {
-  KASSERT(page->ref_cnt == 0,
-          "page %p is still in use, ref_cnt = %u",
-          page_get_phys(page),
-          page->ref_cnt);
   KASSERT(order <= MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
   KASSERT(!page->reserved, "cannot free reserved page %p", page_get_phys(page));
   KASSERT(!page->buddy,

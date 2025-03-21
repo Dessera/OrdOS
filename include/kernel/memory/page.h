@@ -30,7 +30,6 @@
  */
 struct page
 {
-  size_t ref_cnt;
   u8 order;
   enum mem_zone_type zone_type;
 
@@ -71,3 +70,12 @@ page_get(size_t index);
  */
 uintptr_t
 page_get_phys(struct page* page);
+
+/**
+ * @brief Get the page from the physical address
+ *
+ * @param phys physical address of the page
+ * @return struct page* page
+ */
+struct page*
+page_get_by_phys(uintptr_t phys);
