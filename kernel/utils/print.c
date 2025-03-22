@@ -176,7 +176,7 @@ kputs_nint(const char* str)
 }
 
 static void
-__kvsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)
+__vsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)
 {
   itoa(*pbuf, num, base);
   *pbuf += kstrlen(*pbuf);
@@ -184,7 +184,7 @@ __kvsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)
 }
 
 static void
-__kvsprint_u32(char** pbuf, const char** pfmt, u32 num, u8 base)
+__vsprint_u32(char** pbuf, const char** pfmt, u32 num, u8 base)
 {
   utoa(*pbuf, num, base);
   *pbuf += kstrlen(*pbuf);
@@ -192,7 +192,7 @@ __kvsprint_u32(char** pbuf, const char** pfmt, u32 num, u8 base)
 }
 
 static void
-__kvsprint_s(char** pbuf, const char** pfmt, const char* str)
+__vsprint_s(char** pbuf, const char** pfmt, const char* str)
 {
   size_t len = kstrlen(str);
   kmemcpy(*pbuf, str, len);
@@ -201,7 +201,7 @@ __kvsprint_s(char** pbuf, const char** pfmt, const char* str)
 }
 
 static void
-__kvsprint_percent(char** pbuf, const char** pfmt)
+__vsprint_percent(char** pbuf, const char** pfmt)
 {
   **pbuf = '%';
   (*pbuf)++;
@@ -209,7 +209,7 @@ __kvsprint_percent(char** pbuf, const char** pfmt)
 }
 
 static void
-__kvsprint_default(char** pbuf, const char** pfmt)
+__vsprint_default(char** pbuf, const char** pfmt)
 {
   **pbuf = **pfmt;
   (*pbuf)++;
@@ -291,28 +291,28 @@ kvsprint(char* buf, const char* fmt, VA_LIST args)
       switch (*(fmt + 1)) {
         case 'i':
         case 'd':
-          __kvsprint_i32(&buf, &fmt, VA_ARG(args, i32), 10);
+          __vsprint_i32(&buf, &fmt, VA_ARG(args, i32), 10);
           break;
         case 'u':
-          __kvsprint_u32(&buf, &fmt, VA_ARG(args, u32), 10);
+          __vsprint_u32(&buf, &fmt, VA_ARG(args, u32), 10);
           break;
         case 'p':
         case 'X':
         case 'x':
-          __kvsprint_u32(&buf, &fmt, VA_ARG(args, u32), 16);
+          __vsprint_u32(&buf, &fmt, VA_ARG(args, u32), 16);
           break;
         case 's':
-          __kvsprint_s(&buf, &fmt, VA_ARG(args, const char*));
+          __vsprint_s(&buf, &fmt, VA_ARG(args, const char*));
           break;
         case '%':
-          __kvsprint_percent(&buf, &fmt);
+          __vsprint_percent(&buf, &fmt);
           break;
         default:
-          __kvsprint_default(&buf, &fmt);
+          __vsprint_default(&buf, &fmt);
           break;
       }
     } else {
-      __kvsprint_default(&buf, &fmt);
+      __vsprint_default(&buf, &fmt);
     }
   }
 

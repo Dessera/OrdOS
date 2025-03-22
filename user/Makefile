@@ -1,0 +1,1 @@
+user_targets := print.o string.o

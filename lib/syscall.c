@@ -1,4 +1,5 @@
 #include "lib/syscall.h"
+#include "lib/asm.h"
 #include "lib/types.h"
 
 #define SYSCALL_A0(syscall, ret)                                               \
@@ -24,8 +25,8 @@ getpid(void)
   return ret;
 }
 
-ssize_t
-write(size_t fd, char* buf, size_t len)
+size_t
+write(size_t fd, const char* buf, size_t len)
 {
   ssize_t ret;
   SYSCALL_A3(SYSCALL_WRITE, ret, fd, buf, len);

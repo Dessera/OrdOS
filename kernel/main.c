@@ -3,6 +3,7 @@
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
+#include "kernel/task/uproc.h"
 #include "kernel/utils/print.h"
 #include "lib/types.h"
 

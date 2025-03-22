@@ -1,10 +1,7 @@
 #include "kernel/interrupt/syscall.h"
 #include "kernel/config/interrupt.h"
 #include "kernel/log.h"
-// #include "kernel/task/task.h"
-// #include "kernel/utils/print.h"
-// #include "kernel/utils/string.h"
-// #include "lib/syscall.h"
+#include "kernel/task/task.h"
 #include "kernel/utils/string.h"
 #include "lib/syscall.h"
 #include "lib/types.h"
@@ -12,15 +9,14 @@
 static void* __sysall_table[INTR_SYSCALL_SIZE] = { 0 };
 
 static size_t
-syscall_getpid(void)
+sys_getpid(void)
 {
-  // TODO: implement a real process management
-  return 0;
+  return task_get_current()->pid;
 }
 
 // TODO: implement a real file system
-static ssize_t
-syscall_write(size_t fd, char* buf, size_t len)
+static size_t
+sys_write(size_t fd, const char* buf, size_t len)
 {
   (void)fd;
   (void)len;
@@ -32,8 +28,8 @@ syscall_write(size_t fd, char* buf, size_t len)
 void
 init_syscall(void)
 {
-  __sysall_table[SYSCALL_GETPID] = syscall_getpid;
-  __sysall_table[SYSCALL_WRITE] = syscall_write;
+  __sysall_table[SYSCALL_GETPID] = sys_getpid;
+  __sysall_table[SYSCALL_WRITE] = sys_write;
 
   KDEBUG("syscall: %u", INTR_SYSCALL_SIZE);
 }

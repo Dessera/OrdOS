@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lib/asm.h"
 #include "lib/types.h"
 
 enum syscall_enumerate
@@ -13,5 +12,5 @@ size_t
 getpid(void);
 
 // temporary write syscall
-ssize_t
-write(size_t fd, char* buf, size_t len);
+size_t
+write(size_t fd, const char* buf, size_t len);
