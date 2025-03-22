@@ -3,7 +3,7 @@ memory_targets := \
 	gdt.o						\
 	e820.o					\
 	bootmem.o				\
-	page.o					\
+	vpage.o					\
 	buddy/buddy.o		\
 	buddy/page.o		\
 	buddy/zone.o		\

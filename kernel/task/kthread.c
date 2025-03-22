@@ -1,8 +1,8 @@
 #include "kernel/task/kthread.h"
 #include "kernel/config/task.h"
 #include "kernel/memory/memory.h"
+#include "kernel/memory/vpage.h"
 #include "kernel/task/task.h"
-#include "kernel/utils/print.h"
 
 static struct task* __kmain_task;
 
@@ -30,6 +30,7 @@ kthread_create(char* name, u8 priority, task_entry_t function, void* arg)
 
   task_init(task, name, priority);
   task_init_stack(task, function, arg);
+  task->page_table = vpage_kernel_paddr();
 
   task_push_global(task);
   task_push(task);

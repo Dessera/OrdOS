@@ -1,10 +1,9 @@
 #include "kernel/memory/sslab/sslab.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
-#include "kernel/log.h"
 #include "kernel/memory/sslab/cache.h"
+#include "kernel/task/sync.h"
 #include "kernel/utils/list_head.h"
-#include "kernel/utils/print.h"
 
 static struct sslab __sslab[MEM_SSLAB_MAX_ORDER + 1];
 
@@ -20,12 +19,15 @@ void
 sslab_init(struct sslab* sslab, size_t obj_size)
 {
   list_init(&sslab->caches);
+  spin_lock_init(&sslab->lock);
   sslab->obj_size = obj_size;
 }
 
 void*
 sslab_alloc(struct sslab* sslab)
 {
+  spin_lock(&sslab->lock);
+
   struct list_head* pos;
   struct sslab_cache* cache = NULL;
   LIST_FOR_EACH(pos, &sslab->caches)
@@ -37,21 +39,29 @@ sslab_alloc(struct sslab* sslab)
     }
   }
 
+  void* obj = NULL;
+
   if (cache == NULL) {
     cache = sslab_cache_create(sslab->obj_size);
     if (cache == NULL) {
-      return NULL;
+      goto alloc_end;
     }
 
     list_add_tail(&cache->node, &sslab->caches);
   }
 
-  return sslab_cache_alloc(cache);
+  obj = sslab_cache_alloc(cache);
+
+alloc_end:
+  spin_unlock(&sslab->lock);
+  return obj;
 }
 
 void
 sslab_free(struct sslab* sslab, void* obj)
 {
+  spin_lock(&sslab->lock);
+
   struct list_head* pos;
   struct sslab_cache* cache = NULL;
   LIST_FOR_EACH(pos, &sslab->caches)
@@ -71,6 +81,8 @@ sslab_free(struct sslab* sslab, void* obj)
     list_del(&cache->node);
     sslab_cache_destroy(cache);
   }
+
+  spin_unlock(&sslab->lock);
 }
 
 void*
@@ -91,23 +103,4 @@ sslab_global_free(void* obj)
   KASSERT(order <= MEM_SSLAB_MAX_ORDER, "too large object to free");
 
   sslab_free(&__sslab[order], obj);
-}
-
-FORCE_INLINE size_t
-sslab_order_to_size(u8 order)
-{
-  return 1 << order;
-}
-
-FORCE_INLINE u8
-sslab_size_to_order(size_t size)
-{
-  u8 order = 0;
-  size_t base = 1;
-  while (base < size) {
-    base <<= 1;
-    order++;
-  }
-
-  return order;
 }

@@ -16,6 +16,8 @@ kinit(void)
   init_intr();
   init_memory();
   init_task();
+
+  intr_set_status(true);
 }
 
 DECLARE_WITH_PROTOTYPE(void, kmain, void)

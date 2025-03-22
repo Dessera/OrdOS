@@ -3,8 +3,8 @@
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/buddy/buddy.h"
-#include "kernel/memory/page.h"
 #include "kernel/memory/sslab/sslab.h"
+#include "kernel/memory/vpage.h"
 #include "lib/types.h"
 
 void

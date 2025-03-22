@@ -44,6 +44,9 @@ void
 task_init_stack(struct task* task, task_entry_t function, void* arg);
 
 void
+task_init_page_table(struct task* task);
+
+void
 task_push_global(struct task* task);
 
 void

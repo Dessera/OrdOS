@@ -3,7 +3,8 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/e820.h"
 #include "kernel/memory/memory.h"
-#include "kernel/memory/page.h"
+#include "kernel/memory/vpage.h"
+#include "kernel/task/sync.h"
 #include "lib/common.h"
 #include "lib/types.h"
 
@@ -38,6 +39,8 @@ __init_zone(struct mem_zone* zone,
       buddy_free_page(pg, 0);
     }
   }
+
+  spin_lock_init(&zone->lock);
 }
 
 void

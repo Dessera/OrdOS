@@ -25,8 +25,9 @@ debug_mem_zone(struct mem_zone* zone)
     if (area.blocks_free != 0) {
       AUTO p = buddy_alloc_page(ztype, i);
       KINFO("test allocate block of order %u : %p", i, page_get_virt(p));
-      kmemset(
-        (void*)page_get_virt(p), 42, BUDDY_ORDER_PAGES(i) * MEM_PAGE_SIZE);
+      kmemset((void*)page_get_virt(p),
+              42,
+              buddy_order_to_page_cnt(i) * MEM_PAGE_SIZE);
       buddy_free_page(p, i);
     }
   }

@@ -7,7 +7,7 @@
 
 struct spin_lock
 {
-  u8 flag;
+  volatile i32 flag;
 };
 
 void

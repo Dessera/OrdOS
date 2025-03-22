@@ -4,11 +4,14 @@
 #include "kernel/device/clk.h"
 #include "kernel/log.h"
 #include "kernel/memory/buddy/buddy.h"
+#include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
+#include "kernel/memory/vpage.h"
 #include "kernel/task/context.h"
 #include "kernel/task/kthread.h"
 #include "kernel/task/pid.h"
 #include "kernel/task/sync.h"
+#include "kernel/task/tss.h"
 #include "kernel/utils/list_head.h"
 #include "kernel/utils/string.h"
 #include "lib/types.h"
@@ -54,14 +57,14 @@ __task_schedule(void)
   task_set_current(next);
   next->status = TASK_STATUS_RUNNING;
 
-  // void* page_table = next->page_table != NULL
-  //                      ? PAGE_VADDR_TO_PADDR(next->page_table)
-  //                      : (void*)MEM_PAGE_TABLE_START;
-  // __asm__ __volatile__("movl %0, %%cr3" : : "r"(page_table) : "memory");
+  // TODO: merge these two conditions
+  void* page_table =
+    next->page_table != NULL ? next->page_table : vpage_kernel_paddr();
+  __asm__ __volatile__("movl %0, %%cr3" : : "r"(page_table) : "memory");
 
-  // if (next->page_table != NULL) {
-  //   tss_update_esp(next);
-  // }
+  if (next->page_table != NULL) {
+    tss_update_esp(next);
+  }
 
   _asm_thread_switch_to(curr, next);
 }
@@ -91,6 +94,7 @@ init_task(void)
   __init_task_queue();
 
   init_kthread();
+  init_tss();
 
   intr_register_handler(0x20, __task_schedule_handler);
 }
@@ -123,6 +127,20 @@ task_init_stack(struct task* task, task_entry_t function, void* arg)
   ctx->ebx = 0;
   ctx->esi = 0;
   ctx->edi = 0;
+}
+
+void
+task_init_page_table(struct task* task)
+{
+  AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
+  task->page_table = (void*)page_get_phys(page);
+  if (task->page_table == NULL) {
+    KPANIC("failed to allocate page table for task %s", task->name);
+  }
+
+  // TODO: this only works when kernel doesn't map user space memory
+  kmemcpy(
+    (void*)page_get_virt(page), (void*)vpage_kernel_vaddr(), MEM_PAGE_SIZE);
 }
 
 void

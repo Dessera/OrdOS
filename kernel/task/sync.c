@@ -3,16 +3,16 @@
 #include "kernel/task/task.h"
 #include "lib/types.h"
 
-static FORCE_INLINE u8
-__atomic_cmpexchange(u8* ptr, u8 old, u8 new)
+static u8
+__atomic_cmpexchange(volatile i32* ptr, i32 old, i32 new)
 {
   u8 ret;
 
   __asm__ __volatile__("lock;"
-                       "cmpxchgb %2, %1;"
+                       "cmpxchgl %2, %1;"
                        "sete %0"
                        : "=q"(ret), "=m"(*ptr)
-                       : "r"(new), "m"(ptr), "a"(old)
+                       : "r"(new), "m"(*ptr), "a"(old)
                        : "memory");
   return ret;
 }
@@ -23,14 +23,14 @@ spin_lock_init(struct spin_lock* lock)
   lock->flag = 0;
 }
 
-void
+FORCE_INLINE void
 spin_lock(struct spin_lock* lock)
 {
-  while (__atomic_cmpexchange(&lock->flag, 0, 1) == 1)
+  while (__atomic_cmpexchange(&lock->flag, 0, 1) == 0)
     ;
 }
 
-void
+FORCE_INLINE void
 spin_unlock(struct spin_lock* lock)
 {
   lock->flag = 0;

@@ -4,6 +4,7 @@
 #include "kernel/log.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/buddy/zone.h"
+#include "kernel/task/sync.h"
 #include "kernel/utils/list_head.h"
 #include "lib/types.h"
 
@@ -23,19 +24,20 @@ buddy_free_page(struct page* page, u8 order)
           "cannot free page %p that is part of a buddy block",
           page_get_phys(page));
 
-  AUTO idx = page_get_index(page);
-  if (!BUDDY_ALIGN_CHECK(idx, order)) {
+  if (!buddy_page_is_aligned(page, order)) {
     KWARNING("page %p is not aligned to order %u", page_get_phys(page), order);
     return;
   }
 
   AUTO zone = zone_get(page->zone_type);
-  zone->pg_free += BUDDY_ORDER_PAGES(order);
+
+  spin_lock(&zone->lock);
+
+  zone->pg_free += buddy_order_to_page_cnt(order);
 
   AUTO area = &zone->areas[order];
   while (order < MEM_BUDDY_MAX_ORDER) {
-    AUTO buddy_idx = BUDDY_GET_BUDDY_INDEX(idx, order);
-    AUTO buddy = page_get(buddy_idx);
+    AUTO buddy = buddy_page_to_buddy(page, order);
 
     if (!buddy->buddy || buddy->order != order) {
       break;
@@ -43,15 +45,15 @@ buddy_free_page(struct page* page, u8 order)
 
     area_remove_page(area, buddy);
 
-    idx = BUDDY_GET_ASCEND_INDEX(idx, order);
+    page = buddy_page_ascend(page, order);
     order++;
     area = &zone->areas[order];
   }
 
-  // final page
-  page = page_get(idx);
   page->order = order;
   area_add_page(area, page);
+
+  spin_unlock(&zone->lock);
 }
 
 struct page*
@@ -59,6 +61,8 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
 {
   KASSERT(order <= MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
   AUTO zone = zone_get(zone_type);
+
+  spin_lock(&zone->lock);
 
   size_t alloc_order = order;
   struct mem_area* area;
@@ -71,11 +75,13 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
     alloc_order++;
   }
 
+  struct page* page = NULL;
+
   if (alloc_order > MEM_BUDDY_MAX_ORDER) {
-    return NULL;
+    goto alloc_end;
   }
 
-  AUTO page = LIST_ENTRY(area->mem_blocks.next, struct page, node);
+  page = LIST_ENTRY(area->mem_blocks.next, struct page, node);
   KASSERT(page->buddy,
           "broken buddy system, page %p is not part of a block",
           page_get_phys(page));
@@ -92,10 +98,13 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
     page += 1 << alloc_order;
   }
 
-  zone->pg_free -= BUDDY_ORDER_PAGES(order);
+  zone->pg_free -= buddy_order_to_page_cnt(order);
 
   KASSERT(!page->buddy,
           "broken buddy system, allocated page %p is still part of a block",
           page_get_phys(page));
+
+alloc_end:
+  spin_unlock(&zone->lock);
   return page;
 }

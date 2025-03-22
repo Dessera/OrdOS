@@ -4,6 +4,7 @@
 #include "kernel/config/memory.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
+#include "kernel/task/sync.h"
 #include "kernel/utils/list_head.h"
 
 #define MEM_ZONE_SIZE 3
@@ -13,7 +14,6 @@ KSTATIC_ASSERT(MEM_ZONE_SIZE == MEM_ZONE_HIGH + 1,
 
 /**
  * @brief Memory area
- *
  */
 struct mem_area
 {
@@ -30,6 +30,8 @@ struct mem_zone
   size_t pg_start;
   size_t pg_cnt;
   size_t pg_free;
+
+  struct spin_lock lock;
 };
 
 /**
