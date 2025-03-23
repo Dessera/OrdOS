@@ -42,9 +42,9 @@ vpage_kernel_vaddr(void);
 /**
  * @brief Get physical address of kernel page table
  *
- * @return u32* Physical address of kernel page table
+ * @return uintptr_t Physical address of kernel page table
  */
-u32*
+uintptr_t
 vpage_kernel_paddr(void);
 
 /**

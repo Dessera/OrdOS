@@ -1,7 +1,6 @@
 #pragma once
 
-#pragma once
-
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/utils/list_head.h"
 #include "lib/types.h"
 
@@ -17,10 +16,17 @@ spin_lock(struct spin_lock* lock);
 void
 spin_unlock(struct spin_lock* lock);
 
-bool
-intr_lock(void);
-void
-intr_unlock(bool flag);
+static FORCE_INLINE bool
+intr_lock(void)
+{
+  return intr_set_status(false);
+}
+
+static FORCE_INLINE void
+intr_unlock(bool flag)
+{
+  intr_set_status(flag);
+}
 
 struct mutex_lock
 {

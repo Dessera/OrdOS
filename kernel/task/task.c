@@ -1,6 +1,7 @@
 #include "kernel/task/task.h"
 #include "kernel/assert.h"
 #include "kernel/config/memory.h"
+#include "kernel/config/task.h"
 #include "kernel/device/clk.h"
 #include "kernel/log.h"
 #include "kernel/memory/buddy/buddy.h"
@@ -57,14 +58,9 @@ __task_schedule(void)
   task_set_current(next);
   next->status = TASK_STATUS_RUNNING;
 
-  // TODO: merge these two conditions
-  void* page_table =
-    next->page_table != NULL ? next->page_table : vpage_kernel_paddr();
-  __asm__ __volatile__("movl %0, %%cr3" : : "r"(page_table) : "memory");
-
-  if (next->page_table != NULL) {
-    tss_update_esp(next);
-  }
+  __asm__ __volatile__("movl %0, %%cr3" : : "r"(next->page_table) : "memory");
+  // only used for user side
+  tss_update_esp(next);
 
   _asm_thread_switch_to(curr, next);
 }
@@ -102,20 +98,30 @@ init_task(void)
 void
 task_init(struct task* task, const char* name, u8 priority)
 {
+  // TODO: maybe truncate name?
+  KASSERT(kstrlen(name) < TASK_NAME_SIZE, "task name is too long");
+
   kstrcpy(task->name, name);
   task->pid = pidpool_alloc(&__pid_pool);
   task->status = TASK_STATUS_READY;
   task->priority = priority;
   task->ticks = priority;
   task->elapsed_ticks = 0;
-  task->page_table = NULL;
+  task->page_table = 0;
 }
 
-void
+bool
 task_init_stack(struct task* task, task_entry_t function, void* arg)
 {
-  task->stack = (void*)(page_get_virt(buddy_alloc_page(MEM_ZONE_NORMAL, 0)) +
-                        MEM_PAGE_SIZE);
+  AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
+  if (page == NULL) {
+    KWARNING("failed to allocate stack for task %s", task->name);
+    return false;
+  }
+
+  kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
+
+  task->stack = (void*)(page_get_virt(page) + MEM_PAGE_SIZE);
   task->stack -= sizeof(struct thread_context) + sizeof(struct intr_context);
 
   struct thread_context* ctx = (struct thread_context*)task->stack;
@@ -127,20 +133,32 @@ task_init_stack(struct task* task, task_entry_t function, void* arg)
   ctx->ebx = 0;
   ctx->esi = 0;
   ctx->edi = 0;
+
+  return true;
 }
 
-void
+bool
 task_init_page_table(struct task* task)
 {
   AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
-  task->page_table = (void*)page_get_phys(page);
-  if (task->page_table == NULL) {
-    KPANIC("failed to allocate page table for task %s", task->name);
+
+  if (page == NULL) {
+    KWARNING("failed to allocate page table for task %s", task->name);
+    return false;
   }
 
-  // TODO: this only works when kernel doesn't map user space memory
+  kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
+
+  task->page_table = page_get_phys(page);
+
+  // copy kernel page table
   kmemcpy(
-    (void*)page_get_virt(page), (void*)vpage_kernel_vaddr(), MEM_PAGE_SIZE);
+    (void*)(page_get_virt(page) + PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
+    (void*)((uintptr_t)vpage_kernel_vaddr() +
+            PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
+    (MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE));
+
+  return true;
 }
 
 void

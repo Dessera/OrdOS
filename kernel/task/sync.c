@@ -36,18 +36,6 @@ spin_unlock(struct spin_lock* lock)
   lock->flag = 0;
 }
 
-FORCE_INLINE bool
-intr_lock(void)
-{
-  return intr_set_status(false);
-}
-
-FORCE_INLINE void
-intr_unlock(bool flag)
-{
-  intr_set_status(flag);
-}
-
 void
 mutex_lock_init(struct mutex_lock* lck)
 {

@@ -31,7 +31,7 @@ struct task
   struct list_head node;
   struct list_head global_node;
 
-  u32* page_table;
+  uintptr_t page_table;
 };
 
 void
@@ -40,10 +40,10 @@ init_task(void);
 void
 task_init(struct task* task, const char* name, u8 priority);
 
-void
+bool
 task_init_stack(struct task* task, task_entry_t function, void* arg);
 
-void
+bool
 task_init_page_table(struct task* task);
 
 void

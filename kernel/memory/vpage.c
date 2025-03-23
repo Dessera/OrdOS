@@ -1,14 +1,14 @@
-#include "kernel/memory/buddy/page.h"
+#include "kernel/memory/vpage.h"
 #include "kernel/assert.h"
 #include "kernel/config/boot.h"
 #include "kernel/config/memory.h"
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/buddy/buddy.h"
+#include "kernel/memory/buddy/page.h"
 #include "kernel/memory/e820.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/memory/memory.h"
-#include "kernel/memory/vpage.h"
 #include "kernel/task/task.h"
 #include "kernel/utils/compiler.h"
 #include "kernel/utils/string.h"
@@ -131,10 +131,10 @@ vpage_kernel_vaddr(void)
   return __kernel_pde;
 }
 
-FORCE_INLINE u32*
+FORCE_INLINE uintptr_t
 vpage_kernel_paddr(void)
 {
-  return (u32*)MEM_KERNEL_PADDR(__kernel_pde);
+  return MEM_KERNEL_PADDR(__kernel_pde);
 }
 
 uintptr_t
@@ -142,7 +142,7 @@ vpage_link_addr(uintptr_t vaddr)
 {
   AUTO curr = task_get_current();
 
-  AUTO page_table = MEM_GET_WITH_KERNEL_VSTART(curr->page_table);
+  AUTO page_table = (u32*)MEM_GET_WITH_KERNEL_VSTART(curr->page_table);
   KASSERT(page_table != NULL, "there is no page table in task %p", curr);
 
   AUTO ppage = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
@@ -150,6 +150,8 @@ vpage_link_addr(uintptr_t vaddr)
     KWARNING("alloc page failed when link vaddr %p", vaddr);
     return 0;
   }
+
+  kmemset((void*)page_get_virt(ppage), 0, MEM_PAGE_SIZE);
 
   AUTO pde = page_table[PAGE_PDE_INDEX(vaddr)];
   u32* pt = NULL;
@@ -162,6 +164,8 @@ vpage_link_addr(uintptr_t vaddr)
       buddy_free_page(ppage, 0);
       return 0;
     }
+
+    kmemset((void*)page_get_virt(pt_page), 0, MEM_PAGE_SIZE);
 
     page_table[PAGE_PDE_INDEX(vaddr)] =
       PAGE_PDE_DESC(page_get_phys(pt_page), 1, 1, 1);
