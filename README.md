@@ -32,6 +32,12 @@ make test                     # Build all testers
 make TESTER=<name> qemu_test  # Build and run a tester
 ```
 
+## Debug
+
+When running `make all` or `make qemu_debug`, there will be a `ordos.debug` file in the `build` directory (which is a `elf32-i386` file). You can use `gdb` to debug it.
+
+> Note that functions before `init_vpage` cannot be debugged because the kernel is not running in flat memory model before `init_vpage`.
+
 ## Thanks
 
 - A os development tutorial from Charliechen114514: [CCOperateSystem](https://github.com/Charliechen114514/CCOperateSystem)
