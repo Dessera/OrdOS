@@ -6,6 +6,7 @@
 #include "kernel/memory/e820.h"
 #include "kernel/info.h"
 #include "kernel/device/disk.h"
+#include "kernel/device/disk/ide.h"
 
 .code16
 .section ".ldrtext", "ax"
@@ -161,7 +162,7 @@ _prot_load_kernel:
   movl %ecx, %eax
   movl $0x80, %ebx
   mull %ebx
-  movw $DISK_PORT_DATA, %dx
+  movw $IDE0_BASE_PORT, %dx
   movl %eax, %ecx
 _prot_load_kernel_loop:
   call _prot_disk_wait

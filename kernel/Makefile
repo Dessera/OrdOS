@@ -2,7 +2,7 @@ boot_targets := bootsec.o loader.o boot_gdt.o
 
 interrupt_targets := exception.o idt.o interrupt.o syscall.o vecs.o
 
-device_targets := pci.o clk.o
+include $(KERNEL_DIR)/device/Makefile
 
 task_targets := task.o pid.o sync.o kthread.o switch.o tss.o uproc.o
 

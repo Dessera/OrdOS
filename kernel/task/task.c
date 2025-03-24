@@ -3,6 +3,7 @@
 #include "kernel/config/memory.h"
 #include "kernel/config/task.h"
 #include "kernel/device/clk.h"
+#include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
@@ -15,6 +16,7 @@
 #include "kernel/task/tss.h"
 #include "kernel/utils/list_head.h"
 #include "kernel/utils/string.h"
+#include "lib/asm.h"
 #include "lib/types.h"
 
 extern void
@@ -26,6 +28,8 @@ static struct list_head __task_list;
 static struct list_head __task_ready_list;
 static struct task* __current_task = NULL;
 
+static struct task* __task_idle;
+
 static size_t __ticks = 0;
 
 static void
@@ -33,6 +37,16 @@ __task_entry(task_entry_t function, void* arg)
 {
   intr_set_status(true);
   function(arg);
+}
+
+static void
+__task_idle_entry(void*)
+{
+  while (true) {
+    task_park();
+    intr_set_status(true);
+    hlt();
+  }
 }
 
 static FORCE_INLINE void
@@ -54,7 +68,11 @@ __task_schedule(void)
     curr->status = TASK_STATUS_READY;
   }
 
-  KASSERT(!list_empty(&__task_ready_list), "no ready thread to schedule");
+  // KASSERT(!list_empty(&__task_ready_list), "no ready thread to schedule");
+  if (list_empty(&__task_ready_list)) {
+    task_unpark(__task_idle);
+  }
+
   AUTO next = LIST_ENTRY(list_pop(&__task_ready_list), struct task, node);
 
   task_set_current(next);
@@ -96,6 +114,8 @@ init_task(void)
 
   init_kthread();
   init_tss();
+
+  __task_idle = kthread_create("idle", 10, __task_idle_entry, NULL);
 
   intr_register_handler(0x20, __task_schedule_handler);
 }

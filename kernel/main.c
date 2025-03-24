@@ -1,3 +1,4 @@
+#include "kernel/device/disk/disk.h"
 #include "kernel/info.h"
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
@@ -19,6 +20,8 @@ kinit(void)
   init_task();
 
   intr_set_status(true);
+
+  init_disk();
 }
 
 DECLARE_WITH_PROTOTYPE(void, kmain, void)
