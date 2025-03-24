@@ -41,3 +41,19 @@ void
 mutex_lock(struct mutex_lock* lck);
 void
 mutex_unlock(struct mutex_lock* lck);
+
+struct semaphore
+{
+  i8 value;
+  struct spin_lock guard;
+  struct list_head wait_queue;
+};
+
+void
+semaphore_init(struct semaphore* sem, i8 value);
+
+void
+semaphore_down(struct semaphore* sem);
+
+void
+semaphore_up(struct semaphore* sem);

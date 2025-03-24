@@ -20,11 +20,13 @@
 extern void
 _asm_thread_switch_to(struct task* curr, struct task* next);
 
-struct pidpool __pid_pool;
+static struct pidpool __pid_pool;
 
-struct list_head __task_list;
-struct list_head __task_ready_list;
-struct task* __current_task = NULL;
+static struct list_head __task_list;
+static struct list_head __task_ready_list;
+static struct task* __current_task = NULL;
+
+static size_t __ticks = 0;
 
 static void
 __task_entry(task_entry_t function, void* arg)
@@ -69,6 +71,9 @@ static void
 __task_schedule_handler(u32 /* irq */)
 {
   struct task* task = task_get_current();
+
+  // update ticks
+  __ticks++;
 
   task->elapsed_ticks++;
 
@@ -234,4 +239,26 @@ task_unpark(struct task* task)
   task->status = TASK_STATUS_READY;
 
   intr_unlock(intr_status);
+}
+
+void
+task_sleep_ticks(size_t ticks)
+{
+  size_t now = __ticks;
+  size_t end = now + ticks;
+
+  while (true) {
+    if (end < now) {
+      // there is overflow
+      if (__ticks < now && __ticks >= end) {
+        break;
+      }
+    } else {
+      if (__ticks >= end) {
+        break;
+      }
+    }
+
+    task_yield();
+  }
 }

@@ -74,3 +74,25 @@ mutex_unlock(struct mutex_lock* lck)
 
   spin_unlock(&lck->guard);
 }
+
+void
+semaphore_init(struct semaphore* sem, i8 value)
+{
+  sem->value = value;
+  spin_lock_init(&sem->guard);
+  list_init(&sem->wait_queue);
+}
+
+void
+semaphore_down(struct semaphore* sem)
+{
+  spin_lock(&sem->guard);
+
+  if (sem->value > 0) {
+    sem->value--;
+    spin_unlock(&sem->guard);
+  }
+
+  // semdown_exit:
+  spin_unlock(&sem->guard);
+}

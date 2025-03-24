@@ -1,5 +1,8 @@
 #pragma once
 
+/**
+ * @brief User process entry point
+ */
 typedef void (*uproc_entry_t)(void);
 
 /**

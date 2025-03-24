@@ -9,6 +9,11 @@ TEST_DIR = test
 USER_DIR = user
 LIB_DIR = lib
 
+DISK_NAME = disk.img
+DISK_SIZE = 1024
+DISK_PARTITIONS = disk.partitions
+DISK_IMG = $(BUILD_DIR)/$(DISK_NAME)
+
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
 TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
@@ -67,6 +72,11 @@ targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
 include user/Makefile
 
 targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
+
+$(DISK_IMG): $(DISK_PARTITIONS)
+	@mkdir -p $(BUILD_DIR)
+	$(hide)qemu-img create $(DISK_IMG) $(DISK_SIZE)
+	$(hide)cat $(DISK_PARTITIONS) | sfdisk $(DISK_IMG)
 # 	-----------------------------------------------
 
 # 	-------------------- FINAL --------------------
@@ -74,7 +84,7 @@ final_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(targets))
 
 $(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
 	@mkdir -p $(BUILD_DIR)
-	$(hide)gcc -E -P $(INCFLAGS) - < $< > $@
+	$(hide)$(CC) -E -P $(INCFLAGS) - < $< > $@
 	@echo "	[CP] $(LDSCRIPT)"
 
 $(TARGET): $(final_objs) $(LDSCRIPT)

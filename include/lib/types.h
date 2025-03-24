@@ -32,6 +32,8 @@ typedef i32 intptr_t;
 
 #define NPOS ((ssize_t) - 1)
 
+#define MAX_U32 ((u32) - 1)
+#define MIN_U32 ((u32)0)
 #define MAX_SIZE_T ((size_t)-1)
 #define MIN_SIZE_T ((size_t)0)
 #define MAX_SSIZE_T ((ssize_t)0x7FFFFFFF)

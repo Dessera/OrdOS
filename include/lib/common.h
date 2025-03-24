@@ -12,6 +12,10 @@
 #define MEMMB(x) (MEMKB(x) * 1024)
 #define MEMGB(x) (MEMMB(x) * 1024)
 
+#define TMSEC(x) ((x) * 1000)
+#define TMIN(x) (TMSEC(x) * 60)
+#define THOUR(x) (TMIN(x) * 60)
+
 #define ALIGN_UP(x, a) (((x) + (a) - 1) & ~((a) - 1))
 #define ALIGN_DOWN(x, a) ((x) & ~((a) - 1))
 
