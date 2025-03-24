@@ -35,7 +35,7 @@ __task_entry(task_entry_t function, void* arg)
   function(arg);
 }
 
-FORCE_INLINE void
+static FORCE_INLINE void
 __init_task_queue(void)
 {
   list_init(&__task_list);

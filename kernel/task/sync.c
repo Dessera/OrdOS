@@ -76,7 +76,7 @@ mutex_unlock(struct mutex_lock* lck)
 }
 
 void
-semaphore_init(struct semaphore* sem, i8 value)
+semaphore_init(struct semaphore* sem, size_t value)
 {
   sem->value = value;
   spin_lock_init(&sem->guard);
@@ -89,10 +89,32 @@ semaphore_down(struct semaphore* sem)
   spin_lock(&sem->guard);
 
   if (sem->value > 0) {
+    // the semaphore is available
     sem->value--;
     spin_unlock(&sem->guard);
+  } else {
+    // the semaphore is not available
+    struct task* task = task_get_current();
+    list_add_tail(&task->node, &sem->wait_queue);
+    spin_unlock(&sem->guard);
+    task_park();
+  }
+}
+
+void
+semaphore_up(struct semaphore* sem)
+{
+  spin_lock(&sem->guard);
+
+  if (list_empty(&sem->wait_queue)) {
+    // no task is waiting
+    sem->value++;
+  } else {
+    // there are tasks waiting
+    struct task* task =
+      LIST_ENTRY(list_pop(&sem->wait_queue), struct task, node);
+    task_unpark(task);
   }
 
-  // semdown_exit:
   spin_unlock(&sem->guard);
 }

@@ -16,6 +16,8 @@ DISK_IMG = $(BUILD_DIR)/$(DISK_NAME)
 
 # lower case
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
+TARGET_SYMS = $(BUILD_DIR)/$(NAMEFILE).syms
+TARGET_DEBUG = $(BUILD_DIR)/$(NAMEFILE).debug
 TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 
 DEBUG = 1
@@ -41,7 +43,7 @@ ASFLAGS = $(CFLAGS)
 
 LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
-LDFLAGS = -z noexecstack
+LDFLAGS = -z noexecstack --no-warn-rwx-segments
 
 targets :=
 
@@ -54,7 +56,7 @@ endif
 
 .PHONY: all clean qemu rebuild
 
-all: $(TARGET)
+all: $(TARGET) $(TARGET_DEBUG)
 
 # 	-------------------- LIB ----------------------
 include lib/Makefile
@@ -71,7 +73,7 @@ targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
 # 	-------------------- USER -------------------
 include user/Makefile
 
-targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
+# targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
 
 $(DISK_IMG): $(DISK_PARTITIONS)
 	@mkdir -p $(BUILD_DIR)
@@ -88,12 +90,16 @@ $(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
 	@echo "	[CP] $(LDSCRIPT)"
 
 $(TARGET): $(final_objs) $(LDSCRIPT)
-	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(final_objs) -Map $(TARGET).map
+	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(final_objs) -Map $(TARGET_SYMS)
 	@echo "	[LD] $(TARGET)"
+
+$(TARGET_DEBUG): $(final_objs) $(LDSCRIPT)
+	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) --oformat elf32-i386 $(final_objs) -Map $(TARGET_SYMS)
+	@echo "	[LD] $(TARGET_DEBUG)"
 # 	-----------------------------------------------
 
 # 	-------------------- UTILS --------------------
-qemu_debug: $(TARGET)
+qemu_debug: $(TARGET) $(TARGET_DEBUG)
 	qemu-system-i386 -s -S -drive format=raw,file=$(TARGET)
 
 qemu: $(TARGET)
