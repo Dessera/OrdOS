@@ -28,6 +28,7 @@ struct disk
   char name[DISK_NAME_SIZE];
   struct ide_channel* channel;
   size_t dev_id;
+  size_t sec_cnt;
 
   struct disk_partition partitions[4];
   struct disk_partition logical_partitions[8];
@@ -38,6 +39,9 @@ init_disk(void);
 
 void
 disk_identify(struct disk* disk);
+
+void
+disk_scan_partitions(struct disk* disk);
 
 static FORCE_INLINE u8
 disk_get_cnt(void)

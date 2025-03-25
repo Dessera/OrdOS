@@ -10,7 +10,7 @@ USER_DIR = user
 LIB_DIR = lib
 
 DISK_NAME = disk.img
-DISK_SIZE = 1024
+DISK_SIZE = 1M
 DISK_PARTITIONS = disk.partitions
 DISK_IMG = $(BUILD_DIR)/$(DISK_NAME)
 
@@ -56,7 +56,7 @@ endif
 
 .PHONY: all clean qemu rebuild
 
-all: $(TARGET) $(TARGET_DEBUG)
+all: $(TARGET) $(TARGET_DEBUG) $(DISK_IMG)
 
 # 	-------------------- LIB ----------------------
 include lib/Makefile
@@ -99,11 +99,11 @@ $(TARGET_DEBUG): $(final_objs) $(LDSCRIPT)
 # 	-----------------------------------------------
 
 # 	-------------------- UTILS --------------------
-qemu_debug: $(TARGET) $(TARGET_DEBUG)
-	qemu-system-i386 -s -S -drive format=raw,file=$(TARGET)
+qemu_debug: $(TARGET) $(TARGET_DEBUG) $(DISK_IMG)
+	qemu-system-i386 -s -S -drive format=raw,file=$(TARGET) -drive format=raw,file=$(DISK_IMG)
 
-qemu: $(TARGET)
-	qemu-system-i386 -drive format=raw,file=$(TARGET)
+qemu: $(TARGET) $(DISK_IMG)
+	qemu-system-i386 -drive format=raw,file=$(TARGET) -drive format=raw,file=$(DISK_IMG)
 
 clean:
 	$(hide)rm -rf $(BUILD_DIR)

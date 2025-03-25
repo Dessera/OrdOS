@@ -1,5 +1,4 @@
 #include "kernel/task/sync.h"
-#include "kernel/interrupt/interrupt.h"
 #include "kernel/task/task.h"
 #include "lib/types.h"
 

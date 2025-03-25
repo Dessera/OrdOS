@@ -3,10 +3,27 @@
 #include "kernel/device/disk/disk.h"
 #include "kernel/device/disk/ide.h"
 #include "kernel/log.h"
+#include "kernel/utils/print.h"
 #include "kernel/utils/string.h"
 #include "lib/types.h"
 
 // static struct disk* __disks[IDE_CHANNEL_MAX_CNT * 2] = { 0 };
+
+// static void
+// __adjust_disk_buffer(u8* src, size_t start, size_t size)
+// {
+//   for (size_t i = 0; i < size; i += 2) {
+//     if (i + 1 >= size) {
+//       break;
+//     }
+
+//     u8 tmp = src[start + i];
+//     src[start + i] = src[start + i + 1];
+//     src[start + i + 1] = tmp;
+//   }
+
+//   src[start + size - 1] = 0;
+// }
 
 static void
 __disk_init(struct disk* disk,
@@ -26,10 +43,21 @@ init_disk(void)
 {
   init_ide();
 
-  __disk_init(&ide_channel_get(0)->devices[0], "hda", ide_channel_get(0), 0);
-  // __disk_init(&ide_channel_get(0)->devices[1], "hdb", ide_channel_get(0), 1);
-  // __disk_init(&ide_channel_get(1)->devices[0], "hdc", ide_channel_get(1), 0);
-  // __disk_init(&ide_channel_get(1)->devices[1], "hdd", ide_channel_get(1), 1);
+  for (int i = 0; i < disk_get_cnt(); i++) {
+    if (i >= IDE_CHANNEL_MAX_CNT * 2) {
+      break;
+    }
+
+    size_t channel_idx = i / 2;
+    size_t dev_idx = i % 2;
+    char name[5] = { 0 };
+    ksprint(name, "hd%c", 'a' + channel_idx + dev_idx);
+
+    __disk_init(&ide_channel_get(channel_idx)->devices[dev_idx],
+                name,
+                ide_channel_get(channel_idx),
+                dev_idx);
+  }
 
   KINFO("disk init done");
 }
@@ -37,7 +65,7 @@ init_disk(void)
 void
 disk_identify(struct disk* disk)
 {
-  char buf[BOOT_SEC_SIZE] = { 0 };
+  u8 buf[BOOT_SEC_SIZE] = { 0 };
   ide_select_device(disk->channel, disk->dev_id);
   ide_send_cmd(disk->channel, IDE_CMD_IDENTIFY);
 
@@ -46,4 +74,5 @@ disk_identify(struct disk* disk)
   }
 
   ide_read_sector(disk->channel, buf, 1);
+  disk->sec_cnt = *(u32*)(buf + 120);
 }
