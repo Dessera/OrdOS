@@ -1,6 +1,7 @@
 #include "kernel/device/disk/ide.h"
 #include "kernel/assert.h"
 #include "kernel/boot.h"
+#include "kernel/config/device.h"
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/task/sync.h"
 #include "kernel/task/task.h"
@@ -30,7 +31,7 @@ __ide_channel_init(struct ide_channel* channel,
                    u16 base_port,
                    u32 irq)
 {
-  kstrcpy(channel->name, name);
+  kstrncpy(channel->name, name, DEVICE_IDE_CHANNEL_NAME_SIZE);
   channel->base_port = base_port;
   channel->irq = irq;
   channel->irq_ready = true;

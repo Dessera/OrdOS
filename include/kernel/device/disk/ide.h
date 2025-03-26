@@ -1,7 +1,7 @@
 #pragma once
 
-#define IDE_CHANNEL_NAME_SIZE 8
 #define IDE_CHANNEL_MAX_CNT 2
+#define IDE_CHANNEL_DEVICE_MAX_CNT 2
 
 #define IDE0_BASE_PORT 0x1f0
 #define IDE1_BASE_PORT 0x170
@@ -16,6 +16,7 @@
 #ifndef __ASSEMBLER__
 
 #include "kernel/assert.h"
+#include "kernel/config/device.h"
 #include "kernel/device/disk/disk.h"
 #include "kernel/task/sync.h"
 #include "lib/types.h"
@@ -28,7 +29,7 @@
 
 struct ide_channel
 {
-  char name[IDE_CHANNEL_NAME_SIZE];
+  char name[DEVICE_IDE_CHANNEL_NAME_SIZE];
   u16 base_port;
   u32 irq;
 

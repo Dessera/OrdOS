@@ -1,6 +1,7 @@
 #include "kernel/device/disk/disk.h"
 #include "kernel/assert.h"
 #include "kernel/boot.h"
+#include "kernel/config/device.h"
 #include "kernel/device/disk/ide.h"
 #include "kernel/device/disk/partition.h"
 #include "kernel/log.h"
@@ -9,7 +10,9 @@
 #include "kernel/utils/string.h"
 #include "lib/types.h"
 
-static struct disk __disks[IDE_CHANNEL_MAX_CNT * 2] = { 0 };
+static struct disk __disks[IDE_CHANNEL_MAX_CNT * IDE_CHANNEL_DEVICE_MAX_CNT] = {
+  0
+};
 
 static void
 __disk_identify(struct disk* disk)
@@ -32,7 +35,7 @@ __disk_init(struct disk* disk,
             struct ide_channel* channel,
             u8 dev_id)
 {
-  kstrcpy(disk->name, name);
+  kstrncpy(disk->name, name, DEVICE_DISK_NAME_SIZE);
   disk->channel = channel;
   disk->dev_id = dev_id;
 
@@ -43,16 +46,16 @@ static void
 __init_disk(void)
 {
   AUTO disk_cnt = disk_get_cnt();
+  char name[5] = { 0 };
 
   for (size_t i = 0; i < disk_cnt; i++) {
-    if (i >= IDE_CHANNEL_MAX_CNT * 2) {
+    if (i >= IDE_CHANNEL_MAX_CNT * IDE_CHANNEL_DEVICE_MAX_CNT) {
       break;
     }
 
     size_t channel_idx = i / 2;
     size_t dev_idx = i % 2;
-    char name[5] = { 0 };
-    ksprint(name, "hd%c", 'a' + channel_idx + dev_idx);
+    ksprint(name, "sd%c", 'a' + channel_idx + dev_idx);
 
     __disk_init(&__disks[i], name, ide_channel_get(channel_idx), dev_idx);
   }

@@ -12,6 +12,16 @@ kstrcpy(char* dest, const char* src)
   return dest_ptr;
 }
 
+char*
+kstrncpy(char* dest, const char* src, size_t n)
+{
+  KASSERT(dest != NULL && src != NULL, "dest and src must not be NULL");
+  char* dest_ptr = dest;
+  while (n-- && (*dest++ = *src++))
+    ;
+  return dest_ptr;
+}
+
 size_t
 kstrlen(const char* str)
 {

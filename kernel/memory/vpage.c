@@ -174,8 +174,9 @@ vpage_link_addr(uintptr_t vaddr)
     pt = (u32*)MEM_KERNEL_VADDR(PAGE_PADDR(pde));
   }
 
-  AUTO pte = pt[PAGE_PTE_INDEX(vaddr)];
-  KASSERT(!(PAGE_P_MASK & pte), "try to link vaddr %p twice", vaddr);
+  KASSERT(!(PAGE_P_MASK & pt[PAGE_PTE_INDEX(vaddr)]),
+          "try to link vaddr %p twice",
+          vaddr);
 
   pt[PAGE_PTE_INDEX(vaddr)] = PAGE_PTE_DESC(page_get_phys(ppage), 1, 1, 1);
 

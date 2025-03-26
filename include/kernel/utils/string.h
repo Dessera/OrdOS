@@ -13,6 +13,17 @@ char*
 kstrcpy(char* dest, const char* src);
 
 /**
+ * @brief Copy a string, but only copy up to n characters
+ *
+ * @param dest Destination buffer
+ * @param src Source string
+ * @param n Maximum number of characters to copy
+ * @return char* Pointer to the destination buffer
+ */
+char*
+kstrncpy(char* dest, const char* src, size_t n);
+
+/**
  * @brief Get the length of a string
  *
  * @param str String to get the length of

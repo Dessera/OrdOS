@@ -1,11 +1,21 @@
 #pragma once
 
+#include "kernel/config/interrupt.h"
 #include "lib/types.h"
 
 /**
  * @brief Interrupt handler function pointer type
  */
 typedef void (*interrupt_handler_t)(u32);
+
+enum intr_type
+{
+  INTR_TYPE_TIMER = 0x20,
+  INTR_TYPE_KEYBOARD = 0x21,
+  INTR_TYPE_IDE0 = 0x2E,
+  INTR_TYPE_IDE1 = 0x2F,
+  INTR_TYPE_SYSCALL = 0x80,
+};
 
 /**
  * @brief Initializes the interrupt subsystem
