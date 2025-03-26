@@ -64,6 +64,7 @@ __disk_partition_scan_impl(struct disk* disk,
       partition->disk = disk;
       partition->sec_start = partition_table[part_idx].start_lba + sec_start;
       partition->sec_cnt = partition_table[part_idx].sec_cnt;
+      partition->logical = sec_start != 0;
       ksprint(partition->name, "%s%u", disk->name, *pt_cnt);
       list_add_tail(&partition->node, &__partition_list);
 

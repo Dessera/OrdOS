@@ -50,6 +50,9 @@ disk_get(size_t index);
 void
 disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf);
 
+void
+disk_write(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf);
+
 /**
  * @brief Get disk count
  *

@@ -1,5 +1,4 @@
 #include "kernel/device/disk/disk.h"
-#include "kernel/assert.h"
 #include "kernel/boot.h"
 #include "kernel/config/device.h"
 #include "kernel/device/disk/ide.h"
@@ -17,9 +16,12 @@ static struct disk __disks[IDE_CHANNEL_MAX_CNT * IDE_CHANNEL_DEVICE_MAX_CNT] = {
 static void
 __disk_identify(struct disk* disk)
 {
+  AUTO channel = disk->channel;
   u8 buf[BOOT_SEC_SIZE] = { 0 };
-  ide_select_device(disk->channel, disk->dev_id);
-  ide_send_cmd(disk->channel, IDE_CMD_IDENTIFY);
+  ide_select_device(channel, disk->dev_id);
+  ide_send_cmd(channel, IDE_CMD_IDENTIFY);
+
+  semaphore_down_nint(&channel->irq_sem);
 
   if (!ide_is_device_ready(disk->channel)) {
     KPANIC("unexpected device state when identifying disk %s", disk->name);
@@ -108,6 +110,7 @@ disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
       channel, disk->dev_id, sec_start + sec_done_cnt, sec_to_rd);
 
     ide_send_cmd(channel, IDE_CMD_READ);
+    semaphore_down_nint(&channel->irq_sem);
 
     if (!ide_is_device_ready(channel)) {
       KPANIC("unexpected device state when reading disk %s", disk->name);
@@ -116,6 +119,38 @@ disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
     ide_read_sector(channel, buf + sec_done_cnt * BOOT_SEC_SIZE, sec_to_rd);
 
     sec_done_cnt += sec_to_rd;
+  }
+
+  mutex_unlock(&channel->lock);
+}
+
+void
+disk_write(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
+{
+  AUTO channel = disk->channel;
+
+  mutex_lock(&channel->lock);
+
+  ide_select_device(channel, disk->dev_id);
+
+  size_t sec_done_cnt = 0;
+  while (sec_done_cnt < sec_cnt) {
+    size_t sec_to_wr =
+      sec_done_cnt + 256 > sec_cnt ? sec_cnt - sec_done_cnt : 256;
+
+    ide_select_sector(
+      channel, disk->dev_id, sec_start + sec_done_cnt, sec_to_wr);
+
+    ide_send_cmd(channel, IDE_CMD_WRITE);
+
+    if (!ide_is_device_ready(channel)) {
+      KPANIC("unexpected device state when writing disk %s", disk->name);
+    }
+
+    ide_write_sector(channel, buf + sec_done_cnt * BOOT_SEC_SIZE, sec_to_wr);
+
+    semaphore_down_nint(&channel->irq_sem); // wait for write to finish
+    sec_done_cnt += sec_to_wr;
   }
 
   mutex_unlock(&channel->lock);

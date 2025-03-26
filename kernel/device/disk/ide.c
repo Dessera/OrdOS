@@ -100,7 +100,6 @@ ide_send_cmd(struct ide_channel* channel, enum ide_cmd cmd)
 {
   channel->irq_ready = false;
   outb(ide_channel_cmd(channel), cmd);
-  semaphore_down_nint(&channel->irq_sem);
 }
 
 bool
