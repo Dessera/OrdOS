@@ -5,7 +5,6 @@
 #include "kernel/memory/gdt.h"
 #include "kernel/memory/e820.h"
 #include "kernel/info.h"
-#include "kernel/device/disk.h"
 #include "kernel/device/disk/ide.h"
 
 .code16
@@ -128,32 +127,32 @@ _prot_load_kernel:
 
   // store number of sectors
   pushl %eax
-  movw $DISK_CMD_SECS, %dx
+  movw $IDE0_SECCNT_PORT, %dx
   movb %cl, %al
   outb %al, %dx
   popl %eax
 
   // store LBA address
-  movw $DISK_CMD_LBALOW, %dx
+  movw $IDE0_LBALO_PORT, %dx
   outb %al, %dx
 
-  movw $DISK_CMD_LBAMID, %dx
+  movw $IDE0_LBAMID_PORT, %dx
   shrl $8, %eax
   outb %al, %dx
 
-  movw $DISK_CMD_LBAHIGH, %dx
+  movw $IDE0_LBAHI_PORT, %dx
   shrl $8, %eax
   outb %al, %dx
 
-  movw $DISK_CMD_LBAEX, %dx
+  movw $IDE0_LBAEX_PORT, %dx
   shrl $8, %eax
   andb $0x0f, %al
   orb $0xe0, %al
   outb %al, %dx
 
   // read command
-  movw $DISK_CMD_CTRL, %dx
-  movb $DISK_CMD_READ, %al
+  movw $IDE0_CTRL_PORT, %dx
+  movb $IDE_CMD_READ, %al
   outb %al, %dx
 
   call _prot_disk_wait
@@ -180,11 +179,11 @@ _prot_load_kernel_loop:
 _prot_disk_wait:
   pushw %dx
   pushw %ax
-  movw $DISK_CMD_CTRL, %dx
+  movw $IDE0_CTRL_PORT, %dx
 _prot_disk_wait_loop:
   inb %dx, %al
-  andb $DISK_STATUS_READY | DISK_STATUS_BUSY, %al
-  cmpb $DISK_STATUS_READY, %al
+  andb $IDE_STATUS_BIT_DRDY | IDE_STATUS_BIT_BSY, %al
+  cmpb $IDE_STATUS_BIT_DRDY, %al
   jne _prot_disk_wait_loop
   popw %ax
   popw %dx

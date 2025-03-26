@@ -247,10 +247,6 @@ task_unpark(struct task* task)
 {
   bool intr_status = intr_lock();
 
-  KASSERT(task->status == TASK_STATUS_BLOCKED,
-          "invalid status when resuming, received %u",
-          (u32)(task->status));
-
   if (task->status == TASK_STATUS_READY) {
     return;
   }

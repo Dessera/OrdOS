@@ -1,27 +1,12 @@
 #pragma once
 
+#include "kernel/device/disk/ide.h"
 #include "kernel/memory/memory.h"
 #include "lib/types.h"
 
 #define DISK_NAME_SIZE 8
 
-#define DISK_PARTITION_NAME_SIZE 8
-
 #define DISK_CNT_ADDR 0x475
-
-struct ide_channel;
-struct disk;
-
-struct disk_partition
-{
-  char name[DISK_PARTITION_NAME_SIZE];
-  size_t sec_start;
-  size_t sec_cnt;
-
-  struct disk* disk;
-
-  // TODO: file system
-};
 
 struct disk
 {
@@ -30,18 +15,15 @@ struct disk
   size_t dev_id;
   size_t sec_cnt;
 
-  struct disk_partition partitions[4];
-  struct disk_partition logical_partitions[8];
+  // struct disk_partition partitions[4];
+  // struct disk_partition logical_partitions[8];
 };
 
 void
 init_disk(void);
 
 void
-disk_identify(struct disk* disk);
-
-void
-disk_scan_partitions(struct disk* disk);
+disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf);
 
 static FORCE_INLINE u8
 disk_get_cnt(void)

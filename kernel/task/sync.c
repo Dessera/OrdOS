@@ -117,3 +117,39 @@ semaphore_up(struct semaphore* sem)
 
   spin_unlock(&sem->guard);
 }
+
+void
+semaphore_down_nint(struct semaphore* sem)
+{
+  bool istate = intr_lock();
+
+  if (sem->value > 0) {
+    // the semaphore is available
+    sem->value--;
+  } else {
+    // the semaphore is not available
+    struct task* task = task_get_current();
+    list_add_tail(&task->node, &sem->wait_queue);
+    task_park();
+  }
+
+  intr_unlock(istate);
+}
+
+void
+semaphore_up_nint(struct semaphore* sem)
+{
+  bool istate = intr_lock();
+
+  if (list_empty(&sem->wait_queue)) {
+    // no task is waiting
+    sem->value++;
+  } else {
+    // there are tasks waiting
+    struct task* task =
+      LIST_ENTRY(list_pop(&sem->wait_queue), struct task, node);
+    task_unpark(task);
+  }
+
+  intr_unlock(istate);
+}

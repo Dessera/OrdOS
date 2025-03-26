@@ -56,4 +56,10 @@ void
 semaphore_down(struct semaphore* sem);
 
 void
+semaphore_down_nint(struct semaphore* sem);
+
+void
 semaphore_up(struct semaphore* sem);
+
+void
+semaphore_up_nint(struct semaphore* sem);

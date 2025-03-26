@@ -10,7 +10,7 @@ USER_DIR = user
 LIB_DIR = lib
 
 DISK_NAME = disk.img
-DISK_SIZE = 1M
+DISK_SIZE = 80M
 DISK_PARTITIONS = disk.partitions
 DISK_IMG = $(BUILD_DIR)/$(DISK_NAME)
 

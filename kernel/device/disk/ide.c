@@ -18,7 +18,7 @@ __ide_irq_handler(u32 irq)
 
   if (!channel->irq_ready) {
     channel->irq_ready = true;
-    semaphore_up(&channel->irq_sem);
+    semaphore_up_nint(&channel->irq_sem);
 
     inb(ide_channel_status(channel));
   }
@@ -75,11 +75,31 @@ ide_select_device(struct ide_channel* channel, size_t dev_index)
 }
 
 void
+ide_select_sector(struct ide_channel* channel,
+                  size_t dev_index,
+                  size_t sec_start,
+                  size_t sec_cnt)
+{
+  outb(ide_channel_sec_cnt(channel), sec_cnt);
+
+  outb(ide_channel_lba_lo(channel), sec_start & 0xff);
+  outb(ide_channel_lba_mid(channel), (sec_start >> 8) & 0xff);
+  outb(ide_channel_lba_hi(channel), (sec_start >> 16) & 0xff);
+
+  u8 payload = IDE_DEV_BIT_LBA | IDE_DEV_BIT_MBS;
+  if (dev_index != 0) {
+    payload |= IDE_DEV_BIT_DEV;
+  }
+
+  outb(ide_channel_dev(channel), payload | (sec_start >> 24));
+}
+
+void
 ide_send_cmd(struct ide_channel* channel, enum ide_cmd cmd)
 {
   channel->irq_ready = false;
   outb(ide_channel_cmd(channel), cmd);
-  semaphore_down(&channel->irq_sem);
+  semaphore_down_nint(&channel->irq_sem);
 }
 
 bool
@@ -101,4 +121,10 @@ void
 ide_read_sector(struct ide_channel* channel, void* buffer, size_t sector)
 {
   insw(ide_channel_data(channel), buffer, sector * BOOT_SEC_SIZE / 2);
+}
+
+void
+ide_write_sector(struct ide_channel* channel, const void* buffer, size_t sector)
+{
+  outsw(ide_channel_data(channel), buffer, sector * BOOT_SEC_SIZE / 2);
 }
