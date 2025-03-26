@@ -16,11 +16,8 @@ sys_getpid(void)
 
 // TODO: implement a real file system
 static size_t
-sys_write(size_t fd, const char* buf, size_t len)
+sys_write(size_t, const char* buf, size_t)
 {
-  (void)fd;
-  (void)len;
-
   kputs_nint(buf);
   return kstrlen(buf);
 }
@@ -34,12 +31,17 @@ init_syscall(void)
   KDEBUG("syscall: %u", INTR_SYSCALL_SIZE);
 }
 
-void*
-syscall_common_handler(u32 index, void* arg1, void* arg2, void* arg3);
-
-void*
-syscall_common_handler(u32 index, void* arg1, void* arg2, void* arg3)
+DECLARE_WITH_PROTOTYPE(void*,
+                       syscall_common_handler,
+                       u32 index,
+                       void* arg1,
+                       void* arg2,
+                       void* arg3)
 {
+  if (index >= INTR_SYSCALL_SIZE) {
+    KERROR_NINT("syscall: invalid index: %u", index);
+    return NULL;
+  }
   syscall_handler_t handler = __sysall_table[index];
   if (handler != NULL) {
     return handler(arg1, arg2, arg3);

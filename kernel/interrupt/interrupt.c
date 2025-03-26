@@ -46,7 +46,7 @@ intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
 bool
 intr_get_status(void)
 {
-  return (eflags() & INTR_STATUS_MASK) ? true : false;
+  return eflags() & INTR_STATUS_MASK;
 }
 
 bool

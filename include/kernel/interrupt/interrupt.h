@@ -10,6 +10,7 @@ typedef void (*interrupt_handler_t)(u32);
 
 enum intr_type
 {
+  INTR_TYPE_PAGE_FAULT = 0x0e,
   INTR_TYPE_TIMER = 0x20,
   INTR_TYPE_KEYBOARD = 0x21,
   INTR_TYPE_IDE0 = 0x2E,

@@ -37,14 +37,14 @@ KSTATIC_ASSERT(ARRAY_SIZE(__exception_label) == INTR_RESERVE_SIZE,
 static void
 __exception_handler(u32 intr)
 {
-  KPANIC("kernel panic because of %s !", __exception_label[intr]);
+  KPANIC("kernel panic because of %s !", exception_get_name(intr));
 }
 
 static void
 __page_fault_handler(u32 intr)
 {
   KPANIC("kernel panic because of %s, error addr: 0x%x !",
-         __exception_label[intr],
+         exception_get_name(intr),
          rcr2());
 }
 
@@ -52,7 +52,7 @@ void
 init_exception(void)
 {
   for (int i = 0; i < INTR_RESERVE_SIZE; i++) {
-    if (i == 14) { // page fault
+    if (i == INTR_TYPE_PAGE_FAULT) { // page fault
       intr_register_handler(i, __page_fault_handler);
     } else {
       intr_register_handler(i, __exception_handler);
@@ -60,4 +60,13 @@ init_exception(void)
   }
 
   KDEBUG("exceptions: %u", INTR_RESERVE_SIZE);
+}
+
+FORCE_INLINE char*
+exception_get_name(u32 exception)
+{
+  if (exception >= INTR_RESERVE_SIZE) {
+    return "Unknown Exception";
+  }
+  return __exception_label[exception];
 }
