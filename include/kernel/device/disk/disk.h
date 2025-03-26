@@ -5,8 +5,7 @@
 #include "lib/types.h"
 
 #define DISK_NAME_SIZE 8
-
-#define DISK_CNT_ADDR 0x475
+#define DISK_KERNEL_INDEX 0
 
 struct disk
 {
@@ -14,13 +13,16 @@ struct disk
   struct ide_channel* channel;
   size_t dev_id;
   size_t sec_cnt;
-
-  // struct disk_partition partitions[4];
-  // struct disk_partition logical_partitions[8];
 };
 
 void
 init_disk(void);
+
+size_t
+disk_get_index(struct disk* disk);
+
+struct disk*
+disk_get(size_t index);
 
 void
 disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf);
@@ -28,5 +30,5 @@ disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf);
 static FORCE_INLINE u8
 disk_get_cnt(void)
 {
-  return *(u8*)MEM_KERNEL_VADDR(DISK_CNT_ADDR);
+  return *(u8*)MEM_KERNEL_VADDR(0x475);
 }

@@ -1,4 +1,5 @@
 #include "kernel/device/disk/disk.h"
+#include "kernel/assert.h"
 #include "kernel/boot.h"
 #include "kernel/device/disk/ide.h"
 #include "kernel/device/disk/partition.h"
@@ -60,11 +61,30 @@ __init_disk(void)
 void
 init_disk(void)
 {
+  KINFO("initializing disk");
+
   init_ide();
   __init_disk();
   init_partition();
+}
 
-  KINFO("disk init done");
+size_t
+disk_get_index(struct disk* disk)
+{
+  size_t idx = disk - __disks;
+  if (idx > disk_get_cnt()) {
+    KPANIC("invalid disk index %u when getting disk index", idx);
+  }
+  return idx;
+}
+
+struct disk*
+disk_get(size_t index)
+{
+  if (index >= disk_get_cnt()) {
+    KPANIC("invalid disk index %u when getting disk", index);
+  }
+  return &__disks[index];
 }
 
 void
