@@ -211,6 +211,7 @@ task_set_current(struct task* task)
 FORCE_INLINE struct task*
 task_get_current(void)
 {
+  KASSERT(__current_task != nullptr, "unable to get current task (null)");
   return __current_task;
 }
 

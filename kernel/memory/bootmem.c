@@ -29,8 +29,6 @@ init_bootmem(void)
 void*
 bootmem_alloc(size_t size)
 {
-  KASSERT(__free_mem != 0, "bootmem is not initialized");
-
   uintptr_t base = ALIGN_UP(__free_mem, size);
   __free_mem = base + size;
 
@@ -47,12 +45,13 @@ bootmem_alloc(size_t size)
 void
 bootmem_pre_init_pages(struct page* pages, size_t page_cnt)
 {
+  KASSERT(pages != nullptr, "invalid pages when reserving bootmem pages");
   for (uintptr_t addr = BOOT_KERNEL_START; addr < __free_mem;
        addr += MEM_PAGE_SIZE) {
     size_t pg_idx = addr / MEM_PAGE_SIZE;
     if (pg_idx >= page_cnt) {
       break;
     }
-    pages[pg_idx].reserved = 1;
+    pages[pg_idx].reserved = true;
   }
 }

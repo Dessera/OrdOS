@@ -63,7 +63,12 @@ buddy_order_to_page_cnt(u8 order)
 static FORCE_INLINE struct page*
 buddy_page_to_buddy(struct page* page, u8 order)
 {
-  return page_get(page_get_index(page) ^ (1 << order));
+  AUTO index = page_get_index(page) ^ (1 << order);
+  if (page_index_is_overflow(index)) {
+    return nullptr;
+  } else {
+    return page_get(page_get_index(page) ^ (1 << order));
+  }
 }
 
 /**

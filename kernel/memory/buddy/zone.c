@@ -1,4 +1,6 @@
 #include "kernel/memory/buddy/zone.h"
+#include "kernel/assert.h"
+#include "kernel/log.h"
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/e820.h"
@@ -82,12 +84,17 @@ zone_get(enum mem_type type)
 FORCE_INLINE enum mem_type
 zone_get_type(struct mem_zone* zone)
 {
-  return zone - __zones;
+  size_t mtype = zone - __zones;
+  KASSERT(mtype < ARRAY_SIZE(__zones), "invalid memory zone type");
+  return (enum mem_type)mtype;
 }
 
 void
 area_add_page(struct mem_area* area, struct page* page)
 {
+  KASSERT(area != nullptr, "invalid memory area when adding page");
+  KASSERT(page != nullptr, "invalid page when adding to memory area");
+
   list_add(&page->node, &area->mem_blocks);
   area->blocks_free++;
   page->buddy = true;
@@ -96,6 +103,9 @@ area_add_page(struct mem_area* area, struct page* page)
 void
 area_remove_page(struct mem_area* area, struct page* page)
 {
+  KASSERT(area != nullptr, "invalid memory area when removing page");
+  KASSERT(page != nullptr, "invalid page when removing from memory area");
+
   list_del(&page->node);
   area->blocks_free--;
   page->buddy = false;

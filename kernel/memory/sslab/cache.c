@@ -13,9 +13,9 @@ struct sslab_cache*
 sslab_cache_create(size_t obj_size)
 {
   AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
-  if (page == NULL) {
+  if (page == nullptr) {
     KWARNING("failed to allocate page for sslab cache");
-    return NULL;
+    return nullptr;
   }
 
   kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
@@ -44,7 +44,7 @@ struct sslab_object*
 sslab_cache_alloc(struct sslab_cache* cache)
 {
   if (cache->obj_free == 0) {
-    return NULL;
+    return nullptr;
   }
 
   struct sslab_object* obj = (void*)cache + cache->object;

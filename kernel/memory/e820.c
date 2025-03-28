@@ -1,4 +1,5 @@
 #include "kernel/memory/e820.h"
+#include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
@@ -39,7 +40,7 @@ e820_get_entries(void)
 size_t
 e820_get_entries_cnt(void)
 {
-  return (size_t)(*MEM_GET_WITH_KERNEL_VSTART(&_asm_mem_nr));
+  return (*MEM_GET_WITH_KERNEL_VSTART(&_asm_mem_nr));
 }
 
 uintptr_t
@@ -77,8 +78,10 @@ e820_get_pages_cnt(void)
 void
 e820_pre_init_pages(struct page* pages, size_t pages_cnt)
 {
-  struct e820_entry* mem_entries = e820_get_entries();
-  size_t mem_cnt = e820_get_entries_cnt();
+  KASSERT(pages != nullptr, "invalid pages when reserving bootmem pages");
+
+  AUTO mem_entries = e820_get_entries();
+  AUTO mem_cnt = e820_get_entries_cnt();
 
   for (size_t i = 0; i < mem_cnt; i++) {
     if (mem_entries[i].type == E820_TYPE_RAM) {
@@ -92,7 +95,7 @@ e820_pre_init_pages(struct page* pages, size_t pages_cnt)
       if (pg_idx >= pages_cnt) {
         break;
       }
-      pages[pg_idx].reserved = 1;
+      pages[pg_idx].reserved = true;
     }
   }
 }

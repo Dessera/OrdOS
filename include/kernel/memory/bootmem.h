@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/memory/buddy/page.h"
-#include "lib/types.h"
+#include "lib/types.h" // IWYU pragma: keep
 
 /**
  * @brief Initializes the bootmem allocator
@@ -14,6 +14,7 @@ init_bootmem(void);
  *
  * @param size The size of the block to allocate
  * @return void* A pointer to the allocated block of memory
+ * @note The system will panic if the memory cannot be allocated
  */
 void*
 bootmem_alloc(size_t size);

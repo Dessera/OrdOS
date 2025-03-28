@@ -32,6 +32,9 @@ init_page(void);
 size_t
 page_get_index(struct page* page);
 
+bool
+page_index_is_overflow(size_t index);
+
 /**
  * @brief Get the page from the index
  *

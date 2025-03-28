@@ -39,7 +39,7 @@ buddy_free_page(struct page* page, u8 order)
   while (order < MEM_BUDDY_MAX_ORDER) {
     AUTO buddy = buddy_page_to_buddy(page, order);
 
-    if (!buddy->buddy || buddy->order != order) {
+    if (buddy == nullptr || !buddy->buddy || buddy->order != order) {
       break;
     }
 
@@ -75,7 +75,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
     alloc_order++;
   }
 
-  struct page* page = NULL;
+  struct page* page = nullptr;
 
   if (alloc_order > MEM_BUDDY_MAX_ORDER) {
     goto alloc_end;
@@ -95,7 +95,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
     area_add_page(area, page);
 
     page->order = alloc_order;
-    page += 1 << alloc_order;
+    page = buddy_page_to_buddy(page, alloc_order);
   }
 
   zone->pg_free -= buddy_order_to_page_cnt(order);

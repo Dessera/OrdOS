@@ -45,5 +45,5 @@ vpage_kernel_paddr(void);
  *
  * @param vaddr Virtual address to link
  */
-uintptr_t
+void*
 vpage_link_addr(uintptr_t vaddr);

@@ -4,7 +4,7 @@
 
 #ifndef __ASSEMBLER__
 
-#include "lib/types.h"
+#include "lib/types.h" // IWYU pragma: keep
 
 /**
  * @brief Get the kernel virtual address of an address
@@ -63,7 +63,7 @@ init_memory(void);
  * @param type memory type
  * @return char* string representation of the memory type
  */
-char*
+const char*
 mem_type_to_string(enum mem_type type);
 
 /**

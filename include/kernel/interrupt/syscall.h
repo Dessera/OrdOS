@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/types.h"
+#include "lib/types.h" // IWYU pragma: keep
 
 /**
  * @brief Common syscall handler
@@ -13,7 +13,7 @@ typedef void* (*syscall_handler_t)(void*, void*, void*);
 void
 init_syscall(void);
 
-ssize_t
+size_t
 sys_getpid(void);
 
 size_t

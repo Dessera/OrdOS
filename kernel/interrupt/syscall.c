@@ -10,15 +10,10 @@ static void* __sysall_table[INTR_SYSCALL_SIZE] = { 0 };
 
 // static const char* __syscall_name[INTR_SYSCALL_SIZE] = { "getpid", "write" };
 
-ssize_t
+size_t
 sys_getpid(void)
 {
-  AUTO cur = task_get_current();
-  if (cur != NULL) {
-    return cur->pid;
-  } else {
-    return NPOS;
-  }
+  return task_get_current()->pid;
 }
 
 // TODO: implement a real file system

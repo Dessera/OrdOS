@@ -1,5 +1,4 @@
 #include "kernel/memory/memory.h"
-
 #include "kernel/log.h"
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/buddy/buddy.h"
@@ -25,7 +24,7 @@ init_memory(void)
   init_sslab();
 }
 
-char*
+const char*
 mem_type_to_string(enum mem_type type)
 {
   switch (type) {
