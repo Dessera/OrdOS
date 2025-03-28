@@ -92,9 +92,6 @@ zone_get_type(struct mem_zone* zone)
 void
 area_add_page(struct mem_area* area, struct page* page)
 {
-  KASSERT(area != nullptr, "invalid memory area when adding page");
-  KASSERT(page != nullptr, "invalid page when adding to memory area");
-
   list_add(&page->node, &area->mem_blocks);
   area->blocks_free++;
   page->buddy = true;
@@ -103,9 +100,6 @@ area_add_page(struct mem_area* area, struct page* page)
 void
 area_remove_page(struct mem_area* area, struct page* page)
 {
-  KASSERT(area != nullptr, "invalid memory area when removing page");
-  KASSERT(page != nullptr, "invalid page when removing from memory area");
-
   list_del(&page->node);
   area->blocks_free--;
   page->buddy = false;

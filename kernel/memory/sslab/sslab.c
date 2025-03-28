@@ -18,6 +18,9 @@ init_sslab(void)
 void
 sslab_init(struct sslab* sslab, size_t obj_size)
 {
+  KASSERT(obj_size <= sslab_order_to_size(MEM_SSLAB_MAX_ORDER),
+          "too large object size to initialize sslab");
+
   list_init(&sslab->caches);
   spin_lock_init(&sslab->lock);
   sslab->obj_size = obj_size;
@@ -29,7 +32,7 @@ sslab_alloc(struct sslab* sslab)
   spin_lock(&sslab->lock);
 
   struct list_head* pos;
-  struct sslab_cache* cache = NULL;
+  struct sslab_cache* cache = nullptr;
   LIST_FOR_EACH(pos, &sslab->caches)
   {
     AUTO target_cache = LIST_ENTRY(pos, struct sslab_cache, node);
@@ -39,11 +42,11 @@ sslab_alloc(struct sslab* sslab)
     }
   }
 
-  void* obj = NULL;
+  void* obj = nullptr;
 
-  if (cache == NULL) {
+  if (cache == nullptr) {
     cache = sslab_cache_create(sslab->obj_size);
-    if (cache == NULL) {
+    if (cache == nullptr) {
       goto alloc_end;
     }
 
@@ -63,7 +66,7 @@ sslab_free(struct sslab* sslab, void* obj)
   spin_lock(&sslab->lock);
 
   struct list_head* pos;
-  struct sslab_cache* cache = NULL;
+  struct sslab_cache* cache = nullptr;
   LIST_FOR_EACH(pos, &sslab->caches)
   {
     AUTO target_cache = LIST_ENTRY(pos, struct sslab_cache, node);
@@ -73,7 +76,7 @@ sslab_free(struct sslab* sslab, void* obj)
     }
   }
 
-  KASSERT(cache != NULL, "free object that is not in this sslab");
+  KASSERT(cache != nullptr, "free object that is not in this sslab");
 
   sslab_cache_free(cache, obj);
 

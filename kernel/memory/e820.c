@@ -1,5 +1,4 @@
 #include "kernel/memory/e820.h"
-#include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
@@ -78,8 +77,6 @@ e820_get_pages_cnt(void)
 void
 e820_pre_init_pages(struct page* pages, size_t pages_cnt)
 {
-  KASSERT(pages != nullptr, "invalid pages when reserving bootmem pages");
-
   AUTO mem_entries = e820_get_entries();
   AUTO mem_cnt = e820_get_entries_cnt();
 

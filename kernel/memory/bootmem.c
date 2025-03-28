@@ -1,5 +1,4 @@
 #include "kernel/memory/bootmem.h"
-#include "kernel/assert.h"
 #include "kernel/config/boot.h"
 #include "kernel/config/memory.h"
 #include "kernel/log.h"
@@ -45,7 +44,6 @@ bootmem_alloc(size_t size)
 void
 bootmem_pre_init_pages(struct page* pages, size_t page_cnt)
 {
-  KASSERT(pages != nullptr, "invalid pages when reserving bootmem pages");
   for (uintptr_t addr = BOOT_KERNEL_START; addr < __free_mem;
        addr += MEM_PAGE_SIZE) {
     size_t pg_idx = addr / MEM_PAGE_SIZE;

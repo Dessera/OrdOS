@@ -5,6 +5,7 @@
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
+#include "kernel/memory/sslab/sslab.h"
 #include "kernel/utils/string.h"
 #include "lib/common.h"
 #include "lib/types.h"
@@ -12,6 +13,9 @@
 struct sslab_cache*
 sslab_cache_create(size_t obj_size)
 {
+  KASSERT(obj_size <= sslab_order_to_size(MEM_SSLAB_MAX_ORDER),
+          "object size too large when creating sslab cache");
+
   AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
   if (page == nullptr) {
     KWARNING("failed to allocate page for sslab cache");
@@ -59,8 +63,9 @@ sslab_cache_alloc(struct sslab_cache* cache)
 void
 sslab_cache_free(struct sslab_cache* cache, struct sslab_object* obj)
 {
+  KASSERT(sslab_object_in_cache(obj, cache), "sslab object not in cache");
+
   u16 index = (void*)obj - (void*)cache;
-  KASSERT(index < MEM_PAGE_SIZE, "sslab object index out of range");
 
   obj->next = cache->object;
   cache->object = index;

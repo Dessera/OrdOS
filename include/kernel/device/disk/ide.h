@@ -15,7 +15,6 @@
 
 #ifndef __ASSEMBLER__
 
-#include "kernel/assert.h"
 #include "kernel/config/device.h"
 #include "kernel/device/disk/disk.h"
 #include "kernel/task/sync.h"
@@ -38,8 +37,6 @@ struct ide_channel
   struct semaphore irq_sem;
   bool irq_ready;
 };
-
-KSTATIC_ASSERT(IDE_CHANNEL_MAX_CNT == 2, "only two ide channels supported");
 
 enum ide_dev_bit : u8
 {

@@ -1,5 +1,5 @@
 #include "kernel/device/disk/disk.h"
-#include "kernel/info.h"
+#include "kernel/info.h" // IWYU pragma: keep
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"

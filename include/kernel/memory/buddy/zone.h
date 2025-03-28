@@ -1,6 +1,5 @@
 #pragma once
 
-#include "kernel/assert.h"
 #include "kernel/config/memory.h"
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
@@ -8,9 +7,6 @@
 #include "kernel/utils/list_head.h"
 
 #define MEM_ZONE_SIZE 3
-
-KSTATIC_ASSERT(MEM_ZONE_SIZE == MEM_ZONE_HIGH + 1,
-               "MEM_ZONE_SIZE is not correct");
 
 /**
  * @brief Memory area
