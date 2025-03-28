@@ -11,12 +11,12 @@ extern void* _asm_intr_vecs[INTR_IDT_SIZE];
 
 static struct idt_desc __idt[INTR_IDT_SIZE];
 
-void
-idt_desc_init(struct idt_desc* desc,
-              void* entry,
-              u16 sel,
-              enum idt_desc_type type,
-              enum dpl dpl)
+static void
+__idt_desc_init(struct idt_desc* desc,
+                void* entry,
+                u16 sel,
+                enum idt_desc_type type,
+                enum dpl dpl)
 {
   desc->offs_hb = (u16)((u32)entry >> 16);
   desc->offs_lb = (u16)((u32)entry & 0xffff);
@@ -30,19 +30,19 @@ init_idt(void)
 {
   // other interrupts
   for (u16 i = 0; i < INTR_IDT_SIZE; i++) {
-    idt_desc_init(&__idt[i],
-                  _asm_intr_vecs[i],
-                  GDT_KCODE_SELECTOR,
-                  IDT_DESC_TYPE_INT,
-                  DPL_KERNEL);
+    __idt_desc_init(&__idt[i],
+                    _asm_intr_vecs[i],
+                    GDT_KCODE_SELECTOR,
+                    IDT_DESC_TYPE_INT,
+                    DPL_KERNEL);
   }
 
   // syscall
-  idt_desc_init(&__idt[INTR_TYPE_SYSCALL],
-                _asm_intr_vecs[INTR_TYPE_SYSCALL],
-                GDT_KCODE_SELECTOR,
-                IDT_DESC_TYPE_INT,
-                DPL_USER);
+  __idt_desc_init(&__idt[INTR_TYPE_SYSCALL],
+                  _asm_intr_vecs[INTR_TYPE_SYSCALL],
+                  GDT_KCODE_SELECTOR,
+                  IDT_DESC_TYPE_INT,
+                  DPL_USER);
 
   lidt(idt_get_ptr(__idt, ARRAY_SIZE(__idt)));
 

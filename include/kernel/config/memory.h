@@ -7,7 +7,7 @@
 
 #define MEM_BUDDY_MAX_ORDER 10 // 4096 kb
 
-#define MEM_SSLAB_MAX_ORDER 10 // 1024 kb
+#define MEM_SSLAB_MAX_ORDER 10 // 1024 bytes
 
 #define MEM_PAGE_SIZE 0x1000
 

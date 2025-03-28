@@ -3,7 +3,6 @@
 #include "kernel/memory/bootmem.h"
 #include "kernel/memory/e820.h"
 #include "kernel/memory/memory.h"
-#include "kernel/utils/string.h"
 #include "lib/common.h"
 #include "lib/types.h"
 
@@ -15,7 +14,6 @@ init_page(void)
   uintptr_t mem_size = e820_get_memory_size();
   size_t mem_pages = DIV_DOWN(mem_size, MEM_PAGE_SIZE);
   __pages = bootmem_alloc((sizeof(struct page) * mem_pages));
-  kmemset(__pages, 0, sizeof(struct page) * mem_pages);
 
   e820_pre_init_pages(__pages, mem_pages);
   bootmem_pre_init_pages(__pages, mem_pages);

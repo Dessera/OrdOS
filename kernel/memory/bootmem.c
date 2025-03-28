@@ -6,6 +6,7 @@
 #include "kernel/memory/e820.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/compiler.h"
+#include "kernel/utils/string.h"
 #include "lib/common.h"
 #include "lib/types.h"
 
@@ -37,7 +38,10 @@ bootmem_alloc(size_t size)
     KPANIC("bootmem is exhausted, alloc %x bytes failed", size);
   }
 
-  return (void*)MEM_KERNEL_VADDR(base);
+  void* ptr = (void*)MEM_KERNEL_VADDR(base);
+  kmemset(ptr, 0, size);
+
+  return ptr;
 }
 
 void

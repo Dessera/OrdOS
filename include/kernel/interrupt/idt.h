@@ -1,6 +1,5 @@
 #pragma once
 
-#include "kernel/defs.h"
 #include "lib/types.h"
 
 /**
@@ -28,22 +27,6 @@ struct idt_desc
  */
 void
 init_idt(void);
-
-/**
- * @brief Initializes an IDT descriptor
- *
- * @param desc IDT descriptor
- * @param entry Interrupt handler
- * @param sel Segment selector
- * @param type IDT descriptor type
- * @param dpl Descriptor privilege level
- */
-void
-idt_desc_init(struct idt_desc* desc,
-              void* entry,
-              u16 sel,
-              enum idt_desc_type type,
-              enum dpl dpl);
 
 /**
  * @brief Gets the register pointer to the IDT

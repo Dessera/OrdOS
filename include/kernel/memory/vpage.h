@@ -9,14 +9,7 @@
 
 #define PAGE_PADDR(addr) ((addr) & ~(MEM_PAGE_SIZE - 1))
 
-#define PAGE_PDE_P(sign) (sign)
-#define PAGE_PDE_RW(sign) ((sign) << 1)
-#define PAGE_PDE_US(sign) ((sign) << 2)
-
-#define PAGE_P_MASK (PAGE_PDE_P(1))
-
-#define PAGE_PDE_DESC(base, p, w, u)                                           \
-  ((base) | PAGE_PDE_P(p) | PAGE_PDE_RW(w) | PAGE_PDE_US(u))
+#define PAGE_PDE_DESC(base, p, w, u) ((base) | (p) | ((w) << 1) | ((u) << 2))
 #define PAGE_PTE_DESC(base, p, w, u) PAGE_PDE_DESC(base, p, w, u)
 
 #define PAGE_PDE_INDEX(addr) ((addr) >> 22)
