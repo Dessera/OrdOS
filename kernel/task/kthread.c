@@ -1,18 +1,31 @@
 #include "kernel/task/kthread.h"
-#include "kernel/assert.h"
 #include "kernel/config/task.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
 #include "kernel/memory/vpage.h"
 #include "kernel/task/task.h"
+#include "lib/asm.h"
 
 static struct task* __kmain_task;
+static struct task* __idle_task;
+
+static void
+__task_idle_entry(void*)
+{
+  while (true) {
+    task_park();
+    intr_set_status(true);
+    hlt();
+  }
+}
 
 static void
 __inin_kmain(void)
 {
   __kmain_task = kmalloc(sizeof(struct task));
-  KASSERT(__kmain_task != NULL, "failed to allocate memory for kmain task");
+  if (__kmain_task == nullptr) {
+    KPANIC("failed to allocate memory for kmain task");
+  }
 
   task_init(__kmain_task, TASK_KTHREAD_MAIN_NAME, TASK_DEFAULT_PRIORITY);
   __kmain_task->page_table = vpage_kernel_paddr();
@@ -22,10 +35,21 @@ __inin_kmain(void)
   task_set_current(__kmain_task);
 }
 
+static void
+__init_idle(void)
+{
+  __idle_task = kthread_create(
+    TASK_IDLE_NAME, TASK_IDLE_PRIORITY, __task_idle_entry, nullptr);
+  if (__idle_task == nullptr) {
+    KPANIC("failed to create idle task");
+  }
+}
+
 void
 init_kthread(void)
 {
   __inin_kmain();
+  __init_idle();
 }
 
 struct task*
@@ -35,7 +59,7 @@ kthread_create(char* name, u8 priority, task_entry_t function, void* arg)
   struct task* task = kmalloc(sizeof(struct task));
   if (!task) {
     KWARNING("failed to allocate memory for task %s", name);
-    return NULL;
+    return nullptr;
   }
 
   // initialize the task
@@ -45,7 +69,7 @@ kthread_create(char* name, u8 priority, task_entry_t function, void* arg)
   bool res = task_init_stack(task, function, arg);
   if (!res) {
     kfree(task);
-    return NULL;
+    return nullptr;
   }
 
   // set the page table (kernel space)
@@ -56,4 +80,10 @@ kthread_create(char* name, u8 priority, task_entry_t function, void* arg)
   task_push(task);
 
   return task;
+}
+
+struct task*
+kthread_get_idle(void)
+{
+  return __idle_task;
 }

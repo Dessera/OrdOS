@@ -2,7 +2,7 @@
 #include "kernel/config/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/task/task.h"
-#include "kernel/utils/string.h"
+#include "lib/string.h"
 #include "lib/syscall.h"
 #include "lib/types.h"
 
@@ -21,7 +21,7 @@ size_t
 sys_write(size_t, const void* buf, size_t)
 {
   kputs_nint(buf);
-  return kstrlen(buf);
+  return strlen(buf);
 }
 
 void

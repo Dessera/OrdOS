@@ -1,6 +1,6 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
-#include "kernel/utils/string.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 void
@@ -13,7 +13,7 @@ bitmap_init(struct bitmap* bitmap, void* data, size_t byte_size)
 
   bitmap->size = byte_size;
   bitmap->data = data;
-  kmemset(bitmap->data, 0, byte_size);
+  memset(bitmap->data, 0, byte_size);
 }
 
 bool

@@ -5,8 +5,8 @@
 #include "kernel/memory/e820.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/compiler.h"
-#include "kernel/utils/string.h"
 #include "lib/common.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 uintptr_t __free_mem;
@@ -36,7 +36,7 @@ bootmem_alloc(size_t size)
   }
 
   void* ptr = (void*)MEM_KERNEL_VADDR(base);
-  kmemset(ptr, 0, size);
+  memset(ptr, 0, size);
 
   return ptr;
 }

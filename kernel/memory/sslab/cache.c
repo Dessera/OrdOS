@@ -6,8 +6,8 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
 #include "kernel/memory/sslab/sslab.h"
-#include "kernel/utils/string.h"
 #include "lib/common.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 struct sslab_cache*
@@ -22,7 +22,7 @@ sslab_cache_create(size_t obj_size)
     return nullptr;
   }
 
-  kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
+  memset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
 
   struct sslab_cache* cache = (void*)page_get_virt(page);
 
@@ -56,7 +56,7 @@ sslab_cache_alloc(struct sslab_cache* cache)
   cache->obj_free--;
 
   // clear the object
-  kmemset(obj, 0, cache->obj_size);
+  memset(obj, 0, cache->obj_size);
   return obj;
 }
 

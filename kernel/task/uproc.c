@@ -59,7 +59,7 @@ __uproc_entry(void* arg)
                        : "memory");
 }
 
-void
+struct task*
 uproc_create(char* name, uproc_entry_t entry)
 {
   bool res;
@@ -68,7 +68,7 @@ uproc_create(char* name, uproc_entry_t entry)
   struct task* task = kmalloc(sizeof(struct task));
   if (!task) {
     KWARNING("failed to allocate user task %s", name);
-    return;
+    return nullptr;
   }
 
   // initialize the task
@@ -78,7 +78,7 @@ uproc_create(char* name, uproc_entry_t entry)
   res = task_init_stack(task, __uproc_entry, entry);
   if (!res) {
     kfree(task);
-    return;
+    return nullptr;
   }
 
   // initialize the task page table
@@ -86,12 +86,12 @@ uproc_create(char* name, uproc_entry_t entry)
   if (!res) {
     buddy_free_page(page_get_by_phys(task->page_table), 0);
     kfree(task);
-    return;
+    return nullptr;
   }
 
   // push the task to the task list
   task_push(task);
   task_push_global(task);
 
-  return;
+  return task;
 }

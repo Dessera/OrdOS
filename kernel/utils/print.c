@@ -3,8 +3,8 @@
 #include "kernel/device/vga.h"
 #include "kernel/memory/gdt.h"
 #include "kernel/task/sync.h"
-#include "kernel/utils/string.h"
 #include "lib/asm.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 #define SET_VGA_SEGMENT() ASM("movl %0, %%gs" : : "r"(GDT_VIDEO_SELECTOR))
@@ -179,7 +179,7 @@ static void
 __kvsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)
 {
   itoa(*pbuf, num, base);
-  *pbuf += kstrlen(*pbuf);
+  *pbuf += strlen(*pbuf);
   *pfmt += 2;
 }
 
@@ -187,7 +187,7 @@ static void
 __kvsprint_u32(char** pbuf, const char** pfmt, u32 num, u8 base)
 {
   utoa(*pbuf, num, base);
-  *pbuf += kstrlen(*pbuf);
+  *pbuf += strlen(*pbuf);
   *pfmt += 2;
 }
 
@@ -202,8 +202,8 @@ __kvsprint_char(char** pbuf, const char** pfmt, int c)
 static void
 __kvsprint_s(char** pbuf, const char** pfmt, const char* str)
 {
-  size_t len = kstrlen(str);
-  kmemcpy(*pbuf, str, len);
+  size_t len = strlen(str);
+  memcpy(*pbuf, str, len);
   *pbuf += len;
   *pfmt += 2;
 }
@@ -258,7 +258,7 @@ kprintln(const char* str, ...)
   VA_END(args);
 
   // for thread safe, edit local buffer rather than global buffer
-  AUTO buf_len = kstrlen(buf);
+  AUTO buf_len = strlen(buf);
   buf[buf_len] = '\n';
   buf[buf_len + 1] = '\0';
 
@@ -275,7 +275,7 @@ kprintln_nint(const char* str, ...)
   VA_END(args);
 
   // for thread safe, edit local buffer rather than global buffer
-  AUTO buf_len = kstrlen(buf);
+  AUTO buf_len = strlen(buf);
   buf[buf_len] = '\n';
   buf[buf_len + 1] = '\0';
 

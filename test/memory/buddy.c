@@ -4,7 +4,7 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/buddy/zone.h"
 #include "kernel/memory/memory.h"
-#include "kernel/utils/string.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 static void
@@ -25,9 +25,9 @@ debug_mem_zone(struct mem_zone* zone)
     if (area.blocks_free != 0) {
       AUTO p = buddy_alloc_page(ztype, i);
       KINFO("test allocate block of order %u : %p", i, page_get_virt(p));
-      kmemset((void*)page_get_virt(p),
-              42,
-              buddy_order_to_page_cnt(i) * MEM_PAGE_SIZE);
+      memset((void*)page_get_virt(p),
+             42,
+             buddy_order_to_page_cnt(i) * MEM_PAGE_SIZE);
       buddy_free_page(p, i);
     }
   }

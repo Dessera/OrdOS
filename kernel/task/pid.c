@@ -2,13 +2,13 @@
 #include "kernel/config/task.h"
 #include "kernel/task/sync.h"
 #include "kernel/utils/bitmap.h"
-#include "kernel/utils/string.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 void
 pidpool_init(struct pidpool* pool)
 {
-  kmemset(pool->buffer, 0, TASK_PID_BITMAP_SIZE);
+  memset(pool->buffer, 0, TASK_PID_BITMAP_SIZE);
   bitmap_init(&pool->pids, pool->buffer, TASK_PID_BITMAP_SIZE);
 }
 

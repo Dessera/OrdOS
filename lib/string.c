@@ -1,4 +1,4 @@
-#include "user/string.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 char*
@@ -6,6 +6,15 @@ strcpy(char* dest, const char* src)
 {
   char* dest_ptr = dest;
   while ((*dest++ = *src++))
+    ;
+  return dest_ptr;
+}
+
+char*
+strncpy(char* dest, const char* src, size_t n)
+{
+  char* dest_ptr = dest;
+  while (n-- && (*dest++ = *src++))
     ;
   return dest_ptr;
 }
@@ -36,13 +45,13 @@ strchr(const char* str, const char c)
   while (*str && *str != c) {
     str++;
   }
-  return *str == c ? (char*)str : NULL;
+  return *str == c ? (char*)str : nullptr;
 }
 
 char*
 strrchr(const char* str, const char c)
 {
-  const char* last_ptr = NULL;
+  const char* last_ptr = nullptr;
   while (*str) {
     if (*str == c) {
       last_ptr = str;

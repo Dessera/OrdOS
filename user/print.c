@@ -1,8 +1,8 @@
 #include "user/print.h"
+#include "lib/string.h"
 #include "lib/syscall.h"
 #include "lib/types.h"
 #include "user/config/utils.h"
-#include "user/string.h"
 
 static void
 __vsprint_i32(char** pbuf, const char** pfmt, i32 num, u8 base)

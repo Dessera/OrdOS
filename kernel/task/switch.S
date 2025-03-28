@@ -1,6 +1,6 @@
 .section ".text"
-.globl _asm_thread_switch_to
-_asm_thread_switch_to:
+.globl _asm_task_switch_to
+_asm_task_switch_to:
   pushl %esi
   pushl %edi
   pushl %ebx

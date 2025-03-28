@@ -15,20 +15,17 @@
 #include "kernel/task/sync.h"
 #include "kernel/task/tss.h"
 #include "kernel/utils/list_head.h"
-#include "kernel/utils/string.h"
-#include "lib/asm.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 extern void
-_asm_thread_switch_to(struct task* curr, struct task* next);
+_asm_task_switch_to(struct task* curr, struct task* next);
 
 static struct pidpool __pid_pool;
 
 static struct list_head __task_list;
 static struct list_head __task_ready_list;
-static struct task* __current_task = NULL;
-
-static struct task* __task_idle;
+static struct task* __current_task = nullptr;
 
 static size_t __ticks = 0;
 
@@ -37,16 +34,6 @@ __task_entry(task_entry_t function, void* arg)
 {
   intr_set_status(true);
   function(arg);
-}
-
-static void
-__task_idle_entry(void*)
-{
-  while (true) {
-    task_park();
-    intr_set_status(true);
-    hlt();
-  }
 }
 
 static FORCE_INLINE void
@@ -68,9 +55,8 @@ __task_schedule(void)
     curr->status = TASK_STATUS_READY;
   }
 
-  // KASSERT(!list_empty(&__task_ready_list), "no ready thread to schedule");
   if (list_empty(&__task_ready_list)) {
-    task_unpark(__task_idle);
+    task_unpark(kthread_get_idle());
   }
 
   AUTO next = LIST_ENTRY(list_pop(&__task_ready_list), struct task, node);
@@ -79,10 +65,9 @@ __task_schedule(void)
   next->status = TASK_STATUS_RUNNING;
 
   __asm__ __volatile__("movl %0, %%cr3" : : "r"(next->page_table) : "memory");
-  // only used for user side
   tss_update_esp(next);
 
-  _asm_thread_switch_to(curr, next);
+  _asm_task_switch_to(curr, next);
 }
 
 static void
@@ -115,8 +100,6 @@ init_task(void)
   init_kthread();
   init_tss();
 
-  __task_idle = kthread_create("idle", 10, __task_idle_entry, NULL);
-
   intr_register_handler(0x20, __task_schedule_handler);
 }
 
@@ -124,9 +107,9 @@ void
 task_init(struct task* task, const char* name, u8 priority)
 {
   // TODO: maybe truncate name?
-  KASSERT(kstrlen(name) < TASK_NAME_SIZE, "task name is too long");
+  KASSERT(strlen(name) < TASK_NAME_SIZE, "task name is too long");
 
-  kstrcpy(task->name, name);
+  strcpy(task->name, name);
   task->pid = pidpool_alloc(&__pid_pool);
   task->status = TASK_STATUS_READY;
   task->priority = priority;
@@ -144,7 +127,7 @@ task_init_stack(struct task* task, task_entry_t function, void* arg)
     return false;
   }
 
-  kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
+  memset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
 
   task->stack = (void*)(page_get_virt(page) + MEM_PAGE_SIZE);
   task->stack -= sizeof(struct thread_context) + sizeof(struct intr_context);
@@ -172,16 +155,15 @@ task_init_page_table(struct task* task)
     return false;
   }
 
-  kmemset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
+  memset((void*)page_get_virt(page), 0, MEM_PAGE_SIZE);
 
   task->page_table = page_get_phys(page);
 
   // copy kernel page table
-  kmemcpy(
-    (void*)(page_get_virt(page) + PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
-    (void*)((uintptr_t)vpage_kernel_vaddr() +
-            PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
-    (MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE));
+  memcpy((void*)(page_get_virt(page) + PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
+         (void*)((uintptr_t)vpage_kernel_vaddr() +
+                 PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE),
+         (MEM_PAGE_SIZE - PAGE_PDE_KERNEL_OFFSET * PAGE_DESC_SIZE));
 
   return true;
 }

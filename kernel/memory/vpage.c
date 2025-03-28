@@ -12,9 +12,9 @@
 #include "kernel/memory/memory.h"
 #include "kernel/task/task.h"
 #include "kernel/utils/compiler.h"
-#include "kernel/utils/string.h"
 #include "lib/asm.h"
 #include "lib/common.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 static u32* __kernel_pd;
@@ -152,7 +152,7 @@ vpage_link_addr(uintptr_t vaddr)
     return nullptr;
   }
 
-  kmemset((void*)page_get_virt(ppage), 0, MEM_PAGE_SIZE);
+  memset((void*)page_get_virt(ppage), 0, MEM_PAGE_SIZE);
 
   AUTO pde = page_table[PAGE_PDE_INDEX(vaddr)];
   u32* pt = nullptr;
@@ -166,7 +166,7 @@ vpage_link_addr(uintptr_t vaddr)
       return nullptr;
     }
 
-    kmemset((void*)page_get_virt(pt_page), 0, MEM_PAGE_SIZE);
+    memset((void*)page_get_virt(pt_page), 0, MEM_PAGE_SIZE);
 
     page_table[PAGE_PDE_INDEX(vaddr)] =
       PAGE_PDE_DESC(page_get_phys(pt_page), PRESENT, 1, 1);

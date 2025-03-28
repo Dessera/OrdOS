@@ -5,8 +5,8 @@
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/task/sync.h"
 #include "kernel/task/task.h"
-#include "kernel/utils/string.h"
 #include "lib/asm.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 static struct ide_channel __channels[IDE_CHANNEL_MAX_CNT] = { 0 };
@@ -31,7 +31,7 @@ __ide_channel_init(struct ide_channel* channel,
                    u16 base_port,
                    u32 irq)
 {
-  kstrncpy(channel->name, name, DEVICE_IDE_CHANNEL_NAME_SIZE);
+  strncpy(channel->name, name, DEVICE_IDE_CHANNEL_NAME_SIZE);
   channel->base_port = base_port;
   channel->irq = irq;
   channel->irq_ready = true;

@@ -6,7 +6,7 @@
 #include "kernel/log.h"
 #include "kernel/task/sync.h"
 #include "kernel/utils/print.h"
-#include "kernel/utils/string.h"
+#include "lib/string.h"
 #include "lib/types.h"
 
 static struct disk __disks[IDE_CHANNEL_MAX_CNT * IDE_CHANNEL_DEVICE_MAX_CNT] = {
@@ -37,7 +37,7 @@ __disk_init(struct disk* disk,
             struct ide_channel* channel,
             u8 dev_id)
 {
-  kstrncpy(disk->name, name, DEVICE_DISK_NAME_SIZE);
+  strncpy(disk->name, name, DEVICE_DISK_NAME_SIZE);
   disk->channel = channel;
   disk->dev_id = dev_id;
 

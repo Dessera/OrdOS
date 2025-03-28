@@ -10,7 +10,7 @@
  * @return char* Pointer to the destination buffer
  */
 char*
-kstrcpy(char* dest, const char* src);
+strcpy(char* dest, const char* src);
 
 /**
  * @brief Copy a string, but only copy up to n characters
@@ -21,7 +21,7 @@ kstrcpy(char* dest, const char* src);
  * @return char* Pointer to the destination buffer
  */
 char*
-kstrncpy(char* dest, const char* src, size_t n);
+strncpy(char* dest, const char* src, size_t n);
 
 /**
  * @brief Get the length of a string
@@ -30,7 +30,7 @@ kstrncpy(char* dest, const char* src, size_t n);
  * @return size_t Length of the string
  */
 size_t
-kstrlen(const char* str);
+strlen(const char* str);
 
 /**
  * @brief Compare two strings
@@ -41,7 +41,7 @@ kstrlen(const char* str);
  * if str1 < str2, 1 if str1 > str2, 0 if they are equal
  */
 ssize_t
-kstrcmp(const char* str1, const char* str2);
+strcmp(const char* str1, const char* str2);
 
 /**
  * @brief Find the first occurrence of a character in a string
@@ -52,7 +52,7 @@ kstrcmp(const char* str1, const char* str2);
  * not
  */
 char*
-kstrchr(const char* str, const char c);
+strchr(const char* str, const char c);
 
 /**
  * @brief Find the last occurrence of a character in a string
@@ -63,7 +63,7 @@ kstrchr(const char* str, const char c);
  * found
  */
 char*
-kstrrchr(const char* str, const char c);
+strrchr(const char* str, const char c);
 
 /**
  * @brief Concatenate two strings
@@ -73,7 +73,7 @@ kstrrchr(const char* str, const char c);
  * @return char* Pointer to the destination string
  */
 char*
-kstrcat(char* dest, const char* src);
+strcat(char* dest, const char* src);
 
 /**
  * @brief Count the number of occurrences of a character in a string
@@ -83,7 +83,7 @@ kstrcat(char* dest, const char* src);
  * @return size_t Number of occurrences
  */
 size_t
-kstrchrs(const char* str, const char c);
+strchrs(const char* str, const char c);
 
 /**
  * @brief Copy memory from one location to another
@@ -93,7 +93,7 @@ kstrchrs(const char* str, const char c);
  * @param n Number of bytes to copy
  */
 void
-kmemcpy(void* dest, const void* src, size_t n);
+memcpy(void* dest, const void* src, size_t n);
 
 /**
  * @brief Set memory to a value
@@ -103,7 +103,7 @@ kmemcpy(void* dest, const void* src, size_t n);
  * @param n Number of bytes to set
  */
 void
-kmemset(void* dest, u8 c, size_t n);
+memset(void* dest, u8 c, size_t n);
 
 /**
  * @brief Compare memory
@@ -114,4 +114,4 @@ kmemset(void* dest, u8 c, size_t n);
  * @return ssize_t Return 0 if equal, -1 if s1 < s2, 1 if s1 > s2
  */
 ssize_t
-kmemcmp(const void* s1, const void* s2, size_t n);
+memcmp(const void* s1, const void* s2, size_t n);
