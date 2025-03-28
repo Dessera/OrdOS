@@ -6,7 +6,7 @@
 #include "kernel/log.h"
 #include "kernel/task/sync.h"
 #include "kernel/utils/print.h"
-#include "lib/string.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 static struct disk __disks[IDE_CHANNEL_MAX_CNT * IDE_CHANNEL_DEVICE_MAX_CNT] = {

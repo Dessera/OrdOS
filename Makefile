@@ -8,6 +8,7 @@ INCLUDE_DIR = include
 TEST_DIR = test
 USER_DIR = user
 LIB_DIR = lib
+SCRIPTS_DIR = scripts
 
 DISK_NAME = disk.img
 DISK_SIZE = 80M
@@ -18,19 +19,21 @@ DISK_IMG = $(BUILD_DIR)/$(DISK_NAME)
 TARGET = $(BUILD_DIR)/$(NAMEFILE)
 TARGET_SYMS = $(BUILD_DIR)/$(NAMEFILE).syms
 TARGET_DEBUG = $(BUILD_DIR)/$(NAMEFILE).debug
-TEST_TARGET_DIR = $(BUILD_DIR)/$(TEST_DIR)
 
 DEBUG = 1
 LOGLEVEL = 4		# 0: none, 1: error, 2: warning, 3: info, 4: debug 5: trace
 BUILD_TRACE =
 
 TESTER =
+SCRIPT =
+SCRIPT_ARGS =
 
 INCFLAGS = -I$(INCLUDE_DIR)
+STDFLAGS = -std=c23
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes -std=c23		\
+CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes						\
 					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
-					-nostdinc -nostdlib -m32 $(INCFLAGS) 																\
+					-nostdinc -nostdlib -m32 $(INCFLAGS) $(STDFLAGS)										\
 					-D KVERSION=$(VERSION) -D KNAME=$(NAME) -D LOGLEVEL=$(LOGLEVEL)
 
 ifneq ($(DEBUG),)
@@ -44,6 +47,9 @@ ASFLAGS = $(CFLAGS)
 LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
 LDFLAGS = -z noexecstack --no-warn-rwx-segments
+
+CFLAGS_SCRIPTS := $(STDFLAGS)
+LDFLAGS_SCRIPTS :=
 
 targets :=
 
@@ -59,19 +65,19 @@ endif
 all: $(TARGET) $(TARGET_DEBUG) $(DISK_IMG)
 
 # 	-------------------- LIB ----------------------
-include lib/Makefile
+include $(LIB_DIR)/Makefile
 
 targets += $(patsubst %.o, $(LIB_DIR)/%.o,$(lib_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- KERNEL -------------------
-include kernel/Makefile
+include $(KERNEL_DIR)/Makefile
 
 targets += $(patsubst %.o, $(KERNEL_DIR)/%.o,$(kernel_targets))
 # 	-----------------------------------------------
 
 # 	-------------------- USER -------------------
-include user/Makefile
+include $(USER_DIR)/Makefile
 
 # targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
 
@@ -117,17 +123,37 @@ test_targets := $(filter-out $(KERNEL_DIR)/main.o,$(targets))
 test_targets += $(TEST_DIR)/tester.o
 test_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(test_targets))
 
-include test/Makefile
+include $(TEST_DIR)/Makefile
 
-test: $(patsubst %, $(TEST_TARGET_DIR)/%,$(test_entries))
+test: $(patsubst %.o, $(BUILD_DIR)/$(TEST_DIR)/%,$(test_entries))
 
 # makefile remove them for unknown reason (at least idk)
 # use this to prevent it
-test_entry_objs := $(patsubst %, $(TEST_TARGET_DIR)/%.o,$(test_entries))
+test_entry_objs := $(patsubst %.o, $(BUILD_DIR)/$(TEST_DIR)/%.o,$(test_entries))
 .PRECIOUS: $(test_entry_objs)
 
-qemu_test: $(TEST_TARGET_DIR)/$(TESTER)
-	qemu-system-i386 -drive format=raw,file=$(TEST_TARGET_DIR)/$(TESTER)
+ifneq ($(TESTER),)
+qemu_test: $(BUILD_DIR)/$(TEST_DIR)/$(TESTER)
+	qemu-system-i386 -drive format=raw,file=$(BUILD_DIR)/$(TEST_DIR)/$(TESTER)
+endif
+# 	-----------------------------------------------
+
+# 	-------------------- SCRIPTS ------------------
+include $(SCRIPTS_DIR)/Makefile
+
+scripts_objs := $(patsubst %.o,$(BUILD_DIR)/$(SCRIPTS_DIR)/%.o,$(scripts_entries))
+
+scripts: $(patsubst %.o, $(BUILD_DIR)/$(SCRIPTS_DIR)/%,$(scripts_entries))
+
+ifneq ($(SCRIPT),)
+run_script: $(BUILD_DIR)/$(SCRIPTS_DIR)/$(SCRIPT)
+	@$(BUILD_DIR)/$(SCRIPTS_DIR)/$(SCRIPT) $(SCRIPT_ARGS)
+endif
+
+$(BUILD_DIR)/$(SCRIPTS_DIR)/%: $(SCRIPTS_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(hide)$(CC) $(CFLAGS_SCRIPTS) $< -o $@
+	@echo "	[SCRIPT] $<"
 # 	-----------------------------------------------
 
 # 	-------------------- RULES --------------------
@@ -141,7 +167,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(hide)$(CC) $(CFLAGS) -c $< -o $@
 	@echo "	[CC] $<"
 
-$(TEST_TARGET_DIR)/%: $(TEST_TARGET_DIR)/%.o $(LDSCRIPT) $(test_objs)
+$(BUILD_DIR)/$(TEST_DIR)/%: $(BUILD_DIR)/$(TEST_DIR)/%.o $(LDSCRIPT) $(test_objs)
 	$(hide)$(LD) $(LDFLAGS) -o $@ -T $(LDSCRIPT) $(test_objs) $<
 	@echo "	[TESTER] $@"
 # 	-----------------------------------------------
