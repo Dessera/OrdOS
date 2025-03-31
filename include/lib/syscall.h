@@ -2,11 +2,7 @@
 
 #include "lib/types.h"
 
-enum syscall_enumerate
-{
-  SYSCALL_GETPID,
-  SYSCALL_WRITE
-};
+ENUM_DECLARE(intr_syscall, SYSCALL_GETPID, SYSCALL_WRITE)
 
 size_t
 getpid(void);

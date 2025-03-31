@@ -1,18 +1,21 @@
 #pragma once
 
+#ifndef __ASSEMBLER__
+
+#include "lib/common.h"
+
 #define OFFSET_OF(type, member) __builtin_offsetof(type, member)
 
 #define CONTAINER_OF(ptr, type, member)                                        \
-  (type*)((char*)(ptr) - OFFSET_OF(type, member))
+  ({                                                                           \
+    typeof(((type*)0)->member)* mptr = (ptr);                                  \
+    (type*)((char*)mptr - OFFSET_OF(type, member));                            \
+  })
 
 #define VA_LIST __builtin_va_list
 #define VA_START __builtin_va_start
 #define VA_END __builtin_va_end
 #define VA_ARG __builtin_va_arg
-
-// #ifndef NULL
-#define NULL ((void*)0)
-// #endif
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -47,20 +50,35 @@ typedef i32 intptr_t;
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-/**
- * @brief Macro to declare a function with its prototype (some function should
- * not expose to other files but only used in assembler files, use this to
- * simplify the declaration)
- *
- */
 #define DECLARE_WITH_PROTOTYPE(ret, name, ...)                                 \
   ret name(__VA_ARGS__);                                                       \
   ret name(__VA_ARGS__)
 
-#define IMMEDIATE(type, value) ((type)(value))
+#define ENUM_KEY(x) x
+#define ENUM_KEY_STR(x) STRINGIFY(x)
+#define ENUM_INC(x) +1
+
+#define ENUM_DECLARE(enum_name, ...)                                           \
+  enum enum_name                                                               \
+  {                                                                            \
+    RECURSIVE_APPLY_WITH_COMMA(ENUM_KEY, __VA_ARGS__)                          \
+  };                                                                           \
+  constexpr size_t enum_name##_size =                                          \
+    RECURSIVE_APPLY(ENUM_INC, , __VA_ARGS__);                                  \
+                                                                               \
+  static FORCE_INLINE const char* enum_name##_to_str(enum enum_name x)         \
+  {                                                                            \
+    static const char* enum_name##_str[] = { RECURSIVE_APPLY_WITH_COMMA(       \
+      ENUM_KEY_STR, __VA_ARGS__) };                                            \
+    return enum_name##_str[x];                                                 \
+  }
+
+#define ENUM_SIZE(enum_name) enum_name##_size
 
 void
 itoa(char* buffer, i32 value, u8 base);
 
 void
 utoa(char* buffer, u32 value, u8 base);
+
+#endif // __ASSEMBLER__

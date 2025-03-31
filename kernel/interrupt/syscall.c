@@ -1,14 +1,17 @@
 #include "kernel/interrupt/syscall.h"
+#include "kernel/assert.h"
 #include "kernel/config/interrupt.h"
 #include "kernel/log.h"
 #include "kernel/task/task.h"
-#include "lib/string.h"
-#include "lib/syscall.h"
+#include "lib/string.h"  // IWYU pragma: keep
+#include "lib/syscall.h" // IWYU pragma: keep
 #include "lib/types.h"
 
-static void* __sysall_table[INTR_SYSCALL_SIZE] = { 0 };
+KSTATIC_ASSERT(INTR_SYSCALL_SIZE >= ENUM_SIZE(intr_syscall),
+               "syscall table size overflow");
 
-// static const char* __syscall_name[INTR_SYSCALL_SIZE] = { "getpid", "write" };
+static void* __sysall_table[ENUM_SIZE(intr_syscall)] = { sys_getpid,
+                                                         sys_write };
 
 size_t
 sys_getpid(void)
@@ -27,10 +30,7 @@ sys_write(size_t, const void* buf, size_t)
 void
 init_syscall(void)
 {
-  __sysall_table[SYSCALL_GETPID] = sys_getpid;
-  __sysall_table[SYSCALL_WRITE] = sys_write;
-
-  KDEBUG("syscall: %u", INTR_SYSCALL_SIZE);
+  KDEBUG("syscall: %u", ENUM_SIZE(intr_syscall));
 }
 
 DECLARE_WITH_PROTOTYPE(void*,
@@ -45,7 +45,7 @@ DECLARE_WITH_PROTOTYPE(void*,
     return (void*)NPOS;
   }
   syscall_handler_t handler = __sysall_table[index];
-  if (handler != NULL) {
+  if (handler != nullptr) {
     return handler(arg1, arg2, arg3);
   } else {
     KWARNING_NINT("unhandled syscall: %u", index);

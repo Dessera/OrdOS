@@ -6,7 +6,6 @@
 void
 bitmap_init(struct bitmap* bitmap, void* data, size_t byte_size)
 {
-  KASSERT(data != NULL, "bitmap init with invalid data pointer");
   KASSERT_WARN(byte_size < MAX_SSIZE_T / 8,
                "bitmap init with too large size: %u",
                byte_size);

@@ -36,7 +36,7 @@ __disk_partition_scan_impl(struct disk* disk,
                            size_t* pt_cnt)
 {
   struct boot_sector* bs = kmalloc(sizeof(struct boot_sector));
-  if (bs == NULL) {
+  if (bs == nullptr) {
     KWARNING("no memory for boot sector when scanning partitions");
     return;
   }

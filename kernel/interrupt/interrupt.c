@@ -8,8 +8,6 @@
 #include "kernel/log.h"
 #include "lib/asm.h"
 
-#define INTR_STATUS_MASK 0x200
-
 static interrupt_handler_t __interrupt_handlers[INTR_IDT_SIZE] = { 0 };
 
 void
@@ -37,7 +35,7 @@ intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
           "invalid interrupt id, received %x but max is %x",
           interrupt_number,
           INTR_IDT_SIZE);
-  if (__interrupt_handlers[interrupt_number] != NULL) {
+  if (__interrupt_handlers[interrupt_number] != nullptr) {
     KWARNING("overwriting existing interrupt handler at %x", interrupt_number);
   }
   __interrupt_handlers[interrupt_number] = handler;
@@ -46,7 +44,7 @@ intr_register_handler(u32 interrupt_number, interrupt_handler_t handler)
 bool
 intr_get_status(void)
 {
-  return eflags() & INTR_STATUS_MASK;
+  return eflags() & 0x200;
 }
 
 bool
@@ -70,7 +68,7 @@ DECLARE_WITH_PROTOTYPE(void, intr_common_handler, u32 irq)
           irq,
           INTR_IDT_SIZE);
 
-  if (__interrupt_handlers[irq] != NULL) {
+  if (__interrupt_handlers[irq] != nullptr) {
     __interrupt_handlers[irq](irq);
   } else {
     KWARNING_NINT("unhandled interrupt %x occurred", irq);

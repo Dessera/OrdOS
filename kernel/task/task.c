@@ -122,7 +122,7 @@ bool
 task_init_stack(struct task* task, task_entry_t function, void* arg)
 {
   AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
-  if (page == NULL) {
+  if (page == nullptr) {
     KWARNING("failed to allocate stack for task %s", task->name);
     return false;
   }
@@ -150,7 +150,7 @@ task_init_page_table(struct task* task)
 {
   AUTO page = buddy_alloc_page(MEM_ZONE_NORMAL, 0);
 
-  if (page == NULL) {
+  if (page == nullptr) {
     KWARNING("failed to allocate page table for task %s", task->name);
     return false;
   }
