@@ -87,6 +87,18 @@ __task_schedule_handler(u32 /* irq */)
   }
 }
 
+static void
+__task_init_fds(struct task* task)
+{
+  for (i32 i = 0; i < 3; i++) {
+    task->fds[i] = i;
+  }
+
+  for (i32 i = 3; i < TASK_FD_SIZE; i++) {
+    task->fds[i] = -1;
+  }
+}
+
 void
 init_task(void)
 {
@@ -116,6 +128,7 @@ task_init(struct task* task, const char* name, u8 priority)
   task->ticks = priority;
   task->elapsed_ticks = 0;
   task->page_table = 0;
+  __task_init_fds(task);
 }
 
 bool

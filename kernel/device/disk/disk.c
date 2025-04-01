@@ -126,13 +126,8 @@ disk_write(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
 
   ide_select_device(channel, disk->dev_id);
 
-  size_t sec_done_cnt = 0;
-  while (sec_done_cnt < sec_cnt) {
-    size_t sec_to_wr =
-      sec_done_cnt + 256 > sec_cnt ? sec_cnt - sec_done_cnt : 256;
-
-    ide_select_sector(
-      channel, disk->dev_id, sec_start + sec_done_cnt, sec_to_wr);
+  for (size_t sec_idx = 0; sec_idx < sec_cnt; sec_idx++) {
+    ide_select_sector(channel, disk->dev_id, sec_start + sec_idx, 1);
 
     ide_send_cmd(channel, IDE_CMD_WRITE);
 
@@ -140,10 +135,9 @@ disk_write(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
       KPANIC("unexpected device state when writing disk %s", disk->name);
     }
 
-    ide_write_sector(channel, buf + sec_done_cnt * BOOT_SEC_SIZE, sec_to_wr);
+    ide_write_sector(channel, buf + sec_idx * BOOT_SEC_SIZE, 1);
 
     semaphore_down_nint(&channel->irq_sem); // wait for write to finish
-    sec_done_cnt += sec_to_wr;
   }
 
   mutex_unlock(&channel->lock);

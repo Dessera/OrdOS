@@ -37,6 +37,7 @@ struct task
   struct list_head global_node;
 
   uintptr_t page_table;
+  i32 fds[TASK_FD_SIZE];
 };
 
 /**

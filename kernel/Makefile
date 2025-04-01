@@ -6,7 +6,7 @@ include $(KERNEL_DIR)/device/Makefile
 
 task_targets := task.o pid.o sync.o kthread.o switch.o tss.o uproc.o
 
-fs_targets := filesystem.o
+fs_targets := filesystem.o inode.o
 
 utils_targets := print.o compiler.o bitmap.o
 
