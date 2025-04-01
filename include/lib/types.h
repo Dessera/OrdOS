@@ -47,7 +47,7 @@ typedef i32 intptr_t;
 
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
-#define CLEAN_UP(type, cleaner) type __attribute__((cleanup(cleaner)))
+#define CLEAN_UP(cleaner) __attribute__((cleanup(cleaner)))
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 

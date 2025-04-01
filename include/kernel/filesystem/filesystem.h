@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/config/filesystem.h"
+#include "kernel/device/disk/partition.h"
 #include "lib/list_head.h"
 #include "lib/types.h"
 
@@ -57,4 +58,7 @@ void
 init_fs(void);
 
 bool
-fs_mount(char* pname);
+fs_mount(struct disk_partition* part);
+
+void
+fs_umount(struct disk_partition* part);

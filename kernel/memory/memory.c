@@ -4,7 +4,6 @@
 #include "kernel/memory/buddy/buddy.h"
 #include "kernel/memory/sslab/sslab.h"
 #include "kernel/memory/vpage.h"
-#include "lib/types.h"
 
 void
 init_memory(void)
@@ -24,13 +23,13 @@ init_memory(void)
   init_sslab();
 }
 
-FORCE_INLINE void*
+void*
 kmalloc(size_t size)
 {
   return sslab_global_alloc(size);
 }
 
-FORCE_INLINE void
+void
 kfree(void* obj)
 {
   return sslab_global_free(obj);

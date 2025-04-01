@@ -100,6 +100,10 @@ sslab_global_alloc(size_t size)
 void
 sslab_global_free(void* obj)
 {
+  if (obj == nullptr) {
+    return;
+  }
+
   AUTO cache = sslab_object_to_cache(obj);
 
   AUTO order = sslab_size_to_order(cache->obj_size);

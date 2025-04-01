@@ -9,6 +9,7 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
 #include "kernel/utils/bitmap.h"
+#include "lib/common.h"
 #include "lib/list_head.h"
 #include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
@@ -20,44 +21,39 @@ init_fs(void)
 
   if (partition_get_cnt() < 1) {
     KPANIC("no partitions found, cannot mount filesystem");
-  } else if (!fs_mount(partition_get_by_index(0)->name)) {
+  } else if (!fs_mount(partition_get_by_index(0))) {
     KPANIC("failed to mount filesystem");
-  } else {
-    KINFO("filesystem mounted");
   }
 }
 
 bool
-fs_mount(char* pname)
+fs_mount(struct disk_partition* part)
 {
-  AUTO part = partition_get_by_name(pname);
-  if (part == nullptr) {
+  AUTO disk = part->disk;
+
+  // fetch superblock
+  void* KMALLOC_CLEANUP sb_buf = kmalloc(BOOT_SEC_SIZE);
+  if (sb_buf == nullptr) {
     return false;
   }
 
-  void* sb_buf = kmalloc(BOOT_SEC_SIZE);
-  if (sb_buf == nullptr) {
+  disk_read(disk, part->sec_start + 1, 1, sb_buf);
+  if (((struct superblock*)sb_buf)->magic != FS_SUPERBLOCK_MAGIC) {
     return false;
   }
 
   part->sb = kmalloc(sizeof(struct superblock));
   if (part->sb == nullptr) {
-    goto superb_block_alloc_fail;
+    return false;
   }
 
-  AUTO disk = part->disk;
-
-  disk_read(disk, part->sec_start + 1, 1, sb_buf);
   memcpy(part->sb, sb_buf, sizeof(struct superblock));
 
-  if (part->sb->magic != FS_SUPERBLOCK_MAGIC) {
-    goto magic_check_fail;
-  }
-
-  AUTO block_bitmap_page =
-    buddy_alloc_page(MEM_ZONE_NORMAL,
-                     buddy_page_cnt_to_order(part->sb->block_bitmap_sec_cnt *
-                                             BOOT_SEC_SIZE / MEM_PAGE_SIZE));
+  // fetch block bitmap
+  AUTO block_bitmap_page = buddy_alloc_page(
+    MEM_ZONE_NORMAL,
+    buddy_page_cnt_to_order(
+      DIV_UP(part->sb->block_bitmap_sec_cnt * BOOT_SEC_SIZE, MEM_PAGE_SIZE)));
   if (block_bitmap_page == nullptr) {
     goto block_bitmap_alloc_fail;
   }
@@ -71,10 +67,11 @@ fs_mount(char* pname)
   part->block_bitmap.data = block_bitmap;
   part->block_bitmap.size = part->sb->block_bitmap_sec_cnt * BOOT_SEC_SIZE;
 
-  AUTO inode_bitmap_page =
-    buddy_alloc_page(MEM_ZONE_NORMAL,
-                     buddy_page_cnt_to_order(part->sb->inode_bitmap_sec_cnt *
-                                             BOOT_SEC_SIZE / MEM_PAGE_SIZE));
+  // fetch inode bitmap
+  AUTO inode_bitmap_page = buddy_alloc_page(
+    MEM_ZONE_NORMAL,
+    buddy_page_cnt_to_order(
+      DIV_UP(part->sb->inode_bitmap_sec_cnt * BOOT_SEC_SIZE, MEM_PAGE_SIZE)));
   if (inode_bitmap_page == nullptr) {
     goto inode_bitmap_alloc_fail;
   }
@@ -88,19 +85,36 @@ fs_mount(char* pname)
   part->inode_bitmap.data = inode_bitmap;
   part->inode_bitmap.size = part->sb->inode_bitmap_sec_cnt * BOOT_SEC_SIZE;
 
+  // init open inodes list
   list_init(&part->open_inodes);
 
-  kfree(sb_buf);
   return true;
 
 inode_bitmap_alloc_fail:
-  buddy_free_page(block_bitmap_page,
-                  buddy_page_cnt_to_order(part->sb->block_bitmap_sec_cnt *
-                                          BOOT_SEC_SIZE / MEM_PAGE_SIZE));
+  buddy_free_page(
+    block_bitmap_page,
+    buddy_page_cnt_to_order(
+      DIV_UP(part->sb->block_bitmap_sec_cnt * BOOT_SEC_SIZE, MEM_PAGE_SIZE)));
 block_bitmap_alloc_fail:
-magic_check_fail:
   kfree(part->sb);
-superb_block_alloc_fail:
-  kfree(sb_buf);
   return false;
+}
+
+void
+fs_umount(struct disk_partition* part)
+{
+  AUTO inode_page = page_get_by_virt((uintptr_t)part->inode_bitmap.data);
+  AUTO block_bitmap_page = page_get_by_virt((uintptr_t)part->block_bitmap.data);
+
+  buddy_free_page(
+    inode_page,
+    buddy_page_cnt_to_order(
+      DIV_UP(part->sb->inode_bitmap_sec_cnt * BOOT_SEC_SIZE, MEM_PAGE_SIZE)));
+  buddy_free_page(
+    block_bitmap_page,
+    buddy_page_cnt_to_order(
+      DIV_UP(part->sb->block_bitmap_sec_cnt * BOOT_SEC_SIZE, MEM_PAGE_SIZE)));
+
+  kfree(part->sb);
+  part->sb = nullptr;
 }

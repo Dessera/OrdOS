@@ -41,6 +41,8 @@
 
 #ifndef __ASSEMBLER__
 
+#define KMALLOC_CLEANUP CLEAN_UP(kmcleanup)
+
 /**
  * @brief Memory zone type
  */
@@ -68,5 +70,11 @@ kmalloc(size_t size);
  */
 void
 kfree(void* obj);
+
+static FORCE_INLINE void
+kmcleanup(void** obj)
+{
+  kfree(*obj);
+}
 
 #endif
