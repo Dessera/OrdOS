@@ -53,6 +53,18 @@ buddy_order_to_page_cnt(u8 order)
   return 1 << order;
 }
 
+static FORCE_INLINE u8
+buddy_page_cnt_to_order(size_t page_cnt)
+{
+  u8 order = 0;
+  size_t base = 1;
+  while (base < page_cnt) {
+    base <<= 1;
+    order++;
+  }
+  return order;
+}
+
 /**
  * @brief Get the buddy of a page
  *

@@ -1,4 +1,4 @@
-#include "kernel/device/disk/disk.h"
+#include "kernel/filesystem/filesystem.h"
 #include "kernel/info.h" // IWYU pragma: keep
 #include "kernel/interrupt/interrupt.h"
 #include "kernel/log.h"
@@ -20,7 +20,7 @@ kinit(void)
 
   intr_set_status(true);
 
-  init_disk();
+  init_fs();
 }
 
 DECLARE_WITH_PROTOTYPE(void, kmain, void)

@@ -4,6 +4,7 @@
 #include "kernel/memory/memory.h"
 #include "kernel/utils/print.h"
 #include "lib/list_head.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 struct list_head __partition_list;
@@ -103,4 +104,64 @@ init_partition(void)
            partition->sec_cnt);
   }
 #endif
+}
+
+struct disk_partition*
+partition_get_by_name(const char* name)
+{
+  struct list_head* entry;
+  LIST_FOR_EACH(entry, &__partition_list)
+  {
+    AUTO partition = LIST_ENTRY(entry, struct disk_partition, node);
+    if (strcmp(partition->name, name) == 0) {
+      return partition;
+    }
+  }
+  return nullptr;
+}
+
+struct disk_partition*
+partition_get_by_index(size_t index)
+{
+  size_t cnt = 0;
+  struct list_head* entry;
+  LIST_FOR_EACH(entry, &__partition_list)
+  {
+    AUTO partition = LIST_ENTRY(entry, struct disk_partition, node);
+    if (cnt == index) {
+      return partition;
+    }
+    cnt++;
+  }
+
+  return nullptr;
+}
+
+size_t
+partition_get_index(struct disk_partition* partition)
+{
+  size_t cnt = 0;
+  struct list_head* entry;
+  LIST_FOR_EACH(entry, &__partition_list)
+  {
+    AUTO p = LIST_ENTRY(entry, struct disk_partition, node);
+    if (p == partition) {
+      return cnt;
+    }
+    cnt++;
+  }
+
+  return NPOS;
+}
+
+size_t
+partition_get_cnt(void)
+{
+  size_t cnt = 0;
+  struct list_head* entry;
+  LIST_FOR_EACH(entry, &__partition_list)
+  {
+    cnt++;
+  }
+  return cnt;
 }

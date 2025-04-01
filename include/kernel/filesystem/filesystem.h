@@ -52,3 +52,9 @@ struct direntry
   char name[FS_FILENAME_SIZE];
   enum file_type type;
 };
+
+void
+init_fs(void);
+
+bool
+fs_mount(char* pname);

@@ -6,6 +6,8 @@ include $(KERNEL_DIR)/device/Makefile
 
 task_targets := task.o pid.o sync.o kthread.o switch.o tss.o uproc.o
 
+fs_targets := filesystem.o
+
 utils_targets := print.o compiler.o bitmap.o
 
 include $(KERNEL_DIR)/memory/Makefile
@@ -18,3 +20,4 @@ kernel_targets += $(patsubst %.o, device/%.o,$(device_targets))
 kernel_targets += $(patsubst %.o, utils/%.o,$(utils_targets))
 kernel_targets += $(patsubst %.o, memory/%.o,$(memory_targets))
 kernel_targets += $(patsubst %.o, task/%.o,$(task_targets))
+kernel_targets += $(patsubst %.o, filesystem/%.o,$(fs_targets))

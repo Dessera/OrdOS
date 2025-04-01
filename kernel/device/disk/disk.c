@@ -101,13 +101,8 @@ disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
 
   ide_select_device(channel, disk->dev_id);
 
-  size_t sec_done_cnt = 0;
-  while (sec_done_cnt < sec_cnt) {
-    size_t sec_to_rd =
-      sec_done_cnt + 256 > sec_cnt ? sec_cnt - sec_done_cnt : 256;
-
-    ide_select_sector(
-      channel, disk->dev_id, sec_start + sec_done_cnt, sec_to_rd);
+  for (size_t sec_idx = 0; sec_idx < sec_cnt; sec_idx++) {
+    ide_select_sector(channel, disk->dev_id, sec_start + sec_idx, 1);
 
     ide_send_cmd(channel, IDE_CMD_READ);
     semaphore_down_nint(&channel->irq_sem);
@@ -116,9 +111,7 @@ disk_read(struct disk* disk, u32 sec_start, u32 sec_cnt, void* buf)
       KPANIC("unexpected device state when reading disk %s", disk->name);
     }
 
-    ide_read_sector(channel, buf + sec_done_cnt * BOOT_SEC_SIZE, sec_to_rd);
-
-    sec_done_cnt += sec_to_rd;
+    ide_read_sector(channel, buf + sec_idx * BOOT_SEC_SIZE, 1);
   }
 
   mutex_unlock(&channel->lock);

@@ -79,10 +79,12 @@ include $(USER_DIR)/Makefile
 
 # targets += $(patsubst %.o, $(USER_DIR)/%.o,$(user_targets))
 
-$(DISK_IMG): $(DISK_PARTITIONS)
+$(DISK_IMG): $(DISK_PARTITIONS) $(BUILD_DIR)/$(SCRIPTS_DIR)/mkfs
 	@mkdir -p $(BUILD_DIR)
 	$(hide)qemu-img create $(DISK_IMG) $(DISK_SIZE)
 	$(hide)cat $(DISK_PARTITIONS) | sfdisk $(DISK_IMG)
+	$(hide)$(BUILD_DIR)/$(SCRIPTS_DIR)/mkfs $(DISK_IMG)
+	@echo "	[MKFS] $(DISK_IMG)"
 # 	-----------------------------------------------
 
 # 	-------------------- FINAL --------------------

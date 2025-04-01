@@ -234,7 +234,7 @@ partition_create_fs(struct partition* p)
   sb.root_inode_idx = 0;
   sb.direntry_size = sizeof(struct direntry);
 
-  if (!image_write_sec(p->fp, &sb, p->sec_start + 2, 1)) {
+  if (!image_write_sec(p->fp, &sb, p->sec_start + 1, 1)) {
     perror("write superblock");
     exit(EXIT_FAILURE);
   }
