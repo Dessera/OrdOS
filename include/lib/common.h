@@ -46,15 +46,3 @@
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
-// #define MIN(x, y)
-//   ({
-//     typeof(x) _x = (x);
-//     typeof(y) _y = (y);
-//     (typeof(_x + _y))(_x < _y ? _x : _y);
-//   })
-// #define MAX(x, y)
-//   ({
-//     typeof(x) _x = (x);
-//     typeof(y) _y = (y);
-//     (typeof(_x + _y))(_x > _y ? _x : _y);
-//   })

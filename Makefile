@@ -28,12 +28,11 @@ TESTER =
 SCRIPT =
 SCRIPT_ARGS =
 
-INCFLAGS = -I$(INCLUDE_DIR)
 STDFLAGS = -std=c23
 
 CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes						\
 					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
-					-nostdinc -nostdlib -m32 $(INCFLAGS) $(STDFLAGS)										\
+					-nostdinc -nostdlib -m32 -I$(INCLUDE_DIR) $(STDFLAGS)								\
 					-D KVERSION=$(VERSION) -D KNAME=$(NAME) -D LOGLEVEL=$(LOGLEVEL)
 
 ifneq ($(DEBUG),)
@@ -48,7 +47,7 @@ LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
 LDFLAGS = -z noexecstack --no-warn-rwx-segments
 
-CFLAGS_SCRIPTS := $(STDFLAGS) $(INCFLAGS) -D SCRIPT
+CFLAGS_SCRIPTS := $(STDFLAGS) -I$(INCLUDE_DIR)/kernel/config -include $(INCLUDE_DIR)/lib/common.h
 
 targets :=
 
@@ -65,8 +64,6 @@ all: $(TARGET) $(TARGET_DEBUG) $(DISK_IMG)
 
 # 	-------------------- LIB ----------------------
 include $(LIB_DIR)/Makefile
-
-lib_objs := $(patsubst %.o, $(BUILD_DIR)/$(LIB_DIR)/%.o,$(lib_targets))
 
 targets += $(patsubst %.o, $(LIB_DIR)/%.o,$(lib_targets))
 # 	-----------------------------------------------
@@ -93,7 +90,7 @@ final_objs := $(patsubst %.o,$(BUILD_DIR)/%.o,$(targets))
 
 $(LDSCRIPT): $(LDSCRIPT_TEMPLATE)
 	@mkdir -p $(BUILD_DIR)
-	$(hide)$(CC) -E -P $(INCFLAGS) - < $< > $@
+	$(hide)$(CC) -E -P -I$(INCLUDE_DIR) - < $< > $@
 	@echo "	[CP] $(LDSCRIPT)"
 
 $(TARGET): $(final_objs) $(LDSCRIPT)

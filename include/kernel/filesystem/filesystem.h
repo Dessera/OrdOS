@@ -48,7 +48,7 @@ struct dir
 
 struct direntry
 {
-  uint32_t inode_idx;
-  uint8_t name[FS_FILENAME_SIZE];
+  u32 inode_idx;
+  char name[FS_FILENAME_SIZE];
   enum file_type type;
 };

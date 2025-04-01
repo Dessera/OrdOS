@@ -1,12 +1,53 @@
-#include "kernel/boot.h"
-#include "kernel/config/filesystem.h"
-#include "kernel/filesystem/filesystem.h"
-#include "lib/common.h"
-#include "lib/types.h"
+#include "filesystem.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define BOOT_SEC_SIZE 512
+
+struct superblock
+{
+  uint32_t magic;
+  uint32_t sec_cnt;
+  uint32_t inode_cnt;
+  uint32_t sec_start;
+
+  uint32_t block_bitmap_start;
+  uint32_t block_bitmap_sec_cnt;
+
+  uint32_t inode_bitmap_start;
+  uint32_t inode_bitmap_sec_cnt;
+
+  uint32_t inode_table_start;
+  uint32_t inode_table_sec_cnt;
+
+  uint32_t data_start;
+  uint32_t root_inode_idx;
+  uint32_t direntry_size;
+
+  uint8_t other[460];
+} __attribute__((packed));
+
+struct inode
+{
+  uint32_t iid;
+  uint32_t size;
+  uint32_t ref_cnt;
+  uint32_t direct[12];
+  uint32_t indirect;
+
+  // originally list_head but we don't have that
+  uint64_t node_padding;
+};
+
+struct direntry
+{
+  uint32_t inode_idx;
+  char name[FS_FILENAME_SIZE];
+  int32_t type_padding;
+};
 
 struct partition
 {
@@ -15,6 +56,8 @@ struct partition
 
   struct partition* next;
   struct partition* prev;
+
+  FILE* fp;
 };
 
 void
@@ -55,16 +98,6 @@ destroy_partition_list(struct partition* p)
   }
 
   free(head);
-}
-
-void
-partition_create_fs(struct partition* p)
-{
-  AUTO inode_bmap_size = DIV_UP(FS_MAX_FILES / 8, BOOT_SEC_SIZE);
-  AUTO inode_table_size =
-    DIV_UP(FS_MAX_FILES * (sizeof(struct inode)), BOOT_SEC_SIZE);
-  AUTO used_size = inode_bmap_size + inode_table_size + 2;
-  AUTO free_size = p->sec_cnt - used_size;
 }
 
 struct partition_table_entry
@@ -145,6 +178,7 @@ __list_partitions(FILE* fp, struct partition* head, size_t start, size_t base)
 
       new->sec_start = p[i].start_lba + start;
       new->sec_cnt = p[i].sec_cnt;
+      new->fp = fp;
       partition_list_add(head, new);
     }
   }
@@ -166,6 +200,134 @@ list_partitions(FILE* fp)
 
   __list_partitions(fp, head, 0, 0);
   return head;
+}
+
+void
+partition_create_fs(struct partition* p)
+{
+  uint32_t inode_bmap_size = DIV_UP(FS_MAX_FILES, BOOT_SEC_SIZE * 8);
+  uint32_t inode_table_size =
+    DIV_UP(FS_MAX_FILES * (sizeof(struct inode)), BOOT_SEC_SIZE);
+  uint32_t used_size = inode_bmap_size + inode_table_size + 2;
+  uint32_t free_size = p->sec_cnt - used_size;
+
+  uint32_t block_bmap_size = DIV_UP(free_size, BOOT_SEC_SIZE * 8);
+  free_size -= block_bmap_size;
+  block_bmap_size = DIV_UP(free_size, BOOT_SEC_SIZE * 8);
+
+  struct superblock sb = { 0 };
+  sb.magic = FS_SUPERBLOCK_MAGIC;
+  sb.sec_cnt = p->sec_cnt;
+  sb.inode_cnt = FS_MAX_FILES;
+  sb.sec_start = p->sec_start;
+
+  sb.block_bitmap_start = sb.sec_start + 2;
+  sb.block_bitmap_sec_cnt = block_bmap_size;
+
+  sb.inode_bitmap_start = sb.block_bitmap_start + sb.block_bitmap_sec_cnt;
+  sb.inode_bitmap_sec_cnt = inode_bmap_size;
+
+  sb.inode_table_start = sb.inode_bitmap_start + sb.inode_bitmap_sec_cnt;
+  sb.inode_table_sec_cnt = inode_table_size;
+
+  sb.data_start = sb.inode_table_start + sb.inode_table_sec_cnt;
+  sb.root_inode_idx = 0;
+  sb.direntry_size = sizeof(struct direntry);
+
+  if (!image_write_sec(p->fp, &sb, p->sec_start + 2, 1)) {
+    perror("write superblock");
+    exit(EXIT_FAILURE);
+  }
+
+  // init block bitmap
+  uint8_t* block_bitmap = malloc(sb.block_bitmap_sec_cnt * BOOT_SEC_SIZE);
+  if (!block_bitmap) {
+    perror("malloc block bitmap");
+    exit(EXIT_FAILURE);
+  }
+  block_bitmap[0] |= 0x01;
+
+  uint32_t block_bitmap_last_idx = free_size / 8;
+  uint8_t block_bitmap_last_bit = free_size % 8;
+  uint32_t last_size = BOOT_SEC_SIZE - (block_bitmap_last_idx % BOOT_SEC_SIZE);
+
+  memset(&block_bitmap[block_bitmap_last_idx], 0xff, last_size);
+
+  for (size_t i = 0; i <= block_bitmap_last_bit; i++) {
+    block_bitmap[block_bitmap_last_idx] &= ~(1 << i);
+  }
+
+  if (!image_write_sec(
+        p->fp, block_bitmap, sb.block_bitmap_start, sb.block_bitmap_sec_cnt)) {
+    perror("write block bitmap");
+    exit(EXIT_FAILURE);
+  }
+  free(block_bitmap);
+
+  // init inode bitmap
+  uint8_t* inode_bitmap = malloc(sb.inode_bitmap_sec_cnt * BOOT_SEC_SIZE);
+  if (!inode_bitmap) {
+    perror("malloc inode bitmap");
+    exit(EXIT_FAILURE);
+  }
+
+  inode_bitmap[0] |= 0x01;
+
+  if (!image_write_sec(
+        p->fp, inode_bitmap, sb.inode_bitmap_start, sb.inode_bitmap_sec_cnt)) {
+    perror("write inode bitmap");
+    exit(EXIT_FAILURE);
+  }
+  free(inode_bitmap);
+
+  // init inode table
+  struct inode* inode_table = malloc(sb.inode_table_sec_cnt * BOOT_SEC_SIZE);
+  if (!inode_table) {
+    perror("malloc inode table");
+    exit(EXIT_FAILURE);
+  }
+
+  inode_table[0].size = sb.direntry_size * 2;
+  inode_table[0].iid = 0;
+  inode_table[0].direct[0] = sb.data_start;
+
+  if (!image_write_sec(
+        p->fp, inode_table, sb.inode_table_start, sb.inode_table_sec_cnt)) {
+    perror("write inode table");
+    exit(EXIT_FAILURE);
+  }
+  free(inode_table);
+
+  struct direntry* root_dir = malloc(BOOT_SEC_SIZE);
+  if (!root_dir) {
+    perror("malloc root dir");
+    exit(EXIT_FAILURE);
+  }
+
+  root_dir[0].inode_idx = 0;
+  strcpy(root_dir[0].name, ".");
+  root_dir[0].type_padding = 1;
+
+  root_dir[1].inode_idx = 0;
+  strcpy(root_dir[1].name, "..");
+  root_dir[1].type_padding = 1;
+
+  if (!image_write_sec(p->fp, root_dir, sb.data_start, 1)) {
+    perror("write root dir");
+    exit(EXIT_FAILURE);
+  }
+  free(root_dir);
+
+  printf("fs info:\n");
+  printf("  block bitmap start: %u\n", sb.block_bitmap_start);
+  printf("  block bitmap size: %u\n", sb.block_bitmap_sec_cnt);
+  printf("  inode bitmap start: %u\n", sb.inode_bitmap_start);
+  printf("  inode bitmap size: %u\n", sb.inode_bitmap_sec_cnt);
+  printf("  inode table start: %u\n", sb.inode_table_start);
+  printf("  inode table size: %u\n", sb.inode_table_sec_cnt);
+  printf("  data start: %u\n", sb.data_start);
+  printf("  root inode idx: %u\n", sb.root_inode_idx);
+  printf("  direntry size: %u\n", sb.direntry_size);
 }
 
 int

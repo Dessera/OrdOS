@@ -17,7 +17,6 @@
 #define VA_END __builtin_va_end
 #define VA_ARG __builtin_va_arg
 
-#ifndef SCRIPT
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
@@ -41,26 +40,6 @@ typedef i32 intptr_t;
 
 #define MAX_SSIZE_T ((ssize_t)0x7FFFFFFF)
 #define MIN_SSIZE_T ((ssize_t)0x80000000)
-
-void
-itoa(char* buffer, i32 value, u8 base);
-
-void
-utoa(char* buffer, u32 value, u8 base);
-#else
-#include <stdint.h>
-#include <sys/types.h>
-
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-
-typedef int8_t i8;
-typedef int16_t i16;
-typedef int32_t i32;
-typedef int64_t i64;
-#endif // SCRIPT
 
 #define NPOS ((ssize_t) - 1)
 
@@ -97,5 +76,11 @@ typedef int64_t i64;
   {                                                                            \
     return RECURSIVE_APPLY(ENUM_INC, , __VA_ARGS__);                           \
   }
+
+void
+itoa(char* buffer, i32 value, u8 base);
+
+void
+utoa(char* buffer, u32 value, u8 base);
 
 #endif // __ASSEMBLER__
