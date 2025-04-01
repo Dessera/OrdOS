@@ -4,9 +4,7 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/memory.h"
 #include "kernel/task/sync.h"
-#include "kernel/utils/list_head.h"
-
-#define MEM_ZONE_SIZE 3
+#include "lib/list_head.h"
 
 /**
  * @brief Memory area

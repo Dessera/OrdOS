@@ -14,7 +14,7 @@
 #include "kernel/task/pid.h"
 #include "kernel/task/sync.h"
 #include "kernel/task/tss.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 #include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 

@@ -48,8 +48,7 @@ LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
 LDFLAGS = -z noexecstack --no-warn-rwx-segments
 
-CFLAGS_SCRIPTS := $(STDFLAGS)
-LDFLAGS_SCRIPTS :=
+CFLAGS_SCRIPTS := $(STDFLAGS) $(INCFLAGS) -D SCRIPT
 
 targets :=
 
@@ -66,6 +65,8 @@ all: $(TARGET) $(TARGET_DEBUG) $(DISK_IMG)
 
 # 	-------------------- LIB ----------------------
 include $(LIB_DIR)/Makefile
+
+lib_objs := $(patsubst %.o, $(BUILD_DIR)/$(LIB_DIR)/%.o,$(lib_targets))
 
 targets += $(patsubst %.o, $(LIB_DIR)/%.o,$(lib_targets))
 # 	-----------------------------------------------

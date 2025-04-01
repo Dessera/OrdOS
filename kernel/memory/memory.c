@@ -24,21 +24,6 @@ init_memory(void)
   init_sslab();
 }
 
-const char*
-mem_type_to_string(enum mem_type type)
-{
-  switch (type) {
-    case MEM_ZONE_DMA:
-      return "DMA";
-    case MEM_ZONE_NORMAL:
-      return "NORMAL";
-    case MEM_ZONE_HIGH:
-      return "HIGHMEM";
-    default:
-      return "UNKNOWN";
-  }
-}
-
 FORCE_INLINE void*
 kmalloc(size_t size)
 {

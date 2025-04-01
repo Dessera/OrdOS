@@ -12,7 +12,12 @@
  */
 struct list_head
 {
+#ifndef SCRIPT
   struct list_head *next, *prev;
+#else
+  // just for compatibility with script
+  u32 next, prev;
+#endif
 };
 
 /**

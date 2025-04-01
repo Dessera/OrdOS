@@ -2,8 +2,8 @@
 #include "kernel/device/disk/disk.h"
 #include "kernel/log.h"
 #include "kernel/memory/memory.h"
-#include "kernel/utils/list_head.h"
 #include "kernel/utils/print.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 struct list_head __partition_list;

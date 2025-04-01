@@ -4,7 +4,7 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/buddy/zone.h"
 #include "kernel/memory/memory.h"
-#include "lib/string.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 static void
@@ -13,7 +13,7 @@ debug_mem_zone(struct mem_zone* zone)
   AUTO ztype = zone_get_type(zone);
 
   KINFO("memory zone %s : start %u, size %u, free %u",
-        mem_type_to_string(ztype),
+        mem_type_to_str(ztype),
         zone->pg_start,
         zone->pg_cnt,
         zone->pg_free);

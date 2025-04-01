@@ -1,6 +1,6 @@
 #include "kernel/utils/bitmap.h"
 #include "kernel/assert.h"
-#include "lib/string.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 void

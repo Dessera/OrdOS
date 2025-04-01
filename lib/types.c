@@ -1,17 +1,12 @@
 
 
 #include "lib/types.h"
-#include "kernel/assert.h"
 
 static char digits[] = "0123456789abcdef";
 
 static void
 __itoa_impl(char** buffer, i32 value, u8 base)
 {
-  KASSERT(base >= 2 && base <= ARRAY_SIZE(digits),
-          "base out of range, received %u",
-          base);
-
   if (value < 0) {
     **buffer = '-';
     ++(*buffer);
@@ -38,10 +33,6 @@ itoa(char* buffer, i32 value, u8 base)
 static void
 __utoa_impl(char** buffer, u32 value, u8 base)
 {
-  KASSERT(base >= 2 && base <= ARRAY_SIZE(digits),
-          "base out of range, received %u",
-          base);
-
   if (value < base) {
     **buffer = digits[value];
     ++(*buffer);

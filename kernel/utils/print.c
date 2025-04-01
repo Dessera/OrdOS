@@ -4,7 +4,7 @@
 #include "kernel/memory/gdt.h"
 #include "kernel/task/sync.h"
 #include "lib/asm.h"
-#include "lib/string.h"
+#include "lib/string.h" // IWYU pragma: keep
 #include "lib/types.h"
 
 #define SET_VGA_SEGMENT() ASM("movl %0, %%gs" : : "r"(GDT_VIDEO_SELECTOR))

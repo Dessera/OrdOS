@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/device/disk/disk.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 
 struct disk_partition
 {

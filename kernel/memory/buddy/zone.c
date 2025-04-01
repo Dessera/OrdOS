@@ -10,7 +10,7 @@
 #include "lib/common.h"
 #include "lib/types.h"
 
-struct mem_zone __zones[MEM_ZONE_SIZE];
+struct mem_zone __zones[3];
 
 static void
 __init_zone(struct mem_zone* zone,

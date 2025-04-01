@@ -3,7 +3,7 @@
 #include "kernel/config/memory.h"
 #include "kernel/memory/sslab/cache.h"
 #include "kernel/task/sync.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 
 static struct sslab __sslab[MEM_SSLAB_MAX_ORDER + 1];
 

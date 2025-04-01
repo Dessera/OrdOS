@@ -2,8 +2,8 @@
 
 #include "kernel/config/task.h"
 #include "kernel/device/clk.h"
-#include "kernel/utils/list_head.h"
 #include "lib/common.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 typedef void (*task_entry_t)(void*);

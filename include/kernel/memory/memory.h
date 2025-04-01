@@ -44,27 +44,13 @@
 /**
  * @brief Memory zone type
  */
-enum mem_type
-{
-  MEM_ZONE_DMA = 0,
-  MEM_ZONE_NORMAL,
-  MEM_ZONE_HIGH,
-};
+ENUM_DECLARE(mem_type, MEM_ZONE_DMA, MEM_ZONE_NORMAL, MEM_ZONE_HIGH);
 
 /**
  * @brief Initialize the memory management system
  */
 void
 init_memory(void);
-
-/**
- * @brief Convert a memory type to a string
- *
- * @param type memory type
- * @return char* string representation of the memory type
- */
-const char*
-mem_type_to_string(enum mem_type type);
 
 /**
  * @brief Allocate a block of memory (sslab wrapper)

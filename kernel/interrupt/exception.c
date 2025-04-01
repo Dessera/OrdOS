@@ -7,9 +7,6 @@
 #include "lib/asm.h"
 #include "lib/types.h"
 
-KSTATIC_ASSERT(INTR_EXCEPTION_SIZE >= ENUM_SIZE(intr_exception),
-               "exception size overflow");
-
 static void
 __exception_handler(u32 intr)
 {
@@ -27,7 +24,9 @@ __page_fault_handler(u32 intr)
 void
 init_exception(void)
 {
-  for (size_t i = 0; i < ENUM_SIZE(intr_exception); i++) {
+  KASSERT(INTR_EXCEPTION_SIZE >= intr_exception_get_size(),
+          "exception size overflow");
+  for (size_t i = 0; i < intr_exception_get_size(); i++) {
     if (i == INTR_TYPE_PAGE_FAULT) { // page fault
       intr_register_handler(i, __page_fault_handler);
     } else {
@@ -35,5 +34,5 @@ init_exception(void)
     }
   }
 
-  KDEBUG("exceptions: %u", ENUM_SIZE(intr_exception));
+  KDEBUG("exceptions: %u", intr_exception_get_size());
 }

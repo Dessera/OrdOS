@@ -1,37 +1,12 @@
+#include "kernel/boot.h"
+#include "kernel/config/filesystem.h"
+#include "kernel/filesystem/filesystem.h"
+#include "lib/common.h"
+#include "lib/types.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-struct superblock
-{
-  uint32_t magic;
-  uint32_t sec_cnt;
-  uint32_t inode_cnt;
-  uint32_t sec_start;
-
-  uint32_t block_bitmap_start;
-  uint32_t block_bitmap_sec_cnt;
-
-  uint32_t inode_bitmap_start;
-  uint32_t inode_bitmap_sec_cnt;
-
-  uint32_t inode_table_start;
-  uint32_t inode_table_sec_cnt;
-
-  uint32_t data_start;
-  uint32_t root_inode_idx;
-  uint32_t direntry_size;
-
-  uint8_t other[460];
-} __attribute__((packed));
-
-struct inode
-{
-  uint32_t iid;
-  uint32_t size;
-  uint32_t ref_cnt;
-};
 
 struct partition
 {
@@ -85,6 +60,11 @@ destroy_partition_list(struct partition* p)
 void
 partition_create_fs(struct partition* p)
 {
+  AUTO inode_bmap_size = DIV_UP(FS_MAX_FILES / 8, BOOT_SEC_SIZE);
+  AUTO inode_table_size =
+    DIV_UP(FS_MAX_FILES * (sizeof(struct inode)), BOOT_SEC_SIZE);
+  AUTO used_size = inode_bmap_size + inode_table_size + 2;
+  AUTO free_size = p->sec_cnt - used_size;
 }
 
 struct partition_table_entry

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/interrupt/interrupt.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 struct spin_lock

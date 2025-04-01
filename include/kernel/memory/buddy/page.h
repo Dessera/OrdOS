@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/memory/memory.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 /**

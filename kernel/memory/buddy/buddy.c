@@ -5,7 +5,7 @@
 #include "kernel/memory/buddy/page.h"
 #include "kernel/memory/buddy/zone.h"
 #include "kernel/task/sync.h"
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 void

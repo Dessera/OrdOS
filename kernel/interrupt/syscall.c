@@ -7,11 +7,10 @@
 #include "lib/syscall.h" // IWYU pragma: keep
 #include "lib/types.h"
 
-KSTATIC_ASSERT(INTR_SYSCALL_SIZE >= ENUM_SIZE(intr_syscall),
-               "syscall table size overflow");
-
-static void* __sysall_table[ENUM_SIZE(intr_syscall)] = { sys_getpid,
-                                                         sys_write };
+static void* __sysall_table[INTR_SYSCALL_SIZE] = {
+  sys_getpid, sys_write, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr,    nullptr,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+};
 
 size_t
 sys_getpid(void)
@@ -30,7 +29,9 @@ sys_write(size_t, const void* buf, size_t)
 void
 init_syscall(void)
 {
-  KDEBUG("syscall: %u", ENUM_SIZE(intr_syscall));
+  KASSERT(INTR_SYSCALL_SIZE >= intr_syscall_get_size(),
+          "syscall table overflow");
+  KDEBUG("syscall: %u", intr_syscall_get_size());
 }
 
 DECLARE_WITH_PROTOTYPE(void*,

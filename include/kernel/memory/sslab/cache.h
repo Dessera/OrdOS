@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/utils/list_head.h"
+#include "lib/list_head.h"
 #include "lib/types.h"
 
 /**
