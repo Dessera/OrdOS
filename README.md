@@ -4,9 +4,9 @@ My os development demo.
 
 ## TODOS
 
-1. [ ] User space
-2. [ ] More log info
-3. [ ] Memory allocation
+1. [x] User space
+2. [x] More log info
+3. [x] Memory allocation
 4. [ ] File system
 5. [ ] Shell
 6. [ ] Support more gcc versions and std versions
