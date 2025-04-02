@@ -17,13 +17,21 @@
 void
 init_fs(void)
 {
+  KINFO("initializing filesystem subsystem");
+
   init_disk();
 
   if (partition_get_cnt() < 1) {
     KPANIC("no partitions found, cannot mount filesystem");
-  } else if (!fs_mount(partition_get_by_index(0))) {
+  }
+
+  AUTO part = partition_get_by_index(0);
+
+  if (!fs_mount(part)) {
     KPANIC("failed to mount filesystem");
   }
+
+  KDEBUG("current partition: %s", part->name);
 }
 
 bool

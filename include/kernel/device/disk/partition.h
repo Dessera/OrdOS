@@ -15,12 +15,32 @@ struct disk_partition
   struct disk* disk;
   struct list_head node;
 
-  // TODO: file system
   struct superblock* sb;
   struct bitmap block_bitmap;
   struct bitmap inode_bitmap;
   struct list_head open_inodes;
 };
+
+struct partition_table_entry
+{
+  u8 bootable;
+  u8 start_head;
+  u8 start_sec;
+  u8 start_chs;
+  u8 fs_type;
+  u8 end_head;
+  u8 end_sec;
+  u8 end_chs;
+  u32 start_lba;
+  u32 sec_cnt;
+} __attribute__((packed));
+
+struct boot_sector
+{
+  u8 other[446];
+  struct partition_table_entry partition_table[4];
+  u16 signature;
+} __attribute__((packed));
 
 void
 init_partition(void);

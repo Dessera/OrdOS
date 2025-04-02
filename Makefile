@@ -30,7 +30,7 @@ SCRIPT_ARGS =
 
 STDFLAGS = -std=c23
 
-CFLAGS = -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes						\
+CFLAGS =  -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes						\
 					-mno-sse -fno-builtin -fno-pie -fno-pic -fno-stack-protector 				\
 					-nostdinc -nostdlib -m32 -I$(INCLUDE_DIR) $(STDFLAGS)								\
 					-D KVERSION=$(VERSION) -D KNAME=$(NAME) -D LOGLEVEL=$(LOGLEVEL)
@@ -47,7 +47,8 @@ LDSCRIPT_TEMPLATE = kernel.ld.template
 LDSCRIPT = $(BUILD_DIR)/kernel.ld
 LDFLAGS = -z noexecstack --no-warn-rwx-segments
 
-CFLAGS_SCRIPTS := $(STDFLAGS) -I$(INCLUDE_DIR)/kernel/config -include $(INCLUDE_DIR)/lib/common.h
+CFLAGS_SCRIPTS := -Wall -Werror -W -Wstrict-prototypes -Wmissing-prototypes		\
+									$(STDFLAGS) -I$(INCLUDE_DIR) -D __SCRIPT__
 
 targets :=
 

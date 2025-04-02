@@ -66,11 +66,11 @@ __init_disk(void)
 void
 init_disk(void)
 {
-  KINFO("initializing disk");
-
   init_ide();
   __init_disk();
   init_partition();
+
+  KDEBUG("partitions: %u", partition_get_cnt());
 }
 
 size_t

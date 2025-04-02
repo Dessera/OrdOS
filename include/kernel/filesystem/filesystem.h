@@ -2,10 +2,14 @@
 
 #include "kernel/config/filesystem.h"
 #include "kernel/device/disk/partition.h"
-#include "lib/list_head.h"
 #include "lib/types.h"
 
-ENUM_DECLARE(file_type, FT_REGULAR, FT_DIRECTORY, FT_SYMLINK);
+enum file_type : u32
+{
+  FT_REGULAR,
+  FT_DIRECTORY,
+  FT_SYMLINK
+};
 
 struct superblock
 {
@@ -30,26 +34,16 @@ struct superblock
   u8 other[460];
 } __attribute__((packed));
 
-struct inode
-{
-  u32 iid;
-  u32 size;
-  u32 ref_cnt;
-  u32 direct[12];
-  u32 indirect;
-  struct list_head node;
-};
-
-struct dir
-{
-  struct inode* inode;
-  u32 pos;
-  u8 buf[FS_DIRBUFF_SIZE];
-};
+// struct dir
+// {
+//   struct inode* inode;
+//   u32 pos;
+//   u8 buf[FS_DIRBUFF_SIZE];
+// };
 
 struct direntry
 {
-  u32 inode_idx;
+  u32 iid;
   char name[FS_FILENAME_SIZE];
   enum file_type type;
 };

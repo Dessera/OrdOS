@@ -2,8 +2,30 @@
 
 #include "kernel/boot.h"
 #include "kernel/device/disk/partition.h"
-#include "kernel/filesystem/filesystem.h"
 #include "lib/types.h"
+
+/**
+ * @brief Disk inode structure, make sure there is not platform specific
+ * keywords in this structure.
+ */
+struct dinode
+{
+  u32 iid;
+  u32 size;
+  u32 direct[12];
+  u32 indirect;
+};
+
+/**
+ * @brief Memory inode structure, contains the disk inode, reference count and
+ * list node.
+ */
+struct inode
+{
+  struct dinode dinode;
+  size_t ref_cnt;
+  struct list_head node;
+};
 
 struct inode_position
 {

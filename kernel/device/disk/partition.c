@@ -9,27 +9,6 @@
 
 struct list_head __partition_list;
 
-struct partition_table_entry
-{
-  u8 bootable;
-  u8 start_head;
-  u8 start_sec;
-  u8 start_chs;
-  u8 fs_type;
-  u8 end_head;
-  u8 end_sec;
-  u8 end_chs;
-  u32 start_lba;
-  u32 sec_cnt;
-} __attribute__((packed));
-
-struct boot_sector
-{
-  u8 other[446];
-  struct partition_table_entry partition_table[4];
-  u16 signature;
-} __attribute__((packed));
-
 static void
 __disk_partition_scan_impl(struct disk* disk,
                            size_t sec_start,
@@ -92,18 +71,6 @@ init_partition(void)
       __disk_partition_scan(disk_get(i));
     }
   }
-
-#ifdef DEBUG
-  struct list_head* entry;
-  LIST_FOR_EACH(entry, &__partition_list)
-  {
-    AUTO partition = LIST_ENTRY(entry, struct disk_partition, node);
-    KDEBUG("partition %s: start=%u, cnt=%u",
-           partition->name,
-           partition->sec_start,
-           partition->sec_cnt);
-  }
-#endif
 }
 
 struct disk_partition*

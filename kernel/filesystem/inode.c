@@ -10,13 +10,13 @@ void
 inode_init(struct inode* inode, u32 iid)
 {
   memset(inode, 0, sizeof(struct inode));
-  inode->iid = iid;
+  inode->dinode.iid = iid;
 }
 
 void
 inode_locate(struct inode_position* pos, struct disk_partition* part, u32 iid)
 {
-  AUTO inode_table_offset = iid * sizeof(struct inode);
+  AUTO inode_table_offset = iid * sizeof(struct dinode);
 
   pos->sec = part->sb->inode_table_start + inode_table_offset / BOOT_SEC_SIZE;
   pos->offset = inode_table_offset % BOOT_SEC_SIZE;
@@ -26,28 +26,23 @@ bool
 inode_sync(struct inode* inode, struct disk_partition* part)
 {
   struct inode_position pos;
-  inode_locate(&pos, part, inode->iid);
+  inode_locate(&pos, part, inode->dinode.iid);
   KASSERT(pos.sec <= part->sec_start + part->sec_cnt,
           "invalid inode sec position");
 
-  struct inode dinode;
-  memcpy(&dinode, inode, sizeof(struct inode));
-  dinode.ref_cnt = 0;
-  dinode.node.next = nullptr;
-  dinode.node.prev = nullptr;
+  struct dinode dinode;
+  memcpy(&dinode, &inode->dinode, sizeof(struct dinode));
 
-  size_t buf_sec_cnt = inode_pos_is_overflow(&pos) ? 2 : 1;
-
-  void* iobuf = kmalloc(BOOT_SEC_SIZE * buf_sec_cnt);
+  void* iobuf = kmalloc(BOOT_SEC_SIZE);
   if (iobuf == nullptr) {
     return false;
   }
 
-  disk_read(part->disk, pos.sec, buf_sec_cnt, iobuf);
+  disk_read(part->disk, pos.sec, 1, iobuf);
 
-  memcpy(iobuf + pos.offset, &dinode, sizeof(struct inode));
+  memcpy(iobuf + pos.offset, &dinode, sizeof(struct dinode));
 
-  disk_write(part->disk, pos.sec, buf_sec_cnt, iobuf);
+  disk_write(part->disk, pos.sec, 1, iobuf);
 
   kfree(iobuf);
   return true;
@@ -60,7 +55,7 @@ inode_open(struct disk_partition* part, u32 iid)
   LIST_FOR_EACH(entry, &part->open_inodes)
   {
     struct inode* inode = LIST_ENTRY(entry, struct inode, node);
-    if (inode->iid == iid) {
+    if (inode->dinode.iid == iid) {
       inode->ref_cnt++;
       return inode;
     }
@@ -68,21 +63,20 @@ inode_open(struct disk_partition* part, u32 iid)
 
   struct inode_position pos;
   inode_locate(&pos, part, iid);
-  size_t buf_sec_cnt = inode_pos_is_overflow(&pos) ? 2 : 1;
 
   struct inode* inode = kmalloc(sizeof(struct inode));
   if (inode == nullptr) {
     return nullptr;
   }
 
-  void* iobuf = kmalloc(BOOT_SEC_SIZE * buf_sec_cnt);
+  void* iobuf = kmalloc(BOOT_SEC_SIZE);
   if (iobuf == nullptr) {
     kfree(inode);
     return nullptr;
   }
 
-  disk_read(part->disk, pos.sec, buf_sec_cnt, iobuf);
-  memcpy(inode, iobuf + pos.offset, sizeof(struct inode));
+  disk_read(part->disk, pos.sec, 1, iobuf);
+  memcpy(inode, iobuf + pos.offset, sizeof(struct dinode));
 
   list_add_tail(&inode->node, &part->open_inodes);
   inode->ref_cnt = 1;
