@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kernel/interrupt/interrupt.h" // for intr_set_status
-#include "kernel/utils/print.h"         // for kprintln
+#include "kernel/interrupt/interrupt.h" // IWYU pragma: keep
+#include "kernel/utils/print.h"         // IWYU pragma: keep
 
 #define LOGLEVEL_NONE 0
 #define LOGLEVEL_ERROR 1

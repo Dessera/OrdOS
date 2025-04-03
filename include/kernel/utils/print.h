@@ -33,7 +33,7 @@ kputs_nint(const char* str);
  * @note The function donot check parameter count and type
  */
 void
-kprint(const char* str, ...);
+kprint(const char* str, ...) __attribute__((format(printf, 1, 2)));
 
 /**
  * @brief Print a formatted string to the screen (disable interrupts)
@@ -42,7 +42,7 @@ kprint(const char* str, ...);
  * @param ... The arguments
  */
 void
-kprint_nint(const char* str, ...);
+kprint_nint(const char* str, ...) __attribute__((format(printf, 1, 2)));
 
 /**
  * @brief Print a formatted string to the screen, with `\n` at the end (thread
@@ -54,7 +54,7 @@ kprint_nint(const char* str, ...);
  * @note The function donot check parameter count and type
  */
 void
-kprintln(const char* str, ...);
+kprintln(const char* str, ...) __attribute__((format(printf, 1, 2)));
 
 /**
  * @brief Print a formatted string to the screen, with `\n` at the end (disable
@@ -64,7 +64,7 @@ kprintln(const char* str, ...);
  * @param ... The arguments
  */
 void
-kprintln_nint(const char* str, ...);
+kprintln_nint(const char* str, ...) __attribute__((format(printf, 1, 2)));
 
 /**
  * @brief Print a formatted string to the buffer
@@ -74,7 +74,7 @@ kprintln_nint(const char* str, ...);
  * @param ... The arguments
  */
 void
-ksprint(char* buf, const char* str, ...);
+ksprint(char* buf, const char* str, ...) __attribute__((format(printf, 2, 3)));
 
 /**
  * @brief Print a formatted string to the buffer, used to create other utils

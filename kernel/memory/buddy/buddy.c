@@ -19,13 +19,13 @@ void
 buddy_free_page(struct page* page, u8 order)
 {
   KASSERT(order <= MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
-  KASSERT(!page->reserved, "cannot free reserved page %p", page_get_phys(page));
+  KASSERT(!page->reserved, "cannot free reserved page %x", page_get_phys(page));
   KASSERT(!page->buddy,
-          "cannot free page %p that is part of a buddy block",
+          "cannot free page %x that is part of a buddy block",
           page_get_phys(page));
 
   if (!buddy_page_is_aligned(page, order)) {
-    KWARNING("page %p is not aligned to order %u", page_get_phys(page), order);
+    KWARNING("page %x is not aligned to order %x", page_get_phys(page), order);
     return;
   }
 
@@ -83,7 +83,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
 
   page = LIST_ENTRY(area->mem_blocks.next, struct page, node);
   KASSERT(page->buddy,
-          "broken buddy system, page %p is not part of a block",
+          "broken buddy system, page %x is not part of a block",
           page_get_phys(page));
 
   area_remove_page(area, page);
@@ -101,7 +101,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
   zone->pg_free -= buddy_order_to_page_cnt(order);
 
   KASSERT(!page->buddy,
-          "broken buddy system, allocated page %p is still part of a block",
+          "broken buddy system, allocated page %x is still part of a block",
           page_get_phys(page));
 
 alloc_end:
