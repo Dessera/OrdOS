@@ -1,0 +1,2 @@
+subdir('kernel')
+subdir('lib')

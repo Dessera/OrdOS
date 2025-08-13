@@ -1,0 +1,1 @@
+script_mkimage = files('mkimage.sh').get(0)

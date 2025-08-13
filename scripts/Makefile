@@ -1,1 +1,0 @@
-scripts_entries := mkfs.o

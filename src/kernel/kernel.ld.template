@@ -1,0 +1,50 @@
+#include "ordos/kernel/config.h"
+
+OUTPUT_FORMAT(elf32-i386)
+OUTPUT_ARCH(i386)
+ENTRY(_start)
+
+SECTIONS
+{
+  . = ORDOS_KERNEL_LADDR;
+
+  .text.init : {
+    *(.text.init*)
+  }
+
+  .rodata.init : {
+    *(.rodata.init*)
+  }
+
+  .data.init : {
+    *(.data.init*)
+  }
+
+  .bss.init : {
+    *(.bss.init*)
+  }
+
+  . += ORDOS_KERNEL_VADDR;
+
+  .text : AT(ADDR(.text) - ORDOS_KERNEL_VADDR) {
+    *(.text)
+  }
+
+  .rodata : AT(ADDR(.rodata) - ORDOS_KERNEL_VADDR) {
+    *(.rodata)
+  }
+
+  .data : AT(ADDR(.data) - ORDOS_KERNEL_VADDR) {
+    *(.data)
+  }
+
+  .bss : AT(ADDR(.bss) - ORDOS_KERNEL_VADDR) {
+    *(.bss)
+  }
+  __ld_kernel_end_vaddr = .;
+  __ld_kernel_end_paddr = . - ORDOS_KERNEL_VADDR;
+
+  /DISCARD/ : {
+    *(.note*)
+  }
+}
