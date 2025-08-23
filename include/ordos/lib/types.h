@@ -13,6 +13,16 @@
 
 #define NULL ((void*)0)
 
+#define NPOS (-1)
+
+#define offset_of(type, member) __builtin_offsetof(type, member)
+
+#define container_of(ptr, type, member)                                        \
+  ({                                                                           \
+    typeof(((type*)0)->member)* mptr = (ptr);                                  \
+    (type*)((char*)mptr - offset_of(type, member));                            \
+  })
+
 #define va_list __builtin_va_list
 #define va_satrt __builtin_va_start
 #define va_end __builtin_va_end
@@ -33,6 +43,10 @@ typedef i32 ssize_t;
 
 typedef u32 uintptr_t;
 typedef i32 intptr_t;
+
+typedef _Bool bool;
+#define true 1  // NOLINT
+#define false 0 // NOLINT
 
 enum base_flag
 {

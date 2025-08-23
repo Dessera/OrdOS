@@ -108,7 +108,7 @@ vga_create_char(char ch)
  * @param col Cursor column.
  * @return vga_cursor_t Cursor.
  */
-__inline vga_cursor_t
+__inline static vga_cursor_t
 vga_create_cursor(u16 row, u16 col)
 {
   return (row * VGA_BUF_WIDTH) + col;

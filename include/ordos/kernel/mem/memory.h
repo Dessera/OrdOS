@@ -1,7 +1,7 @@
 /**
- * @file map.h
+ * @file memory.h
  * @author Dessera (dessera@qq.com)
- * @brief Init memory info map.
+ * @brief Memory utils.
  * @version 0.1.0
  * @date 2025-08-13
  *
@@ -13,17 +13,32 @@
 
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
+#define MEM_TYPE_HIGH_START 0x30000000
+#define MEM_TYPE_NORMAL_START 0x01000000
+#define MEM_TYPE_DMA_START 0x00000000
+
 /**
- * @brief Memory types.
+ * @brief Memory map types.
  *
  */
-enum mmap_type : u64
+enum mmap_type
 {
   PMEM_AVAILABLE = 1,
   PMEM_RESERVED = 2,
   PMEM_ACPI_RECLAIMABLE = 3,
   PMEM_NVS = 4,
   PMEM_BADRAM = 5,
+};
+
+/**
+ * @brief Memory types.
+ *
+ */
+enum mem_type
+{
+  MEM_DMA,
+  MEM_NORMAL,
+  MEM_HIGH,
 };
 
 /**

@@ -8,6 +8,9 @@ SECTIONS
 {
   . = ORDOS_KERNEL_LADDR;
 
+  __ld_kernel_start_paddr = .;
+  __ld_kernel_start_vaddr = . + ORDOS_KERNEL_VADDR;
+
   .text.init : {
     *(.text.init*)
   }

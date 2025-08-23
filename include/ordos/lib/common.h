@@ -92,6 +92,18 @@
 #define div_down(x, y) ((x) / (y))
 
 /**
+ * @brief Get min value.
+ *
+ */
+#define min(x, y) ((x) < (y) ? (x) : (y))
+
+/**
+ * @brief Get max value.
+ *
+ */
+#define max(x, y) ((x) > (y) ? (x) : (y))
+
+/**
  * @brief Tell compiler the condition is more likely to be true.
  *
  */

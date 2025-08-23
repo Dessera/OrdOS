@@ -19,4 +19,5 @@
 #define ORDOS_INIT_STACKSIZE 0x1000   /**< Init stack size when boot. */
 #define ORDOS_INIT_MMAP_LENGTH 64     /**< Init memory map size. */
 #define ORDOS_INIT_ARGS_BUFSIZE 0x200 /**< Init args size, */
+#define ORDOS_MEM_MAX_ORDER 10        /**< Memory pages max order. */
 #define ORDOS_IO_BUFSIZE 0x200        /**< IO buffer size. */

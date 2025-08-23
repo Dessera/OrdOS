@@ -1,12 +1,11 @@
 #include "ordos/kernel/boot/prelude.h"
 #include "ordos/kernel/boot/multiboot.h"
-#include "ordos/kernel/compiler.h"
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/init.h"
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/mem/bootmem.h"
 #include "ordos/kernel/mem/gdt.h"
-#include "ordos/kernel/mem/map.h"
+#include "ordos/kernel/mem/memory.h"
 #include "ordos/kernel/mem/vpage.h"
 #include "ordos/kernel/utils.h"
 #include "ordos/lib/common.h"
@@ -71,7 +70,7 @@ __init_from_multiboot(struct init_info* init, void* tags)
   if (mmap != NULL) {
     __init_mmap(init, mmap);
   } else {
-    KPRELUDE_PANIC("Prelude failed: Cannot fetch memory map");
+    kpanic_prelude("Prelude failed: Cannot fetch memory map");
   }
 
   if (cmdline != NULL) {
@@ -87,11 +86,11 @@ __prelude static void
 __init_pagetable(struct init_info* init)
 {
   pde_t* pd = bootmem_alloc(ORDOS_KERNEL_PAGE_SIZE);
-  size_t pte_cnt =
-    align_up(compiler_kernel_end_paddr(), ORDOS_KERNEL_PAGE_SIZE) /
-    ORDOS_KERNEL_PAGE_SIZE;
-  size_t pde_cnt = div_up(pte_cnt, VPAGE_DESC_LENGTH);
+  size_t pde_cnt =
+    min(div_up(bootmem_end() / ORDOS_KERNEL_PAGE_SIZE, VPAGE_DESC_LENGTH),
+        pde_index(MEM_TYPE_HIGH_START));
   pte_t* pt = bootmem_alloc(pde_cnt * ORDOS_KERNEL_PAGE_SIZE);
+  size_t pte_cnt = pde_cnt * VPAGE_DESC_LENGTH;
 
   void* pt_iter = pt;
   for (size_t i = 0; i < pde_cnt; ++i) {
@@ -145,7 +144,7 @@ kprelude(u32 magic, void* info)
   struct init_info* init = vaccess(&__init);
 
   if (unlikely(magic != MULTIBOOT_LOADER_MAGIC)) {
-    KPRELUDE_PANIC("Prelude failed: Mismatched multiboot magic");
+    kpanic_prelude("Prelude failed: Mismatched multiboot magic");
   }
 
   __init_from_multiboot(init,

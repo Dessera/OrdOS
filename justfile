@@ -14,3 +14,6 @@ build:
 
 debug:
   {{QEMU}} -drive format=raw,file={{TARGET}} -s -S
+
+run:
+  {{QEMU}} -drive format=raw,file={{TARGET}}

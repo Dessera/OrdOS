@@ -26,6 +26,18 @@ extern const uintptr_t __ld_kernel_end_vaddr[];
 extern const uintptr_t __ld_kernel_end_paddr[];
 
 /**
+ * @brief Linker variable to point kernel start point.
+ *
+ */
+extern const uintptr_t __ld_kernel_start_vaddr[];
+
+/**
+ * @brief Linker variable to point kernel start point.
+ *
+ */
+extern const uintptr_t __ld_kernel_start_paddr[];
+
+/**
  * @brief Get kernel end virtual address.
  *
  * @return uintptr_t Kernel end address.
@@ -45,4 +57,26 @@ __inline static uintptr_t
 compiler_kernel_end_paddr(void)
 {
   return (uintptr_t)__ld_kernel_end_paddr;
+}
+
+/**
+ * @brief Get kernel start virtual address.
+ *
+ * @return uintptr_t Kernel start address.
+ */
+__inline static uintptr_t
+compiler_kernel_start_vaddr(void)
+{
+  return (uintptr_t)__ld_kernel_start_vaddr;
+}
+
+/**
+ * @brief Get kernel start physical address.
+ *
+ * @return uintptr_t Kernel start address.
+ */
+__inline static uintptr_t
+compiler_kernel_start_paddr(void)
+{
+  return (uintptr_t)__ld_kernel_start_paddr;
 }

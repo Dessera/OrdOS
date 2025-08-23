@@ -3,7 +3,7 @@
 #include "ordos/kernel/compiler.h"
 #include "ordos/kernel/init.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/map.h"
+#include "ordos/kernel/mem/memory.h"
 #include "ordos/kernel/utils.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
@@ -36,7 +36,7 @@ bootmem_alloc(size_t size)
 {
   uintptr_t base = align_up(__bootmem_start, size);
   if (base + size > __bootmem_end) {
-    KPRELUDE_PANIC("Prelude failed: boot memory overflow");
+    kpanic_prelude("Prelude failed: boot memory overflow");
   }
 
   __bootmem_start = base + size;

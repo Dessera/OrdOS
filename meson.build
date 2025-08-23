@@ -29,6 +29,8 @@ kernel_args = [
   '-nostdlib',
   '-z', 'noexecstack',
   '-m32',
+  '-DLOGLEVEL=4',
+  '-DDEBUG',
 ]
 
 kernel_ld_args = kernel_args + [
