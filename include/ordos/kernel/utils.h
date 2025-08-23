@@ -18,10 +18,10 @@
  * @brief Access virtual memory space in physical section.
  *
  */
-#define vaccess(ptr) (pcast_offs(ptr, -ORDOS_KERNEL_VADDR))
+#define vaccess(ptr) (poffset(ptr, -ORDOS_KERNEL_VADDR))
 
 /**
  * @brief Access physical memory space in vritual section.
  *
  */
-#define paccess(ptr) (pcast_offs(ptr, ORDOS_KERNEL_VADDR))
+#define paccess(ptr) (poffset(ptr, ORDOS_KERNEL_VADDR))

@@ -1,14 +1,14 @@
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/driver/vga.h"
+#include "ordos/kernel/utils.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
 
 static vga_cursor_t
-__kputdefault(u8 c, vga_cursor_t cursor) // NOLINT
+__kputdefault(char c, vga_cursor_t cursor) // NOLINT
 {
-  // TODO: Color
-  u16 payload = (u16)c | (0x07 << 8); // NOLINT
+  u16 payload = vga_create_char(c);
   vga_set(cursor, payload);
 
   return cursor + 1;
@@ -239,4 +239,18 @@ kvsprint(char* buf, const char* fmt, va_list args) // NOLINT
   }
 
   *buf = '\0';
+}
+
+void
+kprelude_puts(const char* str)
+{
+  u16* dest = vaccess(VGA_BUF_ADDR);
+  const char* src = vaccess(str);
+
+  while (*src != '\0') {
+    *dest = vga_create_char(*src);
+
+    ++src;
+    ++dest;
+  }
 }

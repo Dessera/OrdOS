@@ -13,13 +13,13 @@
 
 #include "ordos/lib/common.h"
 
-static ORDOS_FORCEINLINE void
+static __inline void
 outb(u16 port, u8 data) // NOLINT
 {
   asm_exec("outb %b0, %w1" : : "a"(data), "Nd"(port));
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 outsw(u16 port, const void* addr, u32 size)
 {
   asm_exec("cld;"
@@ -27,7 +27,7 @@ outsw(u16 port, const void* addr, u32 size)
            "+c"(size) : "d"(port));
 }
 
-static ORDOS_FORCEINLINE u8
+static __inline u8
 inb(u16 port)
 {
   u8 data = 0;
@@ -35,7 +35,7 @@ inb(u16 port)
   return data;
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 insw(u16 port, void* addr, u32 size)
 {
   asm_exec("cld;"
@@ -43,25 +43,25 @@ insw(u16 port, void* addr, u32 size)
            "+c"(size) : "d"(port) : "memory");
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 sti(void)
 {
   asm_exec("sti");
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 cli(void)
 {
   asm_exec("cli");
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 lidt(u64 idt_ptr)
 {
   asm_exec("lidt %0" : : "m"(idt_ptr));
 }
 
-static ORDOS_FORCEINLINE u32
+static __inline u32
 eflags(void)
 {
   u32 eflags = 0;
@@ -70,25 +70,25 @@ eflags(void)
   return eflags;
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 hlt(void)
 {
   asm_exec("hlt");
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 invlpg(void* addr)
 {
   asm_exec("invlpg %0" : : "m"(addr) : "memory");
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 lcr3(void* addr)
 {
   asm_exec("movl %0, %%cr3" : : "r"(addr));
 }
 
-static ORDOS_FORCEINLINE u32
+static __inline u32
 rcr0(void)
 {
   u32 cr0 = 0;
@@ -96,13 +96,13 @@ rcr0(void)
   return cr0;
 }
 
-static ORDOS_FORCEINLINE void
+static __inline void
 lcr0(u32 cr0)
 {
   asm_exec("movl %0, %%cr0" : : "r"(cr0));
 }
 
-static ORDOS_FORCEINLINE u32
+static __inline u32
 rcr2(void)
 {
   u32 cr2 = 0;

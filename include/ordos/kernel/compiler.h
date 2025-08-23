@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "ordos/lib/common.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
 /**
@@ -31,7 +30,7 @@ extern const uintptr_t __ld_kernel_end_paddr[];
  *
  * @return uintptr_t Kernel end address.
  */
-ORDOS_FORCEINLINE static uintptr_t
+__inline static uintptr_t
 compiler_kernel_end_vaddr(void)
 {
   return (uintptr_t)__ld_kernel_end_vaddr;
@@ -42,7 +41,7 @@ compiler_kernel_end_vaddr(void)
  *
  * @return uintptr_t Kernel end address.
  */
-ORDOS_FORCEINLINE static uintptr_t
+__inline static uintptr_t
 compiler_kernel_end_paddr(void)
 {
   return (uintptr_t)__ld_kernel_end_paddr;

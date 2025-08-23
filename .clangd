@@ -26,6 +26,7 @@ Diagnostics:
       readability-implicit-bool-conversion,
       misc-no-recursion,
       misc-use-anonymous-namespace,
+      performance-no-int-to-ptr,
     ]
 InlayHints:
   BlockEnd: true

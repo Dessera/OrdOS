@@ -13,6 +13,7 @@
 
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/mem/map.h"
+#include "ordos/kernel/mem/vpage.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
 /**
@@ -21,14 +22,13 @@
  */
 struct init_info
 {
-  // memory.
-  struct mmap_entry mmap[ORDOS_INIT_MMAP_LENGTH];
-  size_t mmap_cnt;
-  uintptr_t mstart;
-  uintptr_t mend;
-
-  // error when initialize.
-  const char* error;
+  struct mmap_entry mmap[ORDOS_INIT_MMAP_LENGTH]; /**< Memory map. */
+  size_t mmap_cnt;                                /**< Memory map count. */
+  pde_t* kernel_pd;                               /**< Kernel page directory. */
+  size_t kernel_pde_cnt;                          /**< Kernel pde count. */
+  pte_t* kernel_pt;                               /**< Kernel page table. */
+  size_t kernel_pte_cnt;                          /**< Kernel pte count. */
+  char cmdline[ORDOS_INIT_ARGS_BUFSIZE];          /**< Boot args. */
 };
 
-extern struct init_info __init;
+extern struct init_info __init; /**< Global init info. */

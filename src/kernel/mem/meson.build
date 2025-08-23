@@ -1,3 +1,4 @@
 kernel_src += files(
-  'map.c',
+  'bootmem.c',
+  'gdt.c',
 )

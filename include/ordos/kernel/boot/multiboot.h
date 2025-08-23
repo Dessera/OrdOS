@@ -17,7 +17,9 @@
 
 #define MULTIBOOT_HEADER_ARCH_1386 0
 
+#define MULTIBOOT_HEADER_ALIGN 8
 #define MULTIBOOT_TAG_ALIGN 8
+
 #define MULTIBOOT_TAG_TYPE_END 0
 #define MULTIBOOT_TAG_TYPE_CMDLINE 1
 #define MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME 2
@@ -63,7 +65,7 @@
 
 #define MULTIBOOT_HEADER(name, isa)                                            \
   name:                                                                        \
-  .align 8;                                                                    \
+  .align MULTIBOOT_HEADER_ALIGN;                                               \
   .long MULTIBOOT_HEADER_MAGIC;                                                \
   .long isa;                                                                   \
   .long name##_end - name;                                                     \
@@ -73,7 +75,7 @@
 
 #define MULTIBOOT_HEADER_TAG_EFI32_ENTRY(name, addr)                           \
   name:                                                                        \
-  .align 8;                                                                    \
+  .align MULTIBOOT_TAG_ALIGN;                                                  \
   .short MULTIBOOT_HEADER_TAG_TYPE_ENTRY_ADDRESS_EFI32;                        \
   .short MULTIBOOT_HEADER_TAG_FLAG_OPTIONAL;                                   \
   .long name##_end - name;                                                     \
@@ -82,7 +84,7 @@
 
 #define MULTIBOOT_HEADER_TAG_BIOS_ENTRY(name, addr)                            \
   name:                                                                        \
-  .align 8;                                                                    \
+  .align MULTIBOOT_TAG_ALIGN;                                                  \
   .short MULTIBOOT_HEADER_TAG_TYPE_ENTRY_ADDRESS;                              \
   .short 0;                                                                    \
   .long name##_end - name;                                                     \
@@ -91,7 +93,7 @@
 
 #define MULTIBOOT_HEADER_TAG_END(name)                                         \
   name:                                                                        \
-  .align 8;                                                                    \
+  .align MULTIBOOT_TAG_ALIGN;                                                  \
   .short MULTIBOOT_HEADER_TAG_TYPE_END;                                        \
   .short 0;                                                                    \
   .long name##_end - name;                                                     \
@@ -133,6 +135,12 @@ struct multiboot_mmap
   u32 entry_size;
   u32 entry_version;
   struct multiboot_mmap_entry entries[0];
+};
+
+struct multiboot_cmdline
+{
+  struct multiboot_tag tag;
+  char string[0];
 };
 
 #endif

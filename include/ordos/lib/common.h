@@ -17,41 +17,49 @@
  * @brief Set label to section.
  *
  */
-#define ORDOS_SECTION(name) __attribute__((section(name)))
+#define __section(name) __attribute__((section(name)))
 
-#define ORDOS_USED __attribute__((used))
+/**
+ * @brief Tell compiler the function is used in somewhere.
+ *
+ */
+#define __used __attribute__((used))
 
 /**
  * @brief Tell compiler the function is used by asm code.
  *
  */
-#define ORDOS_ASMLINKAGE __attribute__((regparm(0))) ORDOS_USED
+#define __asm_linkage __attribute__((regparm(0))) __used
 
 /**
  * @brief Tell compiler the function should not return.
  *
  */
-#define ORDOS_NORETURN __attribute__((noreturn))
+#define __noreturn __attribute__((noreturn))
 
 /**
  * @brief Tell compiler the function is pure.
  *
  */
-#define ORDOS_PUREFN __attribute__((pure))
+#define __pure __attribute__((pure))
 
-#define ORDOS_FORCEINLINE inline __attribute__((always_inline))
+/**
+ * @brief Tell compiler the function should be inline expanded.
+ *
+ */
+#define __inline inline __attribute__((always_inline))
 
 /**
  * @brief Tell compiler check function format args.
  *
  */
-#define ORDOS_FORMAT(func, fmt, args) __attribute__((format(func, fmt, args)))
+#define __format(func, fmt, args) __attribute__((format(func, fmt, args)))
 
 /**
  * @brief Cast pointer with specific offset.
  *
  */
-#define pcast_offs(ptr, offs) ((void*)((uintptr_t)(ptr) + (offs))) // NOLINT
+#define poffset(ptr, offs) ((void*)((uintptr_t)(ptr) + (offs)))
 
 /**
  * @brief Exec asm commands.
@@ -65,6 +73,32 @@
  */
 #define align_up(num, align) (((num) + ((align) - 1)) & (~((align) - 1)))
 
+/**
+ * @brief Align down number.
+ *
+ */
+#define align_down(num, align) ((num) & ~((align) - 1))
+
+/**
+ * @brief Divide up numbers.
+ *
+ */
+#define div_up(x, y) (((x) + (y) - 1) / (y))
+
+/**
+ * @brief Divide down numbers.
+ *
+ */
+#define div_down(x, y) ((x) / (y))
+
+/**
+ * @brief Tell compiler the condition is more likely to be true.
+ *
+ */
 #define likely(...) __builtin_expect(!!(__VA_ARGS__), 1)
 
+/**
+ * @brief Tell compiler the condition is more likely to be false.
+ *
+ */
 #define unlikely(...) __builtin_expect(!!(__VA_ARGS__), 0)

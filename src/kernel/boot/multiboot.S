@@ -1,5 +1,5 @@
-#include <ordos/kernel/config.h>
-#include <ordos/kernel/boot/multiboot.h>
+#include "ordos/kernel/config.h"
+#include "ordos/kernel/boot/multiboot.h"
 
 .section .text.init, "ax"
 
@@ -14,7 +14,10 @@ _start:
   // call c loader with magic and information ptr
   pushl %ebx
   pushl %eax
-  call _kprelude
+  call kprelude
+
+  // call kernel main function
+  call kmain
 
 _start_hlt:
   hlt

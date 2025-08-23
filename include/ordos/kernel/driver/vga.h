@@ -12,23 +12,26 @@
 #pragma once
 
 #include "ordos/kernel/config.h"
-#include "ordos/lib/common.h"
+#include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
 
-#define VGA_BUF_WIDTH 0x50
-#define VGA_BUF_HEIGHT 0x19
-#define VGA_BUF_ADDR (0xB8000 + ORDOS_KERNEL_VADDR)
+#define VGA_BUF_WIDTH 0x50  /**< VGA buffer width. */
+#define VGA_BUF_HEIGHT 0x19 /**< VGA buffer height. */
 
-#define VGA_DP_SIZE (VGA_BUF_WIDTH * VGA_BUF_HEIGHT)
-#define VGA_BUF_SIZE (VGA_DP_SIZE * 2)
+#define VGA_BUF_ADDR                                                           \
+  (0xB8000 + ORDOS_KERNEL_VADDR) /**<  VGA buffer address (vaddr). */
 
-#define VGA_PORT_CMD 0x3d4
-#define VGA_PORT_DATA 0x3d5
+#define VGA_DP_SIZE                                                            \
+  (VGA_BUF_WIDTH * VGA_BUF_HEIGHT)     /**< VGA buffer size (in WORD). */
+#define VGA_BUF_SIZE (VGA_DP_SIZE * 2) /**< VGA buffer size (in BYTE). */
 
-#define VGA_CMD_CURSOR_HIGH 0x0e
-#define VGA_CMD_CURSOR_LOW 0x0f
+#define VGA_PORT_CMD 0x3D4  /**< VGA io port used by command. */
+#define VGA_PORT_DATA 0x3D5 /**< VGA io port used by data. */
 
-#define VGA_BLANK 0x0720
+#define VGA_CMD_CURSOR_HIGH 0x0E /**< VGA set or get high cursor command. */
+#define VGA_CMD_CURSOR_LOW 0x0F  /**< VGA set or get low cursor command. */
+
+#define VGA_BLANK 0x0720 /**< VGA blank character. */
 
 /**
  * @brief VGA curosr.
@@ -86,13 +89,26 @@ void
 vga_scroll(size_t offs);
 
 /**
- * @brief Create VGA cursor.
+ * @brief Util to create VGA character.
+ *
+ * @param ch Character.
+ * @return u16 VGA display character.
+ */
+__inline static u16
+vga_create_char(char ch)
+{
+  // TODO: Color
+  return (u16)ch | (0x07 << 8); // NOLINT
+}
+
+/**
+ * @brief Util to create VGA cursor.
  *
  * @param row Cursor row.
- * @param col Cursor col.
- * @return vga_cursor_t VGA cursor.
+ * @param col Cursor column.
+ * @return vga_cursor_t Cursor.
  */
-static ORDOS_FORCEINLINE vga_cursor_t
+__inline vga_cursor_t
 vga_create_cursor(u16 row, u16 col)
 {
   return (row * VGA_BUF_WIDTH) + col;

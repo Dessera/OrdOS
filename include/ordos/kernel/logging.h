@@ -11,7 +11,28 @@
 
 #pragma once
 
+#include "ordos/kernel/boot/prelude.h"
 #include "ordos/lib/common.h"
+
+/**
+ * @brief Panic in prelude.
+ *
+ */
+#define KPRELUDE_PANIC(str)                                                    \
+  do {                                                                         \
+    kprelude_puts(str);                                                        \
+    while (1) {                                                                \
+    }                                                                          \
+  } while (0)
+
+/**
+ * @brief Warn in prelude.
+ *
+ */
+#define KPRELUDE_WARN(str)                                                     \
+  do {                                                                         \
+    kprelude_puts(str);                                                        \
+  } while (0)
 
 /**
  * @brief Initialize the print subsystem
@@ -43,9 +64,7 @@ kputs_unsafe(const char* str);
  *
  * @note The function donot check parameter count and type.
  */
-ORDOS_FORMAT(printf, 1, 2)
-void
-kprint(const char* str, ...);
+__format(printf, 1, 2) void kprint(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the screen (thread unsafe).
@@ -53,9 +72,7 @@ kprint(const char* str, ...);
  * @param str The format string.
  * @param ... The arguments.
  */
-ORDOS_FORMAT(printf, 1, 2)
-void
-kprint_unsafe(const char* str, ...);
+__format(printf, 1, 2) void kprint_unsafe(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the screen, with `\n` at the end (thread
@@ -66,9 +83,7 @@ kprint_unsafe(const char* str, ...);
  *
  * @note The function donot check parameter count and type.
  */
-ORDOS_FORMAT(printf, 1, 2)
-void
-kprintln(const char* str, ...);
+__format(printf, 1, 2) void kprintln(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the screen, with `\n` at the end (thread
@@ -77,9 +92,7 @@ kprintln(const char* str, ...);
  * @param str The format string.
  * @param ... The arguments.
  */
-ORDOS_FORMAT(printf, 1, 2)
-void
-kprintln_unsafe(const char* str, ...);
+__format(printf, 1, 2) void kprintln_unsafe(const char* str, ...);
 
 /**
  * @brief Print a formatted string to the buffer.
@@ -88,9 +101,7 @@ kprintln_unsafe(const char* str, ...);
  * @param str The format string.
  * @param ... The arguments.
  */
-ORDOS_FORMAT(printf, 2, 3)
-void
-ksprint(char* buf, const char* str, ...);
+__format(printf, 2, 3) void ksprint(char* buf, const char* str, ...);
 
 /**
  * @brief Print a formatted string to the buffer, used to create other utils.
@@ -101,3 +112,11 @@ ksprint(char* buf, const char* str, ...);
  */
 void
 kvsprint(char* buf, const char* fmt, va_list args);
+
+/**
+ * @brief Print a string to the screen (for prelude).
+ *
+ * @param str The string to print (should be a vm addr).
+ */
+__prelude void
+kprelude_puts(const char* str);

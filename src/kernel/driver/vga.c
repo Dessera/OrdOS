@@ -10,7 +10,7 @@ vga_set(vga_cursor_t cursor, u16 value) // NOLINT
     return;
   }
 
-  u16* pdata = pcast_offs(VGA_BUF_ADDR, cursor * 2);
+  u16* pdata = poffset(VGA_BUF_ADDR, cursor * 2);
   *pdata = value;
 }
 
@@ -21,7 +21,7 @@ vga_get(vga_cursor_t cursor)
     return 0;
   }
 
-  u16* pdata = pcast_offs(VGA_BUF_ADDR, cursor * 2);
+  u16* pdata = poffset(VGA_BUF_ADDR, cursor * 2);
   return *pdata;
 }
 
