@@ -2,6 +2,8 @@ kernel_src = files(
   'init.c',
   'logging.c',
   'main.c',
+  'module.c',
+  'test.c', # a test module
 )
 
 subdir('boot')

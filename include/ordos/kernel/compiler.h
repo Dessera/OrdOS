@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "ordos/lib/types.h" // IWYU pragma: keep
+#include "ordos/lib/common.h" // IWYU pragma: keep
+#include "ordos/lib/types.h"  // IWYU pragma: keep
 
 /**
  * @brief Linker variable to point kernel end point.
@@ -24,6 +25,18 @@ extern const uintptr_t __ld_kernel_end_vaddr[];
  *
  */
 extern const uintptr_t __ld_kernel_end_paddr[];
+
+/**
+ * @brief Linker variable to point kernel module start point.
+ *
+ */
+extern const uintptr_t __ld_kernel_modules_start_vaddr[];
+
+/**
+ * @brief Linker variable to point kernel module end point.
+ *
+ */
+extern const uintptr_t __ld_kernel_modules_end_vaddr[];
 
 /**
  * @brief Linker variable to point kernel start point.
@@ -79,4 +92,26 @@ __inline static uintptr_t
 compiler_kernel_start_paddr(void)
 {
   return (uintptr_t)__ld_kernel_start_paddr;
+}
+
+/**
+ * @brief Get kernel module start virtual address.
+ *
+ * @return uintptr_t Kernel module start address.
+ */
+__inline static uintptr_t
+compiler_kernel_module_start_vaddr(void)
+{
+  return (uintptr_t)__ld_kernel_modules_start_vaddr;
+}
+
+/**
+ * @brief Get kernel module end virtual address.
+ *
+ * @return uintptr_t Kernel module end address.
+ */
+__inline static uintptr_t
+compiler_kernel_module_end_vaddr(void)
+{
+  return (uintptr_t)__ld_kernel_modules_end_vaddr;
 }

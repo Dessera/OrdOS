@@ -84,7 +84,7 @@
 #define kerror(fmt, ...)
 #define kerror_unsafe(fmt, ...)
 #else
-#define kerror(fmt, ...) __klog(LOGLEVEL_STR_ERROR fmt, ##__VA_ARGS__)
+#define kerror(fmt, ...) __klog(LOGLEVEL_STR_ERROR, fmt, ##__VA_ARGS__)
 #define kerror_unsafe(fmt, ...)                                                \
   __klog_unsafe(LOGLEVEL_STR_ERROR, fmt, ##__VA_ARGS__)
 #endif

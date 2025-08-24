@@ -2,6 +2,7 @@
 #include "ordos/kernel/intr/intr.h"
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/module.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
@@ -15,6 +16,8 @@ kmain(void)
 
   init_intr();
   init_memory();
+
+  init_module();
 
   while (true) {
     hlt();
