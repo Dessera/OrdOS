@@ -11,7 +11,7 @@ subdir('task')
 subdir('intr')
 
 kernel_ld = compiler.preprocess(
-  'kernel.ld.template',
+  'kernel.ldt',
   include_directories: kernel_inc,
   output: 'kernel.ld',
 ).get(0)

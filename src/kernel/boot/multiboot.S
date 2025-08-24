@@ -16,6 +16,9 @@ _start:
   pushl %eax
   call kprelude
 
+  // fix stack pointer
+  addl $ORDOS_KERNEL_VADDR, %esp
+
   // call kernel main function
   call kmain
 

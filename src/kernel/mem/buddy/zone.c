@@ -27,7 +27,7 @@ __init_zone(struct mem_zone* zone,
 
   zone->pg_start = pg_start;
 
-  for (size_t i = 0; i <= ORDOS_MEM_MAX_ORDER; i++) {
+  for (size_t i = 0; i <= ORDOS_MEM_BUDDY_MAX_ORDER; i++) {
     list_init(&zone->areas[i].mem_blocks);
     zone->areas[i].blocks_free = 0;
   }

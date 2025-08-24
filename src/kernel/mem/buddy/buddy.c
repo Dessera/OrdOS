@@ -63,7 +63,8 @@ init_buddy(void)
 void
 buddy_free_page(struct page* page, u8 order)
 {
-  kassert(order <= ORDOS_MEM_MAX_ORDER, "Order too large, received %u", order);
+  kassert(
+    order <= ORDOS_MEM_BUDDY_MAX_ORDER, "Order too large, received %u", order);
   kassert(!page->reserved, "Cannot free reserved page %x", page_get_phys(page));
   kassert(!page->buddy,
           "Cannot free page %x that is part of a buddy block",
@@ -81,7 +82,7 @@ buddy_free_page(struct page* page, u8 order)
   zone->pg_free += __buddy_order_to_page_cnt(order);
 
   struct mem_area* area = &zone->areas[order];
-  while (order < ORDOS_MEM_MAX_ORDER) {
+  while (order < ORDOS_MEM_BUDDY_MAX_ORDER) {
     struct page* buddy = __buddy_page_to_buddy(page, order);
 
     if (buddy == NULL || !buddy->buddy || buddy->order != order) {
@@ -104,14 +105,15 @@ buddy_free_page(struct page* page, u8 order)
 struct page*
 buddy_alloc_page(enum mem_type zone_type, u8 order)
 {
-  kassert(order <= ORDOS_MEM_MAX_ORDER, "order too large, received %u", order);
+  kassert(
+    order <= ORDOS_MEM_BUDDY_MAX_ORDER, "order too large, received %u", order);
   struct mem_zone* zone = zone_get(zone_type);
 
   spin_lock(&zone->lock);
 
   size_t alloc_order = order;
   struct mem_area* area = NULL;
-  while (alloc_order <= ORDOS_MEM_MAX_ORDER) {
+  while (alloc_order <= ORDOS_MEM_BUDDY_MAX_ORDER) {
     area = &zone->areas[alloc_order];
     if (area->blocks_free > 0) {
       break;
@@ -122,7 +124,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
 
   struct page* page = NULL;
 
-  if (alloc_order > ORDOS_MEM_MAX_ORDER) {
+  if (alloc_order > ORDOS_MEM_BUDDY_MAX_ORDER) {
     goto alloc_end;
   }
 

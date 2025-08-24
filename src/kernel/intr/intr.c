@@ -14,7 +14,7 @@ static intr_handler_t __intr_handlers[ORDOS_INTR_IDT_DESC_CNT] = { 0 };
 void
 init_intr(void)
 {
-  kinfo("Initializing interrupt subsystem.");
+  kinfo("Initializing interrupt subsystem");
 
   init_idt();
   init_exception();

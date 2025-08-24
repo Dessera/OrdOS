@@ -12,19 +12,19 @@ SECTIONS
   __ld_kernel_start_vaddr = . + ORDOS_KERNEL_VADDR;
 
   .text.init : {
-    *(.text.init*)
+    *(.text.init)
   }
 
   .rodata.init : {
-    *(.rodata.init*)
+    *(.rodata.init)
   }
 
   .data.init : {
-    *(.data.init*)
+    *(.data.init)
   }
 
   .bss.init : {
-    *(.bss.init*)
+    *(.bss.init)
   }
 
   . += ORDOS_KERNEL_VADDR;
@@ -39,11 +39,19 @@ SECTIONS
 
   .data : AT(ADDR(.data) - ORDOS_KERNEL_VADDR) {
     *(.data)
+
+    . = ALIGN(4);
+    __ld_kernel_modules_start_vaddr = .;
+
+    *(.data.module)
+
+    __ld_kernel_modules_end_vaddr = .;
   }
 
   .bss : AT(ADDR(.bss) - ORDOS_KERNEL_VADDR) {
     *(.bss)
   }
+
   __ld_kernel_end_vaddr = .;
   __ld_kernel_end_paddr = . - ORDOS_KERNEL_VADDR;
 

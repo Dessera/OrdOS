@@ -19,8 +19,9 @@
 #define ORDOS_INIT_STACKSIZE 0x1000    /**< Init stack size when boot. */
 #define ORDOS_INIT_MMAP_CNT 64         /**< Init memory map size. */
 #define ORDOS_INIT_ARGS_BUFSIZE 0x200  /**< Init args size, */
-#define ORDOS_MEM_MAX_ORDER 10         /**< Memory pages max order. */
 #define ORDOS_MEM_GDT_DESC_CNT 5       /**< GDT count. */
+#define ORDOS_MEM_BUDDY_MAX_ORDER 10   /**< Memory pages max order. */
+#define ORDOS_MEM_SSLAB_MAX_ORDER 10   /**< SSLAB max order. */
 #define ORDOS_INTR_IDT_DESC_CNT 0x81   /**< IDT count. */
 #define ORDOS_INTR_SYSCALL 0x80        /**< IDT syscall index. */
 #define ORDOS_INTR_EXCEPTIONS_CNT 0x14 /**< Interrupt exceptions count. */
@@ -28,3 +29,4 @@
 #define ORDOS_DEV_PIC_MASTER_MASK 0xF8 /**< PIC master mask. */
 #define ORDOS_DEV_PIC_SLAVE_MASK 0xBF  /**< PIC slave maskt. */
 #define ORDOS_IO_BUFSIZE 0x200         /**< IO buffer size. */
+#define ORDOS_MODULE_MAGIC 0xAC84D5EC  /**< Kernel module magic. */

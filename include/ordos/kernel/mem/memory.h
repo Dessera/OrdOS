@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "ordos/lib/types.h" // IWYU pragma: keep
+#include "ordos/kernel/mem/sslab/sslab.h"
+#include "ordos/lib/common.h" // IWYU pragma: keep
+#include "ordos/lib/types.h"  // IWYU pragma: keep
 
 #define MEM_TYPE_HIGH_START 0x30000000
 #define MEM_TYPE_NORMAL_START 0x01000000
@@ -51,3 +53,32 @@ struct mmap_entry
   u64 len;
   enum mmap_type type;
 };
+
+/**
+ * @brief Initialize the memory management system.
+ */
+void
+init_memory(void);
+
+/**
+ * @brief Allocate a block of memory (sslab wrapper).
+ *
+ * @param size Size of the block to allocate (pass 2 ^ n for best performance).
+ * @return void* Pointer to the block allocated.
+ */
+__inline static void*
+kmalloc(size_t size)
+{
+  return sslab_global_alloc(size);
+}
+
+/**
+ * @brief Free a block of memory (sslab wrapper).
+ *
+ * @param obj Pointer to the block to free.
+ */
+__inline static void
+kfree(void* obj)
+{
+  return sslab_global_free(obj);
+}

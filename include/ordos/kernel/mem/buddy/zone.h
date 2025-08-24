@@ -23,7 +23,7 @@ struct mem_area
  */
 struct mem_zone
 {
-  struct mem_area areas[ORDOS_MEM_MAX_ORDER + 1];
+  struct mem_area areas[ORDOS_MEM_BUDDY_MAX_ORDER + 1];
   size_t pg_start;
   size_t pg_cnt;
   size_t pg_free;
