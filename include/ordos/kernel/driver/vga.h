@@ -31,13 +31,37 @@
 #define VGA_CMD_CURSOR_HIGH 0x0E /**< VGA set or get high cursor command. */
 #define VGA_CMD_CURSOR_LOW 0x0F  /**< VGA set or get low cursor command. */
 
-#define VGA_BLANK 0x0720 /**< VGA blank character. */
+#define VGA_BLANK vga_create_char(' ', VGA_BLACK) /**< VGA blank character. */
 
 /**
  * @brief VGA curosr.
  *
  */
 typedef u16 vga_cursor_t;
+
+/**
+ * @brief VGA buffer colors.
+ *
+ */
+enum vga_color
+{
+  VGA_BLACK = 0,
+  VGA_BLUE = 1,
+  VGA_GREEN = 2,
+  VGA_CYAN = 3,
+  VGA_RED = 4,
+  VGA_MAGENTA = 5,
+  VGA_BROWN = 6,
+  VGA_LIGHTGRAY = 7,
+  VGA_DARKGRAY = 8,
+  VGA_LIGHTBLUE = 9,
+  VGA_LIGHTGREEN = 10,
+  VGA_LIGHTCYAN = 11,
+  VGA_LIGHTRED = 12,
+  VGA_PINK = 13,
+  VGA_YELLOW = 14,
+  VGA_WHITE = 15,
+};
 
 /**
  * @brief Set value in VGA buffer.
@@ -92,13 +116,13 @@ vga_scroll(size_t offs);
  * @brief Util to create VGA character.
  *
  * @param ch Character.
+ * @param color Color.
  * @return u16 VGA display character.
  */
 __inline static u16
-vga_create_char(char ch)
+vga_create_char(char ch, enum vga_color color)
 {
-  // TODO: Color
-  return (u16)ch | (0x07 << 8); // NOLINT
+  return (u16)ch | (color << BYTE);
 }
 
 /**

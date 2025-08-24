@@ -21,7 +21,7 @@ __init_mmap(struct init_info* init, struct multiboot_mmap* mmap)
   for (struct multiboot_mmap_entry* entry = mmap->entries;
        (void*)entry < poffset(mmap, mmap->tag.size);
        entry = poffset(entry, mmap->entry_size)) {
-    if (init->mmap_cnt >= ORDOS_INIT_MMAP_LENGTH) {
+    if (init->mmap_cnt >= ORDOS_INIT_MMAP_CNT) {
       break;
     }
 
@@ -87,10 +87,10 @@ __init_pagetable(struct init_info* init)
 {
   pde_t* pd = bootmem_alloc(ORDOS_KERNEL_PAGE_SIZE);
   size_t pde_cnt =
-    min(div_up(bootmem_end() / ORDOS_KERNEL_PAGE_SIZE, VPAGE_DESC_LENGTH),
+    min(div_up(bootmem_end() / ORDOS_KERNEL_PAGE_SIZE, VPAGE_DESC_CNT),
         pde_index(MEM_TYPE_HIGH_START));
   pte_t* pt = bootmem_alloc(pde_cnt * ORDOS_KERNEL_PAGE_SIZE);
-  size_t pte_cnt = pde_cnt * VPAGE_DESC_LENGTH;
+  size_t pte_cnt = pde_cnt * VPAGE_DESC_CNT;
 
   void* pt_iter = pt;
   for (size_t i = 0; i < pde_cnt; ++i) {
@@ -123,7 +123,7 @@ __init_mem(struct init_info* init)
   bootmem_init();
   __init_pagetable(init);
 
-  gdtr_t gdtr = gdt_create_ptr(__gdt, GDT_DESC_LENGTH);
+  gdtr_t gdtr = gdt_create_ptr(__gdt, ORDOS_MEM_GDT_DESC_CNT);
   asm_exec("lgdt %0" : : "m"(gdtr));
   asm_exec("ljmp %0, $1f;"
            "1:" : : "i"(gdt_sel_kcode()));

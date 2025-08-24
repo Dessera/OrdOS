@@ -14,7 +14,7 @@
 #include "ordos/lib/common.h"
 
 __inline static void
-outb(u16 port, u8 data) // NOLINT
+outb(u16 port, u8 data)
 {
   asm_exec("outb %b0, %w1" : : "a"(data), "Nd"(port));
 }

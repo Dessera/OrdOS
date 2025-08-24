@@ -22,13 +22,13 @@
  */
 struct init_info
 {
-  struct mmap_entry mmap[ORDOS_INIT_MMAP_LENGTH]; /**< Memory map. */
-  size_t mmap_cnt;                                /**< Memory map count. */
-  pde_t* kernel_pd;                               /**< Kernel page directory. */
-  size_t kernel_pde_cnt;                          /**< Kernel pde count. */
-  pte_t* kernel_pt;                               /**< Kernel page table. */
-  size_t kernel_pte_cnt;                          /**< Kernel pte count. */
-  char cmdline[ORDOS_INIT_ARGS_BUFSIZE];          /**< Boot args. */
+  struct mmap_entry mmap[ORDOS_INIT_MMAP_CNT]; /**< Memory map. */
+  size_t mmap_cnt;                             /**< Memory map count. */
+  pde_t* kernel_pd;                            /**< Kernel page directory. */
+  size_t kernel_pde_cnt;                       /**< Kernel pde count. */
+  pte_t* kernel_pt;                            /**< Kernel page table. */
+  size_t kernel_pte_cnt;                       /**< Kernel pte count. */
+  char cmdline[ORDOS_INIT_ARGS_BUFSIZE];       /**< Boot args. */
 };
 
 extern struct init_info __init; /**< Global init info. */

@@ -1,8 +1,9 @@
 #include "ordos/kernel/config.h" // IWYU pragma: keep
+#include "ordos/kernel/intr/intr.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/buddy/buddy.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/common.h"
+#include "ordos/lib/types.h"
 
 __asm_linkage void
 kmain(void)
@@ -11,9 +12,9 @@ kmain(void)
 
   kinfo("%s %s", ORDOS_KERNEL_NAME, ORDOS_KERNEL_VERSION);
 
-  init_buddy();
+  init_intr();
 
-  while (1) {
+  while (true) {
     hlt();
   }
 }

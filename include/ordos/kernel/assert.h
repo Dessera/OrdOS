@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ordos/kernel/logging.h" // IWYU pragma: keep
+#include "ordos/kernel/logging.h"
 
 #ifdef DEBUG
 #define kassert(expr, msg, ...)                                                \

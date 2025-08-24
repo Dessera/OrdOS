@@ -52,7 +52,7 @@ list_pop(struct list_head* head)
 }
 
 ssize_t
-list_find(struct list_head* head, struct list_head* entry) // NOLINT
+list_find(struct list_head* head, struct list_head* entry)
 {
   ssize_t index = 0;
   struct list_head* current = NULL;

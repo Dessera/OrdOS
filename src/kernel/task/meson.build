@@ -1,4 +1,3 @@
 kernel_src += files(
-  'pic.c',
-  'vga.c',
+  'sync.c',
 )

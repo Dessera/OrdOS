@@ -4,8 +4,54 @@
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/mem/buddy/page.h"
 #include "ordos/kernel/mem/buddy/zone.h"
+#include "ordos/kernel/task/sync.h"
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h"
+
+/**
+ * @brief Convert order to pages count.
+ *
+ */
+__inline static size_t
+__buddy_order_to_page_cnt(u8 order)
+{
+  return 1 << order;
+}
+
+/**
+ * @brief Check if page is aligned.
+ *
+ */
+__inline static bool
+__buddy_page_is_aligned(struct page* page, u8 order)
+{
+  return !(page_get_index(page) & ((__buddy_order_to_page_cnt(order))-1));
+}
+
+/**
+ * @brief Convert page to it's buddy.
+ *
+ */
+__inline static struct page*
+__buddy_page_to_buddy(struct page* page, u8 order)
+{
+  size_t index = page_get_index(page) ^ (__buddy_order_to_page_cnt(order));
+  if (page_index_is_overflow(index)) {
+    return NULL;
+  }
+
+  return page_get(page_get_index(page) ^ __buddy_order_to_page_cnt(order));
+}
+
+/**
+ * @brief Convert page to it's parent.
+ *
+ */
+__inline static struct page*
+__buddy_page_ascend(struct page* page, u8 order)
+{
+  return page_get(page_get_index(page) & ~__buddy_order_to_page_cnt(order));
+}
 
 void
 init_buddy(void)
@@ -15,7 +61,7 @@ init_buddy(void)
 }
 
 void
-buddy_free_page(struct page* page, u8 order) // NOLINT
+buddy_free_page(struct page* page, u8 order)
 {
   kassert(order <= ORDOS_MEM_MAX_ORDER, "Order too large, received %u", order);
   kassert(!page->reserved, "Cannot free reserved page %x", page_get_phys(page));
@@ -23,20 +69,20 @@ buddy_free_page(struct page* page, u8 order) // NOLINT
           "Cannot free page %x that is part of a buddy block",
           page_get_phys(page));
 
-  if (!buddy_page_is_aligned(page, order)) {
+  if (!__buddy_page_is_aligned(page, order)) {
     kwarn("page %x is not aligned to order %x", page_get_phys(page), order);
     return;
   }
 
   struct mem_zone* zone = zone_get(page->zone_type);
 
-  // spin_lock(&zone->lock);
+  spin_lock(&zone->lock);
 
-  zone->pg_free += buddy_order_to_page_cnt(order);
+  zone->pg_free += __buddy_order_to_page_cnt(order);
 
   struct mem_area* area = &zone->areas[order];
   while (order < ORDOS_MEM_MAX_ORDER) {
-    struct page* buddy = buddy_page_to_buddy(page, order);
+    struct page* buddy = __buddy_page_to_buddy(page, order);
 
     if (buddy == NULL || !buddy->buddy || buddy->order != order) {
       break;
@@ -44,7 +90,7 @@ buddy_free_page(struct page* page, u8 order) // NOLINT
 
     area_remove_page(area, buddy);
 
-    page = buddy_page_ascend(page, order);
+    page = __buddy_page_ascend(page, order);
     order++;
     area = &zone->areas[order];
   }
@@ -52,16 +98,16 @@ buddy_free_page(struct page* page, u8 order) // NOLINT
   page->order = order;
   area_add_page(area, page);
 
-  // spin_unlock(&zone->lock);
+  spin_unlock(&zone->lock);
 }
 
 struct page*
-buddy_alloc_page(enum mem_type zone_type, u8 order) // NOLINT
+buddy_alloc_page(enum mem_type zone_type, u8 order)
 {
   kassert(order <= ORDOS_MEM_MAX_ORDER, "order too large, received %u", order);
   struct mem_zone* zone = zone_get(zone_type);
 
-  // spin_lock(&zone->lock);
+  spin_lock(&zone->lock);
 
   size_t alloc_order = order;
   struct mem_area* area = NULL;
@@ -94,16 +140,28 @@ buddy_alloc_page(enum mem_type zone_type, u8 order) // NOLINT
     area_add_page(area, page);
 
     page->order = alloc_order;
-    page = buddy_page_to_buddy(page, alloc_order);
+    page = __buddy_page_to_buddy(page, alloc_order);
   }
 
-  zone->pg_free -= buddy_order_to_page_cnt(order);
+  zone->pg_free -= __buddy_order_to_page_cnt(order);
 
   kassert(!page->buddy,
           "broken buddy system, allocated page %x is still part of a block",
           page_get_phys(page));
 
 alloc_end:
-  // spin_unlock(&zone->lock);
+  spin_unlock(&zone->lock);
   return page;
+}
+
+u8
+buddy_page_cnt_to_order(size_t page_cnt)
+{
+  u8 order = 0;
+  size_t base = 1;
+  while (base < page_cnt) {
+    base <<= 1;
+    order++;
+  }
+  return order;
 }

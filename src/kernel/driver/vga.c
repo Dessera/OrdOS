@@ -4,7 +4,7 @@
 #include "ordos/lib/types.h"
 
 void
-vga_set(vga_cursor_t cursor, u16 value) // NOLINT
+vga_set(vga_cursor_t cursor, u16 value)
 {
   if (cursor > VGA_DP_SIZE) {
     return;
@@ -32,8 +32,8 @@ vga_set_cursor(vga_cursor_t cursor)
     return;
   }
 
-  u8 cursor_hb = (cursor >> 8);   // NOLINT
-  u8 cursor_lb = (cursor & 0xFF); // NOLINT
+  u8 cursor_hb = (cursor >> BYTE);
+  u8 cursor_lb = (cursor & BYTEMASK);
   outb(VGA_PORT_CMD, VGA_CMD_CURSOR_HIGH);
   outb(VGA_PORT_DATA, cursor_hb);
   outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
@@ -49,7 +49,7 @@ vga_get_cursor(void)
   outb(VGA_PORT_CMD, VGA_CMD_CURSOR_LOW);
   u8 cursor_lb = inb(VGA_PORT_DATA);
 
-  return ((u16)cursor_hb << 8) | (u16)cursor_lb; // NOLINT
+  return ((u16)cursor_hb << BYTE) | (u16)cursor_lb;
 }
 
 void

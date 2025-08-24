@@ -11,11 +11,10 @@
 
 #pragma once
 
+#include "ordos/kernel/config.h"
 #include "ordos/kernel/flag.h" // IWYU pragma: keep
 #include "ordos/lib/common.h"  // IWYU pragma: keep
 #include "ordos/lib/types.h"
-
-#define GDT_DESC_LENGTH 5 /**< GDT length. */
 
 #define GDT_NULL_INDEX 0  /**< GDT NULL descriptor index. */
 #define GDT_KCODE_INDEX 1 /**< GDT KCODE descriptor index. */
@@ -143,18 +142,17 @@ enum gdt_flag
  * @brief Kernel GDT.
  *
  */
-extern struct gdt __gdt[GDT_DESC_LENGTH];
+extern struct gdt __gdt[ORDOS_MEM_GDT_DESC_CNT];
 
 /**
  * @brief Util to create gdtr for `lgdt`.
  *
  * @param gdt GDT pointer.
- * @param size GDT length.
+ * @param size GDT count.
  * @return gdtr_t GDTR
  */
 __inline static gdtr_t
 gdt_create_ptr(struct gdt* gdt, size_t size)
 {
-  return (sizeof(struct gdt) * size - 1) |
-         ((gdtr_t)(uintptr_t)(gdt) << 16); // NOLINT
+  return (sizeof(struct gdt) * size - 1) | ((gdtr_t)(uintptr_t)(gdt) << WORD);
 }

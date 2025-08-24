@@ -41,7 +41,7 @@ bootmem_alloc(size_t size)
 
   __bootmem_start = base + size;
 
-  return (void*)base; // NOLINT
+  return (void*)base;
 }
 
 uintptr_t

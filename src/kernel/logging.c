@@ -6,9 +6,9 @@
 #include "ordos/lib/types.h"
 
 static vga_cursor_t
-__kputdefault(char c, vga_cursor_t cursor) // NOLINT
+__kputdefault(char c, vga_cursor_t cursor)
 {
-  u16 payload = vga_create_char(c);
+  u16 payload = vga_create_char(c, VGA_LIGHTGRAY);
   vga_set(cursor, payload);
 
   return cursor + 1;
@@ -203,7 +203,7 @@ ksprint(char* buf, const char* str, ...)
 }
 
 void
-kvsprint(char* buf, const char* fmt, va_list args) // NOLINT
+kvsprint(char* buf, const char* fmt, va_list args)
 {
   while (*fmt != '\0') {
     if (*fmt == '%') {
@@ -248,7 +248,7 @@ kprelude_puts(const char* str)
   const char* src = vaccess(str);
 
   while (*src != '\0') {
-    *dest = vga_create_char(*src);
+    *dest = vga_create_char(*src, VGA_LIGHTGRAY);
 
     ++src;
     ++dest;

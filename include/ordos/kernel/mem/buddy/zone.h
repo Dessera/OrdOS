@@ -4,6 +4,7 @@
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/mem/buddy/page.h"
 #include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/task/sync.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
@@ -27,7 +28,7 @@ struct mem_zone
   size_t pg_cnt;
   size_t pg_free;
 
-  // struct spin_lock lock;
+  struct spin_lock lock;
 };
 
 extern struct mem_zone __zones[3];

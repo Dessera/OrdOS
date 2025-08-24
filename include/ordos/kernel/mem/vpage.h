@@ -17,7 +17,7 @@
 
 #define VPAGE_DESC_SIZE 4 /**< Page entry size. */
 
-#define VPAGE_DESC_LENGTH                                                      \
+#define VPAGE_DESC_CNT                                                         \
   (ORDOS_KERNEL_PAGE_SIZE /                                                    \
    VPAGE_DESC_SIZE) /**< Page entries length for a page table. */
 

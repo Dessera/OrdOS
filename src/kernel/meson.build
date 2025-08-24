@@ -7,6 +7,8 @@ kernel_src = files(
 subdir('boot')
 subdir('driver')
 subdir('mem')
+subdir('task')
+subdir('intr')
 
 kernel_ld = compiler.preprocess(
   'kernel.ld.template',

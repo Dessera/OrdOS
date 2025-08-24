@@ -19,6 +19,12 @@
 #include "ordos/lib/types.h"
 
 /**
+ * @brief Get the page index of the physical address.
+ *
+ */
+#define page_phys_index(addr) ((addr) >> 12)
+
+/**
  * @brief Physical memory page abstraction.
  */
 struct page
@@ -56,18 +62,6 @@ page_get_index(struct page* page)
           idx,
           __pages_cnt);
   return idx;
-}
-
-/**
- * @brief Get the page index of the physical address.
- *
- * @param addr Physical address.
- * @return size_t Index of the page.
- */
-__inline static size_t
-page_get_index_by_phys(uintptr_t addr)
-{
-  return addr >> 12; // NOLINT
 }
 
 /**

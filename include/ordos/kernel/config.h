@@ -11,13 +11,20 @@
 
 #pragma once
 
-#define ORDOS_KERNEL_NAME "OrdOS"     /**< Kernel name string. */
-#define ORDOS_KERNEL_VERSION "v0.1.0" /**< Kernel version string. */
-#define ORDOS_KERNEL_LADDR 0x100000   /**< Kernel load address. */
-#define ORDOS_KERNEL_VADDR 0xc0000000 /**< Kernel virtual address. */
-#define ORDOS_KERNEL_PAGE_SIZE 0x1000 /**< Kernel pagetable size. */
-#define ORDOS_INIT_STACKSIZE 0x1000   /**< Init stack size when boot. */
-#define ORDOS_INIT_MMAP_LENGTH 64     /**< Init memory map size. */
-#define ORDOS_INIT_ARGS_BUFSIZE 0x200 /**< Init args size, */
-#define ORDOS_MEM_MAX_ORDER 10        /**< Memory pages max order. */
-#define ORDOS_IO_BUFSIZE 0x200        /**< IO buffer size. */
+#define ORDOS_KERNEL_NAME "OrdOS"      /**< Kernel name string. */
+#define ORDOS_KERNEL_VERSION "v0.1.0"  /**< Kernel version string. */
+#define ORDOS_KERNEL_LADDR 0x100000    /**< Kernel load address. */
+#define ORDOS_KERNEL_VADDR 0xc0000000  /**< Kernel virtual address. */
+#define ORDOS_KERNEL_PAGE_SIZE 0x1000  /**< Kernel pagetable size. */
+#define ORDOS_INIT_STACKSIZE 0x1000    /**< Init stack size when boot. */
+#define ORDOS_INIT_MMAP_CNT 64         /**< Init memory map size. */
+#define ORDOS_INIT_ARGS_BUFSIZE 0x200  /**< Init args size, */
+#define ORDOS_MEM_MAX_ORDER 10         /**< Memory pages max order. */
+#define ORDOS_MEM_GDT_DESC_CNT 5       /**< GDT count. */
+#define ORDOS_INTR_IDT_DESC_CNT 0x81   /**< IDT count. */
+#define ORDOS_INTR_SYSCALL 0x80        /**< IDT syscall index. */
+#define ORDOS_INTR_EXCEPTIONS_CNT 0x14 /**< Interrupt exceptions count. */
+#define ORDOS_INTR_SYSCALLS_CNT 0x10   /**< Interrupt syscalls count. */
+#define ORDOS_DEV_PIC_MASTER_MASK 0xF8 /**< PIC master mask. */
+#define ORDOS_DEV_PIC_SLAVE_MASK 0xBF  /**< PIC slave maskt. */
+#define ORDOS_IO_BUFSIZE 0x200         /**< IO buffer size. */

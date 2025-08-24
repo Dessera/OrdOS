@@ -5,6 +5,7 @@
 #include "ordos/kernel/mem/buddy/buddy.h"
 #include "ordos/kernel/mem/buddy/page.h"
 #include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/task/sync.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
 
@@ -12,7 +13,7 @@ struct mem_zone __zones[3] = {};
 
 static void
 __init_zone(struct mem_zone* zone,
-            enum mem_type type, // NOLINT
+            enum mem_type type,
             size_t pg_start,
             size_t pg_end)
 {
@@ -40,7 +41,7 @@ __init_zone(struct mem_zone* zone,
     }
   }
 
-  // spin_lock_init(&zone->lock);
+  spin_lock_init(&zone->lock);
 }
 
 void
@@ -50,20 +51,20 @@ init_zone(void)
 
   __init_zone(&__zones[MEM_DMA],
               MEM_DMA,
-              page_get_index_by_phys(MEM_TYPE_DMA_START),
-              page_get_index_by_phys(MEM_TYPE_NORMAL_START) - 1);
+              page_phys_index(MEM_TYPE_DMA_START),
+              page_phys_index(MEM_TYPE_NORMAL_START) - 1);
   kdebug("Zone DMA: %u pages", __zones[MEM_DMA].pg_cnt);
 
   __init_zone(&__zones[MEM_NORMAL],
               MEM_NORMAL,
-              page_get_index_by_phys(MEM_TYPE_NORMAL_START),
-              page_get_index_by_phys(min(MEM_TYPE_HIGH_START, mem_size)) - 1);
+              page_phys_index(MEM_TYPE_NORMAL_START),
+              page_phys_index(min(MEM_TYPE_HIGH_START, mem_size)) - 1);
   kdebug("zone normal: %u pages", __zones[MEM_NORMAL].pg_cnt);
 
   __init_zone(&__zones[MEM_HIGH],
               MEM_HIGH,
-              page_get_index_by_phys(MEM_TYPE_HIGH_START),
-              page_get_index_by_phys(mem_size) - 1);
+              page_phys_index(MEM_TYPE_HIGH_START),
+              page_phys_index(mem_size) - 1);
   kdebug("zone high: %u pages", __zones[MEM_HIGH].pg_cnt);
 }
 

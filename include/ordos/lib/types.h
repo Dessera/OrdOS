@@ -15,6 +15,18 @@
 
 #define NPOS (-1)
 
+#define BIT 1
+#define BYTE (sizeof(u8) * 8)
+#define WORD (sizeof(u16) * 8)
+#define DWORD (sizeof(u32) * 8)
+#define QWORD (sizeof(u64) * 8)
+
+#define BITMASK 1
+#define BYTEMASK (0xFF)
+#define WORDMASK (0xFFFF)
+#define DWORDMASK (0xFFFFFFFF)
+#define QWORDMASK (0xFFFFFFFFFFFFFFFF)
+
 #define offset_of(type, member) __builtin_offsetof(type, member)
 
 #define container_of(ptr, type, member)                                        \
@@ -45,8 +57,12 @@ typedef u32 uintptr_t;
 typedef i32 intptr_t;
 
 typedef _Bool bool;
-#define true 1  // NOLINT
-#define false 0 // NOLINT
+
+enum
+{
+  true = 1,
+  false = 0
+};
 
 enum base_flag
 {

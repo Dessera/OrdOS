@@ -109,7 +109,7 @@ strchrs(const char* str, const char c)
 }
 
 void
-memcpy(void* dest, const void* src, size_t n) // NOLINT
+memcpy(void* dest, const void* src, size_t n)
 {
   u8* d = dest;
   const u8* s = src;
@@ -120,7 +120,7 @@ memcpy(void* dest, const void* src, size_t n) // NOLINT
 }
 
 void
-memset(void* dest, u8 c, size_t n) // NOLINT
+memset(void* dest, u8 c, size_t n)
 {
   u8* d = dest;
 

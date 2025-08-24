@@ -13,6 +13,7 @@ Diagnostics:
     Remove: [
       bugprone-forward-declaration-namespace,
       bugprone-reserved-identifier,
+      bugprone-easily-swappable-parameters,
       cppcoreguidelines-special-member-functions,
       cppcoreguidelines-pro-type-vararg,
       cppcoreguidelines-avoid-do-while,
@@ -24,6 +25,8 @@ Diagnostics:
       readability-identifier-length,
       readability-convert-member-functions-to-static,
       readability-implicit-bool-conversion,
+      readability-non-const-parameter,
+      readability-function-cognitive-complexity,
       misc-no-recursion,
       misc-use-anonymous-namespace,
       performance-no-int-to-ptr,
