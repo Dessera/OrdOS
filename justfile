@@ -4,7 +4,7 @@ BUILDDIR := "builddir"
 TARGET := BUILDDIR + "/boot.img"
 
 default:
-  just -l
+  @just -l
 
 configure:
   meson setup {{BUILDDIR}} --reconfigure --wipe
@@ -12,8 +12,8 @@ configure:
 build:
   cd {{BUILDDIR}} && meson compile
 
-debug:
-  {{QEMU}} -drive format=raw,file={{TARGET}} -s -S
+qemu-debug:
+  {{QEMU}} -drive format=raw,file={{TARGET}} --enable-kvm -s -S
 
-run:
-  {{QEMU}} -drive format=raw,file={{TARGET}}
+qemu:
+  {{QEMU}} -drive format=raw,file={{TARGET}} --enable-kvm

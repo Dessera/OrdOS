@@ -20,7 +20,7 @@ kernel_args = [
   '-Wstrict-prototypes',
   '-Wno-empty-translation-unit',
   '-Wno-pedantic',
-  '-mno-sse',
+  # '-mno-sse',
   '-fno-builtin',
   '-fno-pie',
   '-fno-pic',

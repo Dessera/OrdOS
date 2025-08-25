@@ -22,7 +22,7 @@ __buddy_order_to_page_cnt(u8 order)
  * @brief Check if page is aligned.
  *
  */
-__inline static bool
+static bool
 __buddy_page_is_aligned(struct page* page, u8 order)
 {
   return !(page_get_index(page) & ((__buddy_order_to_page_cnt(order))-1));
@@ -32,7 +32,7 @@ __buddy_page_is_aligned(struct page* page, u8 order)
  * @brief Convert page to it's buddy.
  *
  */
-__inline static struct page*
+static struct page*
 __buddy_page_to_buddy(struct page* page, u8 order)
 {
   size_t index = page_get_index(page) ^ (__buddy_order_to_page_cnt(order));
@@ -47,7 +47,7 @@ __buddy_page_to_buddy(struct page* page, u8 order)
  * @brief Convert page to it's parent.
  *
  */
-__inline static struct page*
+static struct page*
 __buddy_page_ascend(struct page* page, u8 order)
 {
   return page_get(page_get_index(page) & ~__buddy_order_to_page_cnt(order));

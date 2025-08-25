@@ -17,6 +17,8 @@ __init_zone(struct mem_zone* zone,
             size_t pg_start,
             size_t pg_end)
 {
+  spin_lock_init(&zone->lock);
+
   zone->pg_free = 0;
 
   if (pg_start > pg_end) {
@@ -40,8 +42,6 @@ __init_zone(struct mem_zone* zone,
       buddy_free_page(pg, 0);
     }
   }
-
-  spin_lock_init(&zone->lock);
 }
 
 void

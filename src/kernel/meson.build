@@ -3,7 +3,6 @@ kernel_src = files(
   'logging.c',
   'main.c',
   'module.c',
-  'test.c', # a test module
 )
 
 subdir('boot')
@@ -11,6 +10,7 @@ subdir('driver')
 subdir('mem')
 subdir('task')
 subdir('intr')
+subdir('module')
 
 kernel_ld = compiler.preprocess(
   'kernel.ldt',

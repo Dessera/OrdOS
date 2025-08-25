@@ -1,7 +1,7 @@
 #include "ordos/kernel/task/sync.h"
 #include "ordos/lib/common.h"
 
-static i32
+__inline static i32
 __atomic_cmpexchange(volatile i32* ptr, i32 old, i32 new) // NOLINT
 {
   i32 ret = 0;

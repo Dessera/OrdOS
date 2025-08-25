@@ -12,8 +12,10 @@
 #pragma once
 
 #include "ordos/kernel/boot/prelude.h"
-#include "ordos/lib/asm.h" // IWYU pragma: keep
+#include "ordos/kernel/intr/intr.h" // IWYU pragma: keep
+#include "ordos/lib/asm.h"          // IWYU pragma: keep
 #include "ordos/lib/common.h"
+#include "ordos/lib/types.h" // IWYU pragma: keep
 
 #define LOGLEVEL_NONE 0
 #define LOGLEVEL_ERROR 1
@@ -91,8 +93,9 @@
 
 #define kpanic(fmt, ...)                                                       \
   do {                                                                         \
+    intr_set_status(false);                                                    \
     __klog_unsafe(LOGLEVEL_STR_PANIC, fmt, ##__VA_ARGS__);                     \
-    while (1) {                                                                \
+    while (true) {                                                             \
       hlt();                                                                   \
     }                                                                          \
   } while (0)

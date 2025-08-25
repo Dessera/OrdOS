@@ -30,3 +30,6 @@
 #define ORDOS_DEV_PIC_SLAVE_MASK 0xBF  /**< PIC slave maskt. */
 #define ORDOS_IO_BUFSIZE 0x200         /**< IO buffer size. */
 #define ORDOS_MODULE_MAGIC 0xAC84D5EC  /**< Kernel module magic. */
+#define ORDOS_MODULE_NAME_LENGTH 0x10  /**< Kernel module name max length.*/
+#define ORDOS_MODULE_BUFSIZE 0x20      /**< Kernel module buffer length.*/
+#define ORDOS_SYS_FREQ 1000            /**< System frequency. */

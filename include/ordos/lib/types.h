@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "ordos/lib/common.h" // IWYU pragma: keep
+
 #define NULL ((void*)0)
 
 #define NPOS (-1)
@@ -26,6 +28,9 @@
 #define WORDMASK (0xFFFF)
 #define DWORDMASK (0xFFFFFFFF)
 #define QWORDMASK (0xFFFFFFFFFFFFFFFF)
+
+#define U8_MAX (0xFF)
+#define U8_MIN (0)
 
 #define offset_of(type, member) __builtin_offsetof(type, member)
 
@@ -77,3 +82,15 @@ itoa(char* buffer, i32 value, u8 base);
 
 void
 utoa(char* buffer, u32 value, u8 base);
+
+__inline static bool
+is_digit(char c)
+{
+  return c >= '0' && c <= '9';
+}
+
+__inline static int
+to_digit(char c)
+{
+  return c - '0';
+}
