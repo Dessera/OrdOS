@@ -7,17 +7,23 @@
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
 
+void
+__test_handler(size_t ticks)
+{
+  (void)ticks;
+  kputs(".");
+}
+
 __asm_linkage __noreturn void
 kmain(void)
 {
+  init_module();
   init_print();
 
   kinfo("%s %s", ORDOS_KERNEL_NAME, ORDOS_KERNEL_VERSION);
 
   init_intr();
   init_memory();
-
-  init_module();
 
   while (true) {
     hlt();

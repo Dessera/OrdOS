@@ -133,7 +133,7 @@ pit_register(size_t ticks, pit_handler_t handler)
 }
 
 int
-pit_entry(struct loaded_module* mod)
+pit_entry(struct module* mod)
 {
   list_init(&__watchers_list);
   intr_register(IDRV_PIT, __pit_intr_handler);
@@ -144,4 +144,4 @@ pit_entry(struct loaded_module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(pit_entry, MOD_NOLOAD, sys_pit, "0.1.0")
+module_init_noexit(pit_entry, MOD_COREMOD, sys_pit)

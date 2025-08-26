@@ -23,7 +23,7 @@ pic_set_mask(u16 mask)
 }
 
 int
-pic_entry(struct loaded_module* mod)
+pic_entry(struct module* mod)
 {
   __pic_init(PIC_MASTER, PIC_MASTEROFFS, 0x04);
   __pic_init(PIC_SLAVE, PIC_SLAVEOFFS, 0x02);
@@ -34,4 +34,4 @@ pic_entry(struct loaded_module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(pic_entry, MOD_NOLOAD, sys_pic, "0.1.0")
+module_init_noexit(pic_entry, MOD_COREMOD, sys_pic)

@@ -40,6 +40,8 @@
     (type*)((char*)mptr - offset_of(type, member));                            \
   })
 
+#define countof(arr) (sizeof(arr) / sizeof(arr[0]))
+
 #define va_list __builtin_va_list
 #define va_satrt __builtin_va_start
 #define va_end __builtin_va_end

@@ -37,15 +37,14 @@ SECTIONS
     *(.rodata)
   }
 
+  .data.module ALIGN(1) : AT(ADDR(.data.module) - ORDOS_KERNEL_VADDR) SUBALIGN(1) {
+    __ld_kernel_modules_start_vaddr = .;
+    *(.data.module)
+    __ld_kernel_modules_end_vaddr = .;
+  }
+
   .data : AT(ADDR(.data) - ORDOS_KERNEL_VADDR) {
     *(.data)
-
-    . = ALIGN(4);
-    __ld_kernel_modules_start_vaddr = .;
-
-    *(.data.module)
-
-    __ld_kernel_modules_end_vaddr = .;
   }
 
   .bss : AT(ADDR(.bss) - ORDOS_KERNEL_VADDR) {
