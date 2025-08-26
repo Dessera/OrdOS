@@ -29,6 +29,26 @@ struct page*
 buddy_alloc_page(enum mem_type zone_type, u8 order);
 
 /**
+ * @brief Check if page is aligned to order.
+ *
+ * @param page Page struct.
+ * @param order Order.
+ * @return true If page is aligned, otherwise false.
+ */
+bool
+buddy_page_is_aligned(struct page* page, u8 order);
+
+/**
+ * @brief Check if page index is aligned to order.
+ *
+ * @param index Page index.
+ * @param order Order.
+ * @return true If page is aligned, otherwise false.
+ */
+bool
+buddy_page_index_is_aligned(size_t index, u8 order);
+
+/**
  * @brief Convert page count to order.
  *
  * @param page_cnt Page count.
@@ -36,3 +56,15 @@ buddy_alloc_page(enum mem_type zone_type, u8 order);
  */
 u8
 buddy_page_cnt_to_order(size_t page_cnt);
+
+/**
+ * @brief Convert order to pages count.
+ *
+ * @param order Order.
+ * @return size_t Page count.
+ */
+__inline static size_t
+buddy_order_to_page_cnt(u8 order)
+{
+  return 1 << order;
+}

@@ -12,6 +12,34 @@
 struct mem_zone __zones[3] = {};
 
 static void
+__add_free_block(size_t start, size_t cnt)
+{
+  size_t remaining = cnt;
+  size_t curr = start;
+
+  for (int order = ORDOS_MEM_BUDDY_MAX_ORDER; order >= 0 && remaining > 0;
+       --order) {
+    size_t blk_size = buddy_order_to_page_cnt(order);
+
+    while (remaining >= blk_size && buddy_page_index_is_aligned(curr, order)) {
+      struct page* pg = page_get(curr);
+      buddy_free_page(pg, order);
+
+      curr += blk_size;
+      remaining -= blk_size;
+    }
+  }
+
+  while (remaining > 0) {
+    struct page* pg = page_get(curr);
+    buddy_free_page(pg, 0);
+
+    ++curr;
+    --remaining;
+  }
+}
+
+static void
 __init_zone(struct mem_zone* zone,
             enum mem_type type,
             size_t pg_start,
@@ -20,14 +48,12 @@ __init_zone(struct mem_zone* zone,
   spin_lock_init(&zone->lock);
 
   zone->pg_free = 0;
-
+  zone->pg_start = pg_start;
   if (pg_start > pg_end) {
     zone->pg_cnt = 0;
   } else {
     zone->pg_cnt = pg_end - pg_start + 1;
   }
-
-  zone->pg_start = pg_start;
 
   for (size_t i = 0; i <= ORDOS_MEM_BUDDY_MAX_ORDER; i++) {
     list_init(&zone->areas[i].mem_blocks);
@@ -38,8 +64,34 @@ __init_zone(struct mem_zone* zone,
     struct page* pg = page_get(i);
     pg->zone_type = type;
 
-    if (!pg->reserved) {
-      buddy_free_page(pg, 0);
+    // if (!pg->reserved) {
+    //   buddy_free_page(pg, 0);
+    // }
+  }
+
+  size_t curr = pg_start;
+  while (curr <= pg_end) {
+    struct page* pg = page_get(curr);
+
+    if (pg->reserved) {
+      ++curr;
+      continue;
+    }
+
+    size_t blk_start = curr;
+    size_t blk_cnt = 0;
+
+    while (curr <= pg_end) {
+      pg = page_get(curr);
+      if (pg->reserved) {
+        break;
+      }
+      ++blk_cnt;
+      ++curr;
+    }
+
+    if (blk_cnt > 0) {
+      __add_free_block(blk_start, blk_cnt);
     }
   }
 }

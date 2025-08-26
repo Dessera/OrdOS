@@ -9,38 +9,18 @@
 #include "ordos/lib/types.h"
 
 /**
- * @brief Convert order to pages count.
- *
- */
-__inline static size_t
-__buddy_order_to_page_cnt(u8 order)
-{
-  return 1 << order;
-}
-
-/**
- * @brief Check if page is aligned.
- *
- */
-static bool
-__buddy_page_is_aligned(struct page* page, u8 order)
-{
-  return !(page_get_index(page) & ((__buddy_order_to_page_cnt(order))-1));
-}
-
-/**
  * @brief Convert page to it's buddy.
  *
  */
 static struct page*
 __buddy_page_to_buddy(struct page* page, u8 order)
 {
-  size_t index = page_get_index(page) ^ (__buddy_order_to_page_cnt(order));
+  size_t index = page_get_index(page) ^ (buddy_order_to_page_cnt(order));
   if (page_index_is_overflow(index)) {
     return NULL;
   }
 
-  return page_get(page_get_index(page) ^ __buddy_order_to_page_cnt(order));
+  return page_get(page_get_index(page) ^ buddy_order_to_page_cnt(order));
 }
 
 /**
@@ -50,7 +30,7 @@ __buddy_page_to_buddy(struct page* page, u8 order)
 static struct page*
 __buddy_page_ascend(struct page* page, u8 order)
 {
-  return page_get(page_get_index(page) & ~__buddy_order_to_page_cnt(order));
+  return page_get(page_get_index(page) & ~buddy_order_to_page_cnt(order));
 }
 
 void
@@ -70,7 +50,7 @@ buddy_free_page(struct page* page, u8 order)
           "Cannot free page %x that is part of a buddy block",
           page_get_phys(page));
 
-  if (!__buddy_page_is_aligned(page, order)) {
+  if (!buddy_page_is_aligned(page, order)) {
     kwarn("page %x is not aligned to order %x", page_get_phys(page), order);
     return;
   }
@@ -79,7 +59,7 @@ buddy_free_page(struct page* page, u8 order)
 
   spin_lock(&zone->lock);
 
-  zone->pg_free += __buddy_order_to_page_cnt(order);
+  zone->pg_free += buddy_order_to_page_cnt(order);
 
   struct mem_area* area = &zone->areas[order];
   while (order < ORDOS_MEM_BUDDY_MAX_ORDER) {
@@ -145,7 +125,7 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
     page = __buddy_page_to_buddy(page, alloc_order);
   }
 
-  zone->pg_free -= __buddy_order_to_page_cnt(order);
+  zone->pg_free -= buddy_order_to_page_cnt(order);
 
   kassert(!page->buddy,
           "broken buddy system, allocated page %x is still part of a block",
@@ -154,6 +134,18 @@ buddy_alloc_page(enum mem_type zone_type, u8 order)
 alloc_end:
   spin_unlock(&zone->lock);
   return page;
+}
+
+bool
+buddy_page_is_aligned(struct page* page, u8 order)
+{
+  return !(page_get_index(page) & ((buddy_order_to_page_cnt(order))-1));
+}
+
+bool
+buddy_page_index_is_aligned(size_t index, u8 order)
+{
+  return !(index & ((buddy_order_to_page_cnt(order))-1));
 }
 
 u8
