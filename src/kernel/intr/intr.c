@@ -1,11 +1,11 @@
 #include "ordos/kernel/intr/intr.h"
 #include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/driver/pic.h"
 #include "ordos/kernel/intr/exception.h"
 #include "ordos/kernel/intr/idt.h"
 #include "ordos/kernel/intr/syscall.h"
 #include "ordos/kernel/logging.h"
+#include "ordos/kernel/module.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
 
@@ -19,9 +19,6 @@ init_intr(void)
   init_idt();
   init_exception();
   init_syscall();
-  init_pic();
-
-  intr_set_status(true);
 }
 
 void

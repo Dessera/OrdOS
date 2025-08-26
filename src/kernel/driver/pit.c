@@ -9,6 +9,36 @@
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h"
 
+enum pit_io_port : u16
+{
+  PIT_CHANNEL0 = 0x40,
+  PIT_CHANNEL1 = 0x41,
+  PIT_CHANNEL2 = 0x42,
+  PIT_MODEREG = 0x43,
+};
+
+enum pit_flag : u8
+{
+  PIT_SEL_C0 = 0x00,
+  PIT_SEL_C1 = 0x40,
+  PIT_SEL_C2 = 0x80,
+
+  PIT_LATCHCNT = 0x00,
+  PIT_LBONLY = 0x10,
+  PIT_HBONLY = 0x20,
+  PIT_LBHB = 0x30,
+
+  PIT_INTR = 0x00,
+  PIT_ONESHOT = 0x02,
+  PIT_RATE = 0x04,
+  PIT_SQUARE = 0x06,
+  PIT_SWSTROBE = 0x08,
+  PIT_HWSTROBE = 0x0A,
+
+  PIT_BIN = 0x00,
+  PIT_BCD = 0x01,
+};
+
 struct tick_watcher
 {
   size_t ticks;
@@ -99,7 +129,6 @@ pit_register(size_t ticks, pit_handler_t handler)
   list_add(&watcher->node, &__watchers_list);
 
   intr_unlock(status);
-
   return E_SUCCESS;
 }
 
@@ -115,4 +144,4 @@ pit_entry(struct loaded_module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(pit_entry, MOD_AUTOLOAD, sys_pit, "0.1.0")
+module_init_noexit(pit_entry, MOD_NOLOAD, sys_pit, "0.1.0")
