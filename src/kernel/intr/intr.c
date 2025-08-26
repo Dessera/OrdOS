@@ -20,10 +20,12 @@ init_intr(void)
   init_exception();
   init_syscall();
   init_pic();
+
+  intr_set_status(true);
 }
 
 void
-intr_register(intr_code_t code, intr_handler_t handler)
+intr_register(enum intr_type code, intr_handler_t handler)
 {
   kassert(code < ORDOS_INTR_IDT_DESC_CNT,
           "Interrupt: Invalid interrupt id, received %x but max is %x",
@@ -41,7 +43,7 @@ intr_register(intr_code_t code, intr_handler_t handler)
 }
 
 void
-intr_unregister(intr_code_t code)
+intr_unregister(enum intr_type code)
 {
   kassert(code < ORDOS_INTR_IDT_DESC_CNT,
           "Interrupt: Invalid interrupt id, received %x but max is %x",
@@ -88,6 +90,6 @@ intr_common_handler(u32 irq)
   if (__intr_handlers[irq] != NULL) {
     __intr_handlers[irq](irq);
   } else {
-    kwarn_unsafe("Interrupt: Unhandled interrupt %x", irq);
+    kdebug_unsafe("Interrupt: Unhandled interrupt %x", irq);
   }
 }

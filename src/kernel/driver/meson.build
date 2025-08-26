@@ -1,5 +1,5 @@
 kernel_src += files(
   'pic.c',
-  'timer.c',
+  'pit.c',
   'vga.c',
 )

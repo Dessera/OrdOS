@@ -28,8 +28,9 @@
 #define ORDOS_INTR_SYSCALLS_CNT 0x10   /**< Interrupt syscalls count. */
 #define ORDOS_DEV_PIC_MASTER_MASK 0xF8 /**< PIC master mask. */
 #define ORDOS_DEV_PIC_SLAVE_MASK 0xBF  /**< PIC slave maskt. */
+#define ORDOS_DEV_PIT_MAX_TICKS 64     /**< PIT watcher max ticks. */
 #define ORDOS_IO_BUFSIZE 0x200         /**< IO buffer size. */
 #define ORDOS_MODULE_MAGIC 0xAC84D5EC  /**< Kernel module magic. */
 #define ORDOS_MODULE_NAME_LENGTH 0x10  /**< Kernel module name max length.*/
 #define ORDOS_MODULE_BUFSIZE 0x20      /**< Kernel module buffer length.*/
-#define ORDOS_SYS_FREQ 1000            /**< System frequency. */
+#define ORDOS_SYS_DEFAULT_FREQ 1000    /**< System default frequency. */

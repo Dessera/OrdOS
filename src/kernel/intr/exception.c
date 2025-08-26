@@ -27,13 +27,13 @@ static const char* __intr_exception_labels[ORDOS_INTR_EXCEPTIONS_CNT] = {
 };
 
 static void
-__exception_handler(intr_code_t intr)
+__exception_handler(enum intr_type intr)
 {
   kpanic("Kernel panic because of %s !", __intr_exception_labels[intr]);
 }
 
 static void
-__page_fault_handler(intr_code_t intr)
+__page_fault_handler(enum intr_type intr)
 {
   kpanic("Kernel panic because of %s, error addr: 0x%x !",
          __intr_exception_labels[intr],
@@ -43,8 +43,8 @@ __page_fault_handler(intr_code_t intr)
 void
 init_exception(void)
 {
-  for (intr_code_t i = 0; i < ORDOS_INTR_EXCEPTIONS_CNT; i++) {
-    if (i == INTR_PAGE_FAULT) {
+  for (enum intr_type i = 0; i < ORDOS_INTR_EXCEPTIONS_CNT; i++) {
+    if (i == IE_PAGE_FAULT) {
       intr_register(i, __page_fault_handler);
     } else {
       intr_register(i, __exception_handler);

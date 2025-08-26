@@ -12,18 +12,18 @@
 #pragma once
 
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/module/deps.h"
 #include "ordos/kernel/module/version.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h"
 
-#define __module_init(mentry, mexit, mname, mversion, ...)                     \
+#define __module_init(mentry, mexit, mflag, mname, mversion, ...)              \
   __used static const char* __##mname##_deps[] = { __VA_ARGS__ };              \
   __section(".data.module")                                                    \
     __used static struct module __##mname = { .name = #mname,                  \
                                               .version = mversion,             \
                                               .deps = __##mname##_deps,        \
+                                              .flag = mflag,                   \
                                               .entry = mentry,                 \
                                               .exit = mexit,                   \
                                               .magic = ORDOS_MODULE_MAGIC };
@@ -32,11 +32,12 @@
  * @brief Util to define a kernel module.
  *
  */
-#define module_init(mentry, mexit, mname, mversion, ...)                       \
-  __module_init(mentry, mexit, mname, mversion, ##__VA_ARGS__, 0)
+#define module_init(mentry, mexit, mflag, mname, mversion, ...)                \
+  __module_init(mentry, mexit, mflag, mname, mversion, ##__VA_ARGS__, 0)
 
-#define module_init_noexit(mentry, mname, mversion, ...)                       \
-  module_init(mentry, __module_default_exit, mname, mversion, ##__VA_ARGS__)
+#define module_init_noexit(mentry, mflag, mname, mversion, ...)                \
+  module_init(                                                                 \
+    mentry, __module_default_exit, mflag, mname, mversion, ##__VA_ARGS__)
 
 struct loaded_module;
 
@@ -52,6 +53,12 @@ typedef int (*module_entry_t)(struct loaded_module* mod);
  */
 typedef void (*module_exit_t)(struct loaded_module* mod);
 
+enum module_flag
+{
+  MOD_NOLOAD = 0,
+  MOD_AUTOLOAD = 1,
+};
+
 /**
  * @brief Kernel module type.
  *
@@ -61,18 +68,24 @@ struct module
   const char* name;
   const char* version;
   const char** deps;
+  enum module_flag flag;
   module_entry_t entry;
   module_exit_t exit;
   u32 magic;
 };
 
+/**
+ * @brief Loaded kernel module type.
+ *
+ */
 struct loaded_module
 {
   const char* name;
   struct version version;
-  struct dependency* deps;
-  size_t deps_cnt;
   struct list_head node;
+  struct loaded_module** deps;
+  size_t deps_cnt;
+  size_t refs_cnt;
   module_entry_t entry;
   module_exit_t exit;
 };
@@ -85,21 +98,21 @@ void
 init_module(void);
 
 /**
- * @brief Load module to kernel.
+ * @brief Load a module.
  *
- * @param mod Raw module pointer.
- * @return Loaded module.
+ * @param name Module name.
+ * @return int Load status.
  */
-struct loaded_module*
-load_module(struct module* mod);
+int
+load_module(const char* name);
 
 /**
- * @brief Unload module to kernel.
+ * @brief Unload a module.
  *
- * @param mod Loaded module pointer.
+ * @param name Module name.
  */
 void
-unload_module(struct loaded_module* mod);
+unload_module(const char* name);
 
 /**
  * @brief Find loaded module.
@@ -109,16 +122,6 @@ unload_module(struct loaded_module* mod);
  */
 struct loaded_module*
 find_module(const char* name);
-
-/**
- * @brief Check if module has dependency.
- *
- * @param mod Loaded module.
- * @param name Dependency name.
- * @return true If module has the dependency, otherwise false.
- */
-bool
-module_has_dep(struct loaded_module* mod, const char* name);
 
 /**
  * @brief Find loaded module dependency.

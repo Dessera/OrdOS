@@ -7,7 +7,7 @@
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
 
-__asm_linkage void
+__asm_linkage __noreturn void
 kmain(void)
 {
   init_print();

@@ -13,7 +13,7 @@ build:
   cd {{BUILDDIR}} && meson compile
 
 qemu-debug:
-  {{QEMU}} -drive format=raw,file={{TARGET}} --enable-kvm -s -S
+  {{QEMU}} -drive format=raw,file={{TARGET}} -s -S
 
 qemu:
   {{QEMU}} -drive format=raw,file={{TARGET}} --enable-kvm
