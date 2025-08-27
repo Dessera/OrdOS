@@ -134,4 +134,6 @@ sslab_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(sys_mem_sslab, MOD_COREMOD, sslab_entry, "sys_mem_buddy")
+module_dependency(sys_mem_buddy);
+
+module_init_noexit(sys_mem_sslab, MOD_COREMOD, sslab_entry, sys_mem_buddy);

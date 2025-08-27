@@ -12,8 +12,8 @@
 #pragma once
 
 #include "ordos/kernel/boot/prelude.h"
-#include "ordos/kernel/intr/intr.h" // IWYU pragma: keep
-#include "ordos/lib/asm.h"          // IWYU pragma: keep
+#include "ordos/kernel/intr.h" // IWYU pragma: keep
+#include "ordos/lib/asm.h"     // IWYU pragma: keep
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 

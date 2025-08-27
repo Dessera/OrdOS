@@ -34,4 +34,4 @@ pic_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(sys_pic, MOD_COREMOD, pic_entry)
+module_init_noexit(sys_pic, MOD_COREMOD, pic_entry);

@@ -166,4 +166,4 @@ buddy_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(sys_mem_buddy, MOD_COREMOD, buddy_entry)
+module_init_noexit(sys_mem_buddy, MOD_COREMOD, buddy_entry);

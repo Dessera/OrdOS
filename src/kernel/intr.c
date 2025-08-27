@@ -1,6 +1,7 @@
-#include "ordos/kernel/intr/intr.h"
+#include "ordos/kernel/intr.h"
 #include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
+#include "ordos/kernel/error.h"
 #include "ordos/kernel/intr/exception.h"
 #include "ordos/kernel/intr/idt.h"
 #include "ordos/kernel/intr/syscall.h"
@@ -10,16 +11,6 @@
 #include "ordos/lib/types.h"
 
 static intr_handler_t __intr_handlers[ORDOS_INTR_IDT_DESC_CNT] = { 0 };
-
-void
-init_intr(void)
-{
-  kinfo("Initializing interrupt subsystem");
-
-  init_idt();
-  init_exception();
-  init_syscall();
-}
 
 void
 intr_register(enum intr_type code, intr_handler_t handler)
@@ -86,7 +77,23 @@ intr_common_handler(u32 irq)
 
   if (__intr_handlers[irq] != NULL) {
     __intr_handlers[irq](irq);
-  } else {
-    kdebug_unsafe("Interrupt: Unhandled interrupt %x", irq);
   }
 }
+
+int
+intr_entry(struct module* mod)
+{
+  (void)mod;
+
+  init_idt();
+  init_exception();
+  init_syscall();
+
+  intr_set_status(true);
+
+  return E_SUCCESS;
+}
+
+module_dependency(sys_pic);
+
+module_init_noexit(sys_intr, MOD_COREMOD | MOD_AUTOLOAD, intr_entry, sys_pic);

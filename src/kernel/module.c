@@ -15,7 +15,7 @@ void
 __unload_module(struct module* mod)
 {
   if (mod->magic != ORDOS_MODULE_MAGIC) {
-    kwarn("Module: Module magic mismatched");
+    kwarn("Module: Invalid module magic");
     return;
   }
 
@@ -36,7 +36,6 @@ __unload_module(struct module* mod)
     }
 
     __unload_module(mod->deps[i]);
-    mod->deps[i] = NULL;
   }
 }
 
@@ -52,13 +51,13 @@ __load_module(struct module* mod)
     goto load_success;
   }
 
+  size_t loaded_deps_cnt = 0;
   for (size_t i = 0; i < mod->deps_cnt; ++i) {
-    struct module* dep = load_module(mod->deps_name[i]);
-    if (dep == NULL) {
+    if (__load_module(mod->deps[i]) != E_SUCCESS) {
       goto deps_failed;
     }
 
-    mod->deps[i] = dep;
+    ++loaded_deps_cnt;
   }
 
   if (mod->entry(mod) != E_SUCCESS) {
@@ -72,13 +71,12 @@ load_success:
 
 init_failed:
 deps_failed:
-  for (size_t i = 0; i < mod->deps_cnt; ++i) {
+  for (size_t i = 0; i < loaded_deps_cnt; ++i) {
     if (mod->deps[i] == NULL) {
       break;
     }
 
     __unload_module(mod->deps[i]);
-    mod->deps[i] = NULL;
   }
 
   return E_LOAD;

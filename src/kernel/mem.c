@@ -29,7 +29,9 @@ mem_entry(struct module* mod)
   return E_SUCCESS;
 }
 
+module_dependency(sys_mem_sslab);
+
 module_init_noexit(sys_mem,
                    MOD_COREMOD | MOD_AUTOLOAD,
                    mem_entry,
-                   "sys_mem_sslab")
+                   sys_mem_sslab);

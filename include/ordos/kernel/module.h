@@ -13,27 +13,45 @@
 
 #include "ordos/kernel/config.h"
 #include "ordos/lib/common.h"
+#include "ordos/lib/expr.h"
 #include "ordos/lib/types.h"
+
+#define __module_concat_impl(lhs, rhs) lhs##rhs
+#define __module_concat(lhs, rhs) __module_concat_impl(lhs, rhs)
+
+#define __module_name(name)                                                    \
+  __module_concat(__module_concat(__module_concat(__, name), _mod_),           \
+                  ORDOS_MODULE_MAGIC)
+
+#define __module_ptr(name) &__module_name(name)
+
+#define __module_deps_name(name) __module_concat(__module_name(name), _deps)
+
+#define __module_deps(...)                                                     \
+  __recursive_apply_with_comma(__module_ptr, __VA_ARGS__)
+
+/**
+ * @brief Util to declare module dependency.
+ *
+ */
+#define module_dependency(name) extern struct module __module_name(name)
 
 /**
  * @brief Util to define a kernel module.
  *
  */
 #define module_init(mname, mflag, mentry, mexit, ...)                          \
-  __used static const char* __##mname##_deps_name[] = { __VA_ARGS__ };         \
-  __used static struct module*                                                 \
-    __##mname##_deps[countof(__##mname##_deps_name)] = {};                     \
-  __section(".data.module") __used static struct module __##mname = {          \
-    .name = #mname,                                                            \
-    .deps_name = __##mname##_deps_name,                                        \
-    .deps = __##mname##_deps,                                                  \
-    .deps_cnt = countof(__##mname##_deps_name),                                \
-    .refs_cnt = 0,                                                             \
-    .flag = mflag,                                                             \
-    .entry = mentry,                                                           \
-    .exit = mexit,                                                             \
-    .magic = ORDOS_MODULE_MAGIC                                                \
-  };
+  __used static struct module* __module_deps_name(                             \
+    name)[] = { __module_deps(__VA_ARGS__) };                                  \
+  __section(".data.module") struct module __module_name(                       \
+    mname) = { .name = #mname,                                                 \
+               .deps = __module_deps_name(name),                               \
+               .deps_cnt = countof(__module_deps_name(name)),                  \
+               .refs_cnt = 0,                                                  \
+               .flag = mflag,                                                  \
+               .entry = mentry,                                                \
+               .exit = mexit,                                                  \
+               .magic = ORDOS_MODULE_MAGIC }
 
 /**
  * @brief Util to define a noexit kernel module.
@@ -72,7 +90,6 @@ struct module
 {
   const char* name;
   struct module** deps;
-  const char** deps_name;
   size_t deps_cnt;
   size_t refs_cnt;
   int flag;

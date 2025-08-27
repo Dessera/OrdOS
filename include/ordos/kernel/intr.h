@@ -55,12 +55,6 @@ enum intr_type : u32
 typedef void (*intr_handler_t)(enum intr_type);
 
 /**
- * @brief Initializes the interrupt subsystem.
- */
-void
-init_intr(void);
-
-/**
  * @brief Registers a handler for a specific interrupt.
  *
  * @param code The interrupt code to register the handler for.

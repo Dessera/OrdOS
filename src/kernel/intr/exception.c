@@ -1,6 +1,6 @@
 #include "ordos/kernel/intr/exception.h"
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/intr/intr.h"
+#include "ordos/kernel/intr.h"
 #include "ordos/kernel/logging.h"
 
 static const char* __intr_exception_labels[ORDOS_INTR_EXCEPTIONS_CNT] = {

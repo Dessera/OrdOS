@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ordos/kernel/intr/intr.h"
+#include "ordos/kernel/intr.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
 

@@ -1,7 +1,7 @@
 #include "ordos/kernel/driver/pit.h"
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/error.h"
-#include "ordos/kernel/intr/intr.h"
+#include "ordos/kernel/intr.h"
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/mem.h"
 #include "ordos/kernel/module.h"
@@ -144,4 +144,4 @@ pit_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(sys_pit, MOD_COREMOD, pit_entry)
+module_init_noexit(sys_pit, MOD_COREMOD, pit_entry);

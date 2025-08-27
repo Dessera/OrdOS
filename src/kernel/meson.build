@@ -1,5 +1,6 @@
 kernel_src = files(
   'init.c',
+  'intr.c',
   'logging.c',
   'main.c',
   'mem.c',
