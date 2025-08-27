@@ -3,7 +3,7 @@
 #include "ordos/kernel/compiler.h"
 #include "ordos/kernel/init.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/utils.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"

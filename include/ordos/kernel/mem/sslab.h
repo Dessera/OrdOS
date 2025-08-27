@@ -28,12 +28,6 @@ struct sslab
 };
 
 /**
- * @brief Initialize the global sslab allocator.
- */
-void
-init_sslab(void);
-
-/**
  * @brief Initialize a sslab allocator.
  *
  * @param sslab The sslab allocator.

@@ -3,7 +3,7 @@
 #include "ordos/kernel/error.h"
 #include "ordos/kernel/intr/intr.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/module.h"
 #include "ordos/kernel/task/sync.h"
 #include "ordos/lib/list_head.h"
@@ -144,4 +144,4 @@ pit_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(pit_entry, MOD_COREMOD, sys_pit)
+module_init_noexit(sys_pit, MOD_COREMOD, pit_entry)

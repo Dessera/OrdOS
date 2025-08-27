@@ -19,7 +19,7 @@
  * @brief Util to define a kernel module.
  *
  */
-#define module_init(mentry, mexit, mflag, mname, ...)                          \
+#define module_init(mname, mflag, mentry, mexit, ...)                          \
   __used static const char* __##mname##_deps_name[] = { __VA_ARGS__ };         \
   __used static struct module*                                                 \
     __##mname##_deps[countof(__##mname##_deps_name)] = {};                     \
@@ -39,8 +39,8 @@
  * @brief Util to define a noexit kernel module.
  *
  */
-#define module_init_noexit(mentry, mflag, mname, ...)                          \
-  module_init(mentry, __module_default_exit, mflag, mname, ##__VA_ARGS__)
+#define module_init_noexit(mname, mflag, mentry, ...)                          \
+  module_init(mname, mflag, mentry, __module_default_exit, ##__VA_ARGS__)
 
 struct module;
 
@@ -75,7 +75,7 @@ struct module
   const char** deps_name;
   size_t deps_cnt;
   size_t refs_cnt;
-  enum module_flag flag;
+  int flag;
   module_entry_t entry;
   module_exit_t exit;
   u32 magic;
@@ -115,14 +115,14 @@ struct module*
 find_module(const char* name);
 
 /**
- * @brief Find loaded module dependency.
+ * @brief Load all module which has specific flags (and MOD_AUTOLOAD).
  *
- * @param mod Loaded module.
- * @param name Dependency name.
- * @return struct module* Dependency.
+ * @param flags Module flags, will be ignored.
+ * @return size_t Loaded module (no deps).
+ * @note Do not increase `refs_cnt` if module has loaded.
  */
-struct module*
-find_module_dep(struct module* mod, const char* name);
+size_t
+autoload_module(int flags);
 
 /**
  * @brief Default exit function for modules that cannot be unloaded.

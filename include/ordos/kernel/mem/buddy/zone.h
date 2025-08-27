@@ -1,13 +1,16 @@
 #pragma once
 
-#include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/mem/buddy/page.h"
-#include "ordos/kernel/mem/memory.h"
 #include "ordos/kernel/task/sync.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
+
+#define MEM_TYPE_HIGH_START 0x30000000
+#define MEM_TYPE_NORMAL_START 0x01000000
+#define MEM_TYPE_DMA_START 0x00000000
 
 /**
  * @brief Memory area.
@@ -60,9 +63,7 @@ zone_get(enum mem_type type)
 __inline static enum mem_type
 zone_get_type(struct mem_zone* zone)
 {
-  size_t mtype = zone - __zones;
-  kassert(mtype < 3, "Invalid memory zone type");
-  return (enum mem_type)mtype;
+  return (enum mem_type)(zone - __zones);
 }
 
 /**

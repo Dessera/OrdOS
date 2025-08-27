@@ -1,10 +1,10 @@
 #include "ordos/kernel/mem/buddy/zone.h"
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/logging.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/mem/bootmem.h"
-#include "ordos/kernel/mem/buddy/buddy.h"
+#include "ordos/kernel/mem/buddy.h"
 #include "ordos/kernel/mem/buddy/page.h"
-#include "ordos/kernel/mem/memory.h"
 #include "ordos/kernel/task/sync.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
@@ -63,10 +63,6 @@ __init_zone(struct mem_zone* zone,
   for (size_t i = pg_start; i <= pg_end; i++) {
     struct page* pg = page_get(i);
     pg->zone_type = type;
-
-    // if (!pg->reserved) {
-    //   buddy_free_page(pg, 0);
-    // }
   }
 
   size_t curr = pg_start;
@@ -105,19 +101,26 @@ init_zone(void)
               MEM_DMA,
               page_phys_index(MEM_TYPE_DMA_START),
               page_phys_index(MEM_TYPE_NORMAL_START) - 1);
-  kdebug("Zone DMA: %u pages", __zones[MEM_DMA].pg_cnt);
 
   __init_zone(&__zones[MEM_NORMAL],
               MEM_NORMAL,
               page_phys_index(MEM_TYPE_NORMAL_START),
               page_phys_index(min(MEM_TYPE_HIGH_START, mem_size)) - 1);
-  kdebug("zone normal: %u pages", __zones[MEM_NORMAL].pg_cnt);
 
   __init_zone(&__zones[MEM_HIGH],
               MEM_HIGH,
               page_phys_index(MEM_TYPE_HIGH_START),
               page_phys_index(mem_size) - 1);
-  kdebug("zone high: %u pages", __zones[MEM_HIGH].pg_cnt);
+
+  kinfo("Zone DMA: %u mb, %u pages",
+        page_size(__zones[MEM_DMA].pg_cnt, MBYTES),
+        __zones[MEM_DMA].pg_cnt);
+  kinfo("zone normal: %u mb, %u pages",
+        page_size(__zones[MEM_NORMAL].pg_cnt, MBYTES),
+        __zones[MEM_NORMAL].pg_cnt);
+  kinfo("zone high: %u mb, %u pages",
+        page_size(__zones[MEM_HIGH].pg_cnt, MBYTES),
+        __zones[MEM_HIGH].pg_cnt);
 }
 
 void

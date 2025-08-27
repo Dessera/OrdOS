@@ -1,9 +1,11 @@
-#include "ordos/kernel/mem/buddy/buddy.h"
+#include "ordos/kernel/mem/buddy.h"
 #include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
+#include "ordos/kernel/error.h"
 #include "ordos/kernel/logging.h"
 #include "ordos/kernel/mem/buddy/page.h"
 #include "ordos/kernel/mem/buddy/zone.h"
+#include "ordos/kernel/module.h"
 #include "ordos/kernel/task/sync.h"
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h"
@@ -31,13 +33,6 @@ static struct page*
 __buddy_page_ascend(struct page* page, u8 order)
 {
   return page_get(page_get_index(page) & ~buddy_order_to_page_cnt(order));
-}
-
-void
-init_buddy(void)
-{
-  init_page();
-  init_zone();
 }
 
 void
@@ -159,3 +154,16 @@ buddy_page_cnt_to_order(size_t page_cnt)
   }
   return order;
 }
+
+int
+buddy_entry(struct module* mod)
+{
+  (void)mod;
+
+  init_page();
+  init_zone();
+
+  return E_SUCCESS;
+}
+
+module_init_noexit(sys_mem_buddy, MOD_COREMOD, buddy_entry)

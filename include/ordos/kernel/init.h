@@ -12,7 +12,7 @@
 #pragma once
 
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/mem/vpage.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 

@@ -1,7 +1,6 @@
 #include "ordos/kernel/config.h" // IWYU pragma: keep
 #include "ordos/kernel/intr/intr.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/memory.h"
 #include "ordos/kernel/module.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/common.h"
@@ -22,8 +21,9 @@ kmain(void)
 
   kinfo("%s %s", ORDOS_KERNEL_NAME, ORDOS_KERNEL_VERSION);
 
+  autoload_module(MOD_COREMOD);
+
   init_intr();
-  init_memory();
 
   while (true) {
     hlt();

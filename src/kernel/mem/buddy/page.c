@@ -3,8 +3,8 @@
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/init.h"
 #include "ordos/kernel/logging.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/kernel/mem/bootmem.h"
-#include "ordos/kernel/mem/memory.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/types.h"
 
@@ -55,5 +55,7 @@ init_page(void)
   __mmap_reserve();
   __bootmem_reserve();
 
-  kdebug("Physical memory: %u pages", __pages_cnt);
+  kinfo("Physical memory %u mb, %u pages",
+        page_size(__pages_cnt, MBYTES),
+        __pages_cnt);
 }

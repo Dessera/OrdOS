@@ -11,18 +11,11 @@
 
 #pragma once
 
-#include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/mem/memory.h"
+#include "ordos/kernel/mem.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/list_head.h"
 #include "ordos/lib/types.h"
-
-/**
- * @brief Get the page index of the physical address.
- *
- */
-#define page_phys_index(addr) ((addr) >> 12)
 
 /**
  * @brief Physical memory page abstraction.
@@ -56,12 +49,7 @@ init_page(void);
 __inline static size_t
 page_get_index(struct page* page)
 {
-  size_t idx = page - __pages;
-  kassert(idx < __pages_cnt,
-          "Page index out of bounds: received: %u, max: %u",
-          idx,
-          __pages_cnt);
-  return idx;
+  return page - __pages;
 }
 
 /**
@@ -85,10 +73,6 @@ page_index_is_overflow(size_t index)
 __inline static struct page*
 page_get(size_t index)
 {
-  kassert(index < __pages_cnt,
-          "Page index out of bounds: received: %u, max: %u",
-          index,
-          __pages_cnt);
   return &__pages[index];
 }
 
@@ -138,4 +122,23 @@ __inline static struct page*
 page_get_by_virt(uintptr_t virt)
 {
   return page_get_by_phys(virt - ORDOS_KERNEL_VADDR);
+}
+
+/**
+ * @brief Get memory size from pages.
+ *
+ * @param pages_cnt
+ * @return __inline
+ */
+__inline static size_t
+page_size(size_t pages_cnt, size_t base)
+{
+  return pages_cnt * ORDOS_KERNEL_PAGE_SIZE / base;
+}
+
+__inline static size_t
+page_phys_index(uintptr_t addr)
+{
+  // TODO: 12 is from PAGE_SIZE
+  return addr >> 12; // NOLINT
 }

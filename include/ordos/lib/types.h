@@ -23,6 +23,9 @@
 #define DWORD (sizeof(u32) * 8)
 #define QWORD (sizeof(u64) * 8)
 
+#define KBYTES (1024)
+#define MBYTES (KBYTES * 1024)
+
 #define BITMASK 1
 #define BYTEMASK (0xFF)
 #define WORDMASK (0xFFFF)
@@ -41,6 +44,9 @@
   })
 
 #define countof(arr) (sizeof(arr) / sizeof(arr[0]))
+
+#define has_flags(flags, req) (((flags) & (req)) == (req))
+#define mask_flags(flags, req) ((flags) & (~(req)))
 
 #define va_list __builtin_va_list
 #define va_satrt __builtin_va_start

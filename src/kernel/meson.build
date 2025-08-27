@@ -2,6 +2,7 @@ kernel_src = files(
   'init.c',
   'logging.c',
   'main.c',
+  'mem.c',
   'module.c',
 )
 
@@ -10,7 +11,6 @@ subdir('driver')
 subdir('mem')
 subdir('task')
 subdir('intr')
-subdir('module')
 
 kernel_ld = compiler.preprocess(
   'kernel.ldt',

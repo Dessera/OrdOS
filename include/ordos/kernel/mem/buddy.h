@@ -4,10 +4,14 @@
 #include "ordos/lib/types.h"
 
 /**
- * @brief Initializes the buddy memory allocator.
+ * @brief Allocate a block of pages from the buddy allocator.
+ *
+ * @param zone_type Type of memory zone.
+ * @param order Order of the block.
+ * @return struct page* First page of the block.
  */
-void
-init_buddy(void);
+struct page*
+buddy_alloc_page(enum mem_type zone_type, u8 order);
 
 /**
  * @brief Free pages to the buddy allocator.
@@ -17,16 +21,6 @@ init_buddy(void);
  */
 void
 buddy_free_page(struct page* page, u8 order);
-
-/**
- * @brief Allocate a block of pages from the buddy allocator.
- *
- * @param zone_type Type of memory zone.
- * @param order Order of the block.
- * @return struct page* First page of the block.
- */
-struct page*
-buddy_alloc_page(enum mem_type zone_type, u8 order);
 
 /**
  * @brief Check if page is aligned to order.

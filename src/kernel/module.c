@@ -1,5 +1,6 @@
 #include "ordos/kernel/module.h"
 #include "ordos/kernel/compiler.h"
+#include "ordos/kernel/config.h"
 #include "ordos/kernel/error.h"
 #include "ordos/kernel/logging.h"
 #include "ordos/lib/common.h"
@@ -13,6 +14,15 @@ size_t __mods_cnt = 0;
 void
 __unload_module(struct module* mod)
 {
+  if (mod->magic != ORDOS_MODULE_MAGIC) {
+    kwarn("Module: Module magic mismatched");
+    return;
+  }
+
+  if (mod->refs_cnt == 0) {
+    return;
+  }
+
   --mod->refs_cnt;
   if (mod->refs_cnt != 0) {
     return;
@@ -28,6 +38,50 @@ __unload_module(struct module* mod)
     __unload_module(mod->deps[i]);
     mod->deps[i] = NULL;
   }
+}
+
+int
+__load_module(struct module* mod)
+{
+  if (mod->magic != ORDOS_MODULE_MAGIC) {
+    kwarn("Module: Module magic mismatched");
+    return E_LOAD;
+  }
+
+  if (mod->refs_cnt != 0) {
+    goto load_success;
+  }
+
+  for (size_t i = 0; i < mod->deps_cnt; ++i) {
+    struct module* dep = load_module(mod->deps_name[i]);
+    if (dep == NULL) {
+      goto deps_failed;
+    }
+
+    mod->deps[i] = dep;
+  }
+
+  if (mod->entry(mod) != E_SUCCESS) {
+    kwarn("Module: Unable to load %s because init failed", mod->name);
+    goto init_failed;
+  }
+
+load_success:
+  ++mod->refs_cnt;
+  return E_SUCCESS;
+
+init_failed:
+deps_failed:
+  for (size_t i = 0; i < mod->deps_cnt; ++i) {
+    if (mod->deps[i] == NULL) {
+      break;
+    }
+
+    __unload_module(mod->deps[i]);
+    mod->deps[i] = NULL;
+  }
+
+  return E_LOAD;
 }
 
 void
@@ -53,37 +107,8 @@ load_module(const char* name)
     return NULL;
   }
 
-  if (mod->refs_cnt != 0) {
-    goto load_success;
-  }
-
-  for (size_t i = 0; i < mod->deps_cnt; ++i) {
-    struct module* dep = load_module(mod->deps_name[i]);
-    if (dep == NULL) {
-      goto deps_failed;
-    }
-
-    mod->deps[i] = dep;
-  }
-
-  if (mod->entry(mod) != E_SUCCESS) {
-    kwarn("Module: Unable to load %s because init failed", mod->name);
-    goto init_failed;
-  }
-
-load_success:
-  ++mod->refs_cnt;
-  return mod;
-
-init_failed:
-deps_failed:
-  for (size_t i = 0; i < mod->deps_cnt; ++i) {
-    if (mod->deps[i] == NULL) {
-      break;
-    }
-
-    __unload_module(mod->deps[i]);
-    mod->deps[i] = NULL;
+  if (__load_module(mod) == E_SUCCESS) {
+    return mod;
   }
 
   return NULL;
@@ -93,7 +118,7 @@ void
 unload_module(const char* name)
 {
   struct module* mod = find_module(name);
-  if (mod == NULL || mod->refs_cnt != 0) {
+  if (mod == NULL) {
     kwarn("Module: No module named %s in modules list", name);
     return;
   }
@@ -113,16 +138,22 @@ find_module(const char* name)
   return NULL;
 }
 
-struct module*
-find_module_dep(struct module* mod, const char* name)
+size_t
+autoload_module(int flags)
 {
-  for (size_t i = 0; i < mod->deps_cnt; ++i) {
-    if (strcmp(mod->deps_name[i], name) == 0) {
-      return mod->deps[i];
+  int req = mask_flags(flags, MOD_AUTOLOAD | MOD_NOLOAD);
+  size_t res = 0;
+
+  for (size_t i = 0; i < __mods_cnt; ++i) {
+    if (mask_flags(__mods[i].flag, MOD_AUTOLOAD | MOD_NOLOAD) == req) {
+      if (has_flags(__mods[i].flag, MOD_AUTOLOAD) && __mods[i].refs_cnt == 0 &&
+          __load_module(&__mods[i]) == E_SUCCESS) {
+        ++res;
+      }
     }
   }
 
-  return NULL;
+  return res;
 }
 
 void

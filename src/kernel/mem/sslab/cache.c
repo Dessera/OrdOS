@@ -2,9 +2,9 @@
 #include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
 #include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/buddy/buddy.h"
+#include "ordos/kernel/mem.h"
+#include "ordos/kernel/mem/buddy.h"
 #include "ordos/kernel/mem/buddy/page.h"
-#include "ordos/kernel/mem/memory.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"

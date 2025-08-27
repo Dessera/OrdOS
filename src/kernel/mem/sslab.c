@@ -1,18 +1,12 @@
-#include "ordos/kernel/mem/sslab/sslab.h"
+#include "ordos/kernel/mem/sslab.h"
 #include "ordos/kernel/assert.h"
 #include "ordos/kernel/config.h"
+#include "ordos/kernel/error.h"
 #include "ordos/kernel/mem/sslab/cache.h"
+#include "ordos/kernel/module.h"
 #include "ordos/lib/list_head.h"
 
 static struct sslab __sslab[ORDOS_MEM_SSLAB_MAX_ORDER + 1] = { 0 };
-
-void
-init_sslab(void)
-{
-  for (int i = 0; i <= ORDOS_MEM_SSLAB_MAX_ORDER; i++) {
-    sslab_init(&__sslab[i], sslab_order_to_size(i));
-  }
-}
 
 void
 sslab_init(struct sslab* sslab, size_t obj_size)
@@ -127,3 +121,17 @@ sslab_size_to_order(size_t size)
 
   return order;
 }
+
+int
+sslab_entry(struct module* mod)
+{
+  (void)mod;
+
+  for (int i = 0; i <= ORDOS_MEM_SSLAB_MAX_ORDER; i++) {
+    sslab_init(&__sslab[i], sslab_order_to_size(i));
+  }
+
+  return E_SUCCESS;
+}
+
+module_init_noexit(sys_mem_sslab, MOD_COREMOD, sslab_entry, "sys_mem_buddy")

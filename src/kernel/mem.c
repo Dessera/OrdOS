@@ -1,11 +1,14 @@
+#include "ordos/kernel/error.h"
 #include "ordos/kernel/init.h"
-#include "ordos/kernel/logging.h"
-#include "ordos/kernel/mem/buddy/buddy.h"
-#include "ordos/kernel/mem/sslab/sslab.h"
 #include "ordos/kernel/mem/vpage.h"
+#include "ordos/kernel/module.h"
 #include "ordos/kernel/utils.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
+/**
+ * @brief Unload top pages.
+ *
+ */
 static void
 __init_vpage(void)
 {
@@ -16,13 +19,17 @@ __init_vpage(void)
   }
 }
 
-void
-init_memory(void)
+int
+mem_entry(struct module* mod)
 {
-  kinfo("Initializing memory management subsystem");
-
-  init_buddy();
-  init_sslab();
+  (void)mod;
 
   __init_vpage();
+
+  return E_SUCCESS;
 }
+
+module_init_noexit(sys_mem,
+                   MOD_COREMOD | MOD_AUTOLOAD,
+                   mem_entry,
+                   "sys_mem_sslab")
