@@ -1,9 +1,9 @@
 #include "ordos/kernel/module.h"
 #include "ordos/kernel/compiler.h"
 #include "ordos/kernel/config.h"
-#include "ordos/kernel/error.h"
-#include "ordos/kernel/logging.h"
 #include "ordos/lib/common.h"
+#include "ordos/lib/error.h"
+#include "ordos/lib/logging.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"  // IWYU pragma: keep
 
@@ -11,11 +11,10 @@ struct module* __mods;
 
 size_t __mods_cnt = 0;
 
-void
+static void
 __unload_module(struct module* mod)
 {
   if (mod->magic != ORDOS_MODULE_MAGIC) {
-    kwarn("Module: Invalid module magic");
     return;
   }
 
@@ -39,11 +38,10 @@ __unload_module(struct module* mod)
   }
 }
 
-int
+static int
 __load_module(struct module* mod)
 {
   if (mod->magic != ORDOS_MODULE_MAGIC) {
-    kwarn("Module: Module magic mismatched");
     return E_LOAD;
   }
 
@@ -61,7 +59,6 @@ __load_module(struct module* mod)
   }
 
   if (mod->entry(mod) != E_SUCCESS) {
-    kwarn("Module: Unable to load %s because init failed", mod->name);
     goto init_failed;
   }
 
@@ -96,20 +93,15 @@ init_module(void)
   }
 }
 
-struct module*
+int
 load_module(const char* name)
 {
   struct module* mod = find_module(name);
   if (mod == NULL) {
-    kwarn("Module: No module named %s in modules list", name);
-    return NULL;
+    return E_NOTFOUND;
   }
 
-  if (__load_module(mod) == E_SUCCESS) {
-    return mod;
-  }
-
-  return NULL;
+  return __load_module(mod);
 }
 
 void
@@ -117,7 +109,6 @@ unload_module(const char* name)
 {
   struct module* mod = find_module(name);
   if (mod == NULL) {
-    kwarn("Module: No module named %s in modules list", name);
     return;
   }
 

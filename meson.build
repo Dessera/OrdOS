@@ -40,7 +40,7 @@ kernel_ld_args = kernel_args + [
 
 kernel = executable(
   'vmordos',
-  kernel_src + lib_src,
+  kernel_src,
   c_args: kernel_args,
   link_args: kernel_ld_args,
   link_depends: kernel_ld,

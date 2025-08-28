@@ -1,3 +1,14 @@
+/**
+ * @file expr.h
+ * @author Dessera (dessera@qq.com)
+ * @brief Expression utils.
+ * @version 0.1.0
+ * @date 2025-08-27
+ *
+ * @copyright Copyright (c) 2025 Dessera
+ *
+ */
+
 #pragma once
 
 #define PARENS ()

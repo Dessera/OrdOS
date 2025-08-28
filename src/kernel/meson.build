@@ -1,17 +1,10 @@
-kernel_src = files(
+kernel_src += files(
   'init.c',
-  'intr.c',
-  'logging.c',
   'main.c',
-  'mem.c',
   'module.c',
 )
 
 subdir('boot')
-subdir('driver')
-subdir('mem')
-subdir('task')
-subdir('intr')
 
 kernel_ld = compiler.preprocess(
   'kernel.ldt',

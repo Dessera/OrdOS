@@ -1,5 +1,7 @@
-lib_src = files(
-  'list_head.c',
+kernel_src += files(
   'string.c',
+  'sync.c',
   'types.c',
 )
+
+subdir('util')

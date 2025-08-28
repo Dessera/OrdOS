@@ -14,21 +14,38 @@
 #include "ordos/kernel/config.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/expr.h"
+#include "ordos/lib/section.h"
 #include "ordos/lib/types.h"
 
 #define __module_concat_impl(lhs, rhs) lhs##rhs
 #define __module_concat(lhs, rhs) __module_concat_impl(lhs, rhs)
 
+/**
+ * @brief Get module real name.
+ *
+ */
 #define __module_name(name)                                                    \
   __module_concat(__module_concat(__module_concat(__, name), _mod_),           \
                   ORDOS_MODULE_MAGIC)
 
-#define __module_ptr(name) &__module_name(name)
-
+/**
+ * @brief Get module deps array name.
+ *
+ */
 #define __module_deps_name(name) __module_concat(__module_name(name), _deps)
 
+/**
+ * @brief Get dep pointer.
+ *
+ */
+#define __module_ptr(name) &__module_name(name)
+
+/**
+ * @brief Convert deps to array.
+ *
+ */
 #define __module_deps(...)                                                     \
-  __recursive_apply_with_comma(__module_ptr, __VA_ARGS__)
+  { __recursive_apply_with_comma(__module_ptr, __VA_ARGS__) }
 
 /**
  * @brief Util to declare module dependency.
@@ -41,9 +58,9 @@
  *
  */
 #define module_init(mname, mflag, mentry, mexit, ...)                          \
-  __used static struct module* __module_deps_name(                             \
-    name)[] = { __module_deps(__VA_ARGS__) };                                  \
-  __section(".data.module") struct module __module_name(                       \
+  __used static struct module* __module_deps_name(name)[] =                    \
+    __module_deps(__VA_ARGS__);                                                \
+  __module struct module __module_name(                                        \
     mname) = { .name = #mname,                                                 \
                .deps = __module_deps_name(name),                               \
                .deps_cnt = countof(__module_deps_name(name)),                  \
@@ -74,12 +91,16 @@ typedef int (*module_entry_t)(struct module* mod);
  */
 typedef void (*module_exit_t)(struct module* mod);
 
+/**
+ * @brief Module flags.
+ *
+ */
 enum module_flag
 {
-  MOD_NOLOAD = 0x00,
-  MOD_AUTOLOAD = 0x01,
-  MOD_SYSMOD = 0x00,
-  MOD_COREMOD = 0x02,
+  MOD_NOLOAD = 0x00,   // Module will not be loaded automatically.
+  MOD_AUTOLOAD = 0x01, // Module will be loaded automatically.
+  MOD_SYSMOD = 0x00,   // Module is system module (common module).
+  MOD_COREMOD = 0x02,  // Module is core module (kernel basic subsystem).
 };
 
 /**
@@ -99,7 +120,7 @@ struct module
 };
 
 /**
- * @brief Initialize all modules.
+ * @brief Initialize module subsystem.
  *
  */
 void
@@ -109,9 +130,9 @@ init_module(void);
  * @brief Load a module.
  *
  * @param name Module name.
- * @return struct module* Loaded module.
+ * @return int Load status.
  */
-struct module*
+int
 load_module(const char* name);
 
 /**

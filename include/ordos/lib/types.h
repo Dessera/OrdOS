@@ -32,8 +32,12 @@
 #define DWORDMASK (0xFFFFFFFF)
 #define QWORDMASK (0xFFFFFFFFFFFFFFFF)
 
-#define U8_MAX (0xFF)
-#define U8_MIN (0)
+#define U8_MAX ((u8) - 1)
+#define U8_MIN ((u8)0)
+#define USIZE_MAX ((size_t)-1)
+#define USIZE_MIN ((size_t)0)
+#define ISIZE_MAX ((ssize_t)0x7FFFFFFF)
+#define ISIZE_MIN ((ssize_t)0)
 
 #define offset_of(type, member) __builtin_offsetof(type, member)
 
@@ -44,6 +48,8 @@
   })
 
 #define countof(arr) (sizeof(arr) / sizeof(arr[0]))
+
+#define unused(var) ((void)var)
 
 #define has_flags(flags, req) (((flags) & (req)) == (req))
 #define mask_flags(flags, req) ((flags) & (~(req)))
