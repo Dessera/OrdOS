@@ -28,6 +28,7 @@ __force_sched_rr(struct list_head* ready_list)
 
   struct task* next = list_entry(list_pop(ready_list), struct task, node);
   task_set_current(next);
+  next->status = TSK_RUNNING;
 
   lcr3(next->pd);
   tss_update_esp(next);

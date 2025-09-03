@@ -89,8 +89,6 @@ intr_entry(struct module* mod)
   init_exception();
   init_syscall();
 
-  intr_set_status(true);
-
   return E_SUCCESS;
 }
 

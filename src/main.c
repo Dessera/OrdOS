@@ -17,6 +17,8 @@ kmain(void)
 
   autoload_module(MOD_CORE);
 
+  intr_set_status(true);
+
   while (true) {
     hlt();
   }

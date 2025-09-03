@@ -16,4 +16,4 @@ qemu-debug:
   {{QEMU}} -drive format=raw,file={{TARGET}} -s -S
 
 qemu:
-  {{QEMU}} -drive format=raw,file={{TARGET}} --enable-kvm
+  {{QEMU}} -drive format=raw,file={{TARGET}}

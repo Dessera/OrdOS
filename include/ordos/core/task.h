@@ -46,6 +46,7 @@ enum task_status
  */
 struct task
 {
+  void* stack;
   size_t pid;
   char name[ORDOS_TASK_NAME_LENGTH];
   enum task_status status;
@@ -58,7 +59,6 @@ struct task
   struct list_head global_node;
 
   pde_t* pd;
-  void* stack;
 };
 
 /**

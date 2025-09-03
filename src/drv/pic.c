@@ -18,8 +18,8 @@ __pic_init(u16 port, u8 offs, u8 bind)
 void
 pic_set_mask(u16 mask)
 {
-  outb(PIC_MASTER_CMD, (mask >> BYTE) & BYTEMASK);
-  outb(PIC_SLAVE_CMD, mask & BYTEMASK);
+  outb(PIC_MASTER_DATA, (mask >> BYTE) & BYTEMASK);
+  outb(PIC_SLAVE_DATA, mask & BYTEMASK);
 }
 
 int

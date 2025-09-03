@@ -194,4 +194,8 @@ task_entry(struct module* mod)
 module_dependency(sys_mem);
 module_dependency(drv_pit);
 
-module_init_noexit(sys_task, MOD_CORE, task_entry, sys_mem, drv_pit);
+module_init_noexit(sys_task,
+                   MOD_CORE | MOD_AUTOLOAD,
+                   task_entry,
+                   sys_mem,
+                   drv_pit);

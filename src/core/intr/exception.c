@@ -29,13 +29,13 @@ static const char* __intr_exception_labels[ORDOS_INTR_EXCEPTIONS_CNT] = {
 static void
 __exception_handler(enum intr_type intr)
 {
-  kerror("Kernel panic because of %s !", __intr_exception_labels[intr]);
+  kpanic("Kernel panic because of %s !", __intr_exception_labels[intr]);
 }
 
 static void
 __page_fault_handler(enum intr_type intr)
 {
-  kpanic("Kernel panic because of %s, error addr: 0x%x !",
+  kerror("Kernel panic because of %s, error addr: 0x%x !",
          __intr_exception_labels[intr],
          rcr2());
 }
