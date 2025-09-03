@@ -6,6 +6,9 @@
 #include "ordos/core/task/context.h"
 #include "ordos/core/task/kthread.h"
 #include "ordos/core/task/pid.h"
+#include "ordos/core/task/sched.h"
+#include "ordos/core/task/tss.h"
+#include "ordos/drv/pit.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
@@ -21,6 +24,8 @@ static struct list_head __tasks_ready_list;
 
 static struct task* __task_curr = NULL;
 
+static struct sched* __task_sched = NULL;
+
 static void
 __task_entry(task_entry_t function, void* arg)
 {
@@ -29,8 +34,16 @@ __task_entry(task_entry_t function, void* arg)
 }
 
 static void
+__task_pit_handler(size_t ticks)
+{
+  unused(ticks);
+  __task_sched->entry(&__tasks_ready_list);
+}
+
+static void
 __task_schedule(void)
 {
+  __task_sched->fentry(&__tasks_ready_list);
 }
 
 void
@@ -147,8 +160,6 @@ task_unpark(struct task* task)
 int
 task_entry(struct module* mod)
 {
-  unused(mod);
-
   pidpool_init(&__pids);
 
   list_init(&__tasks_list);
@@ -164,14 +175,23 @@ task_entry(struct module* mod)
     return E_KERNPANIC;
   }
 
+  init_tss();
+
+  size_t scheds = autoload_module(MOD_SCHED | MOD_AUTOLOAD);
+  minfo(mod, "%u schedulers", scheds);
+
+  // TODO: Mutable
+  __task_sched = sched_find("rr");
+  if (__task_sched == NULL) {
+    merror(mod, "Failed to load scheduler rr");
+  }
+
+  pit_register(1, __task_pit_handler);
+
   return E_SUCCESS;
 }
 
 module_dependency(sys_mem);
 module_dependency(drv_pit);
 
-module_init_noexit(sys_task,
-                   MOD_CORE | MOD_AUTOLOAD,
-                   task_entry,
-                   sys_mem,
-                   drv_pit);
+module_init_noexit(sys_task, MOD_CORE, task_entry, sys_mem, drv_pit);

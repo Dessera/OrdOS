@@ -29,7 +29,7 @@ static const char* __intr_exception_labels[ORDOS_INTR_EXCEPTIONS_CNT] = {
 static void
 __exception_handler(enum intr_type intr)
 {
-  kpanic("Kernel panic because of %s !", __intr_exception_labels[intr]);
+  kerror("Kernel panic because of %s !", __intr_exception_labels[intr]);
 }
 
 static void

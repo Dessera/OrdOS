@@ -21,6 +21,7 @@
 #define GDT_KDATA_INDEX 2 /**< GDT KDATA descriptor index. */
 #define GDT_UCODE_INDEX 3 /**< GDT UCODE descriptor index. */
 #define GDT_UDATA_INDEX 4 /**< GDT UDATA descriptor index. */
+#define GDT_TSS_INDEX 5   /**< GDT TSS descriptor index. */
 
 /**
  * @brief Util to create GDT selector for registers.
@@ -51,6 +52,12 @@
  *
  */
 #define gdt_sel_udata() gdt_create_sel(GDT_UDATA_INDEX, DPL_USER)
+
+/**
+ * @brief GDT TSS selector.
+ *
+ */
+#define gdt_sel_tss() gdt_create_sel(GDT_TSS_INDEX, DPL_KERNEL)
 
 /**
  * @brief Util to create GDT descriptor, which should be statically initialized.
@@ -101,6 +108,15 @@
   gdt_desc(0, 0xFFFFF, GDT_PRESENT | GDT_USER | GDT_DATA | GDT_G | GDT_D)
 
 /**
+ * @brief GDT TSS descriptor.
+ *
+ */
+#define gdt_desc_tss(ctx)                                                      \
+  gdt_desc((uintptr_t)ctx,                                                     \
+           sizeof(struct tss_context),                                         \
+           GDT_PRESENT | GDT_KERNEL | GDT_TSS | GDT_G)
+
+/**
  * @brief GDTR for `lgdt`.
  *
  */
@@ -126,7 +142,6 @@ struct gdt
  */
 enum gdt_flag
 {
-  GDT_NULL = 0x0,     /**< GDT is NULL entry. */
   GDT_TSS = 0x09,     /**< GDT is TSS entry. */
   GDT_CODE = 0x1a,    /**< GDT is code section entry. */
   GDT_DATA = 0x12,    /**< GDT is data section entry. */

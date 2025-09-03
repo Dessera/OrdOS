@@ -17,5 +17,7 @@ kmain(void)
 
   autoload_module(MOD_CORE);
 
-  kpanic("system halt");
+  while (true) {
+    hlt();
+  }
 }

@@ -133,3 +133,6 @@ task_park(void);
  */
 void
 task_unpark(struct task* task);
+
+void
+_asm_task_switch_to(struct task* curr, struct task* next);
