@@ -1,9 +1,9 @@
 #include "ordos/drv/vga.h"
-#include "ordos/kernel/module.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/types.h"
+#include "ordos/module.h"
 
 void
 vga_set(vga_cursor_t cursor, u16 value)
@@ -95,4 +95,4 @@ vga_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(drv_vga, MOD_COREMOD, vga_entry);
+module_init_noexit(drv_vga, MOD_CORE, vga_entry);

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ordos/config.h"
 #include "ordos/core/mem.h"
 #include "ordos/core/mem/buddy/page.h"
-#include "ordos/kernel/config.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/sync.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
@@ -34,7 +34,7 @@ struct mem_zone
   struct spin_lock lock;
 };
 
-extern struct mem_zone __zones[3];
+extern struct mem_zone __zones[3]; /**< Memory zones. */
 
 /**
  * @brief Initialize the memory zones.

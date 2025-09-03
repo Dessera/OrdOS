@@ -17,7 +17,7 @@
 
 #define NPOS (-1)
 
-#define BIT 1
+#define BIT (1)
 #define BYTE (sizeof(u8) * 8)
 #define WORD (sizeof(u16) * 8)
 #define DWORD (sizeof(u32) * 8)
@@ -77,12 +77,20 @@ typedef i32 intptr_t;
 
 typedef _Bool bool;
 
+/**
+ * @brief Boolean literal.
+ *
+ */
 enum
 {
   true = 1,
   false = 0
 };
 
+/**
+ * @brief Number base flags.
+ *
+ */
 enum base_flag
 {
   BASE_BIN = 2,
@@ -91,18 +99,44 @@ enum base_flag
   BASE_HEX = 16
 };
 
+/**
+ * @brief Convert int to string.
+ *
+ * @param buffer Destination buffer.
+ * @param value Number to be converted.
+ * @param base Convertion base.
+ */
 void
 itoa(char* buffer, i32 value, u8 base);
 
+/**
+ * @brief Convert unsigned int to string.
+ *
+ * @param buffer Destination buffer.
+ * @param value Number to be converted.
+ * @param base Convertion base.
+ */
 void
 utoa(char* buffer, u32 value, u8 base);
 
+/**
+ * @brief Check if character is digit.
+ *
+ * @param c Character.
+ * @return bool true if character is digit, otherwise false.
+ */
 __inline static bool
 is_digit(char c)
 {
   return c >= '0' && c <= '9';
 }
 
+/**
+ * @brief Convert character to digit.
+ *
+ * @param c Character.
+ * @return int Converted digit.
+ */
 __inline static int
 to_digit(char c)
 {

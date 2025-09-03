@@ -4,6 +4,13 @@
 #include "ordos/lib/types.h"
 
 /**
+ * @brief Init buddy system.
+ *
+ */
+void
+init_buddy(void);
+
+/**
  * @brief Allocate a block of pages from the buddy allocator.
  *
  * @param zone_type Type of memory zone.

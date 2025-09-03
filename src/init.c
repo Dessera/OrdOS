@@ -1,3 +1,3 @@
-#include "ordos/kernel/init.h"
+#include "ordos/init.h"
 
 struct init_info __init = {};

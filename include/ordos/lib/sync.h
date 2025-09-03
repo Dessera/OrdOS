@@ -14,6 +14,7 @@
 #include "ordos/core/intr.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
+#include "ordos/lib/util/list_head.h"
 
 /**
  * @brief COW spin lock.
@@ -70,38 +71,89 @@ intr_unlock(bool flag)
   intr_set_status(flag);
 }
 
-// struct mutex_lock
-// {
-//   u8 flag;
-//   struct spin_lock guard;
-//   struct list_head wait_queue;
-// };
+/**
+ * @brief Mutex lock.
+ *
+ */
+struct mutex_lock
+{
+  volatile u8 flag;
+  struct spin_lock guard;
+  struct list_head wait_queue;
+};
 
-// void
-// mutex_lock_init(struct mutex_lock* lck);
-// void
-// mutex_lock(struct mutex_lock* lck);
-// void
-// mutex_unlock(struct mutex_lock* lck);
+/**
+ * @brief Init mutex lock.
+ *
+ * @param lck MUtex lock.
+ */
+void
+mutex_lock_init(struct mutex_lock* lck);
 
-// struct semaphore
-// {
-//   size_t value;
-//   struct spin_lock guard;
-//   struct list_head wait_queue;
-// };
+/**
+ * @brief Acquire mutex.
+ *
+ * @param lck Lock.
+ */
+void
+mutex_lock(struct mutex_lock* lck);
 
-// void
-// semaphore_init(struct semaphore* sem, size_t value);
+/**
+ * @brief Unlock mutex.
+ *
+ * @param lck Lock.
+ */
+void
+mutex_unlock(struct mutex_lock* lck);
 
-// void
-// semaphore_down(struct semaphore* sem);
+/**
+ * @brief Semaphore.
+ *
+ */
+struct semaphore
+{
+  volatile size_t value;
+  struct spin_lock guard;
+  struct list_head wait_queue;
+};
 
-// void
-// semaphore_down_nint(struct semaphore* sem);
+/**
+ * @brief Init semaphore.
+ *
+ * @param sem Semaphore.
+ * @param value Init value.
+ */
+void
+semaphore_init(struct semaphore* sem, size_t value);
 
-// void
-// semaphore_up(struct semaphore* sem);
+/**
+ * @brief Acquire semaphore.
+ *
+ * @param sem Semaphore.
+ */
+void
+semaphore_down(struct semaphore* sem);
 
-// void
-// semaphore_up_nint(struct semaphore* sem);
+/**
+ * @brief Acquire semaphore (in no interrupt context).
+ *
+ * @param sem Semaphore.
+ */
+void
+semaphore_down_intr(struct semaphore* sem);
+
+/**
+ * @brief Release semaphore.
+ *
+ * @param sem Semaphore.
+ */
+void
+semaphore_up(struct semaphore* sem);
+
+/**
+ * @brief Release semaphore (in no interrupt context).
+ *
+ * @param sem Semaphore.
+ */
+void
+semaphore_up_intr(struct semaphore* sem);

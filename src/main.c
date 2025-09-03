@@ -1,8 +1,8 @@
-#include "ordos/kernel/config.h" // IWYU pragma: keep
-#include "ordos/kernel/module.h"
+#include "ordos/config.h" // IWYU pragma: keep
 #include "ordos/lib/common.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
+#include "ordos/module.h"
 
 __asm_linkage __noreturn void
 kmain(void)
@@ -15,7 +15,7 @@ kmain(void)
 
   kinfo("%s %s", ORDOS_KERNEL_NAME, ORDOS_KERNEL_VERSION);
 
-  autoload_module(MOD_COREMOD);
+  autoload_module(MOD_CORE);
 
   kpanic("system halt");
 }

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ordos/kernel/config.h"
+#include "ordos/config.h"
 #include "ordos/lib/types.h"
 
 #define INTR_EFLAG 0x200 /**< Interrupt eflag mask. */

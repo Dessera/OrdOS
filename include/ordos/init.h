@@ -11,9 +11,9 @@
 
 #pragma once
 
+#include "ordos/config.h"
 #include "ordos/core/mem/mmap.h"
 #include "ordos/core/mem/vpage.h"
-#include "ordos/kernel/config.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
 /**

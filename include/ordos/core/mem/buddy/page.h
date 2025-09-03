@@ -11,8 +11,8 @@
 
 #pragma once
 
+#include "ordos/config.h"
 #include "ordos/core/mem.h"
-#include "ordos/kernel/config.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
 #include "ordos/lib/util/list_head.h"
@@ -47,9 +47,21 @@ init_page(void);
  * @return size_t Index of the page.
  */
 __inline static size_t
-page_get_index(struct page* page)
+page_index(struct page* page)
 {
   return page - __pages;
+}
+
+/**
+ * @brief Get page index from physical address.
+ *
+ * @param addr Physical address.
+ * @return size_t Page index.
+ */
+__inline static size_t
+page_phys_index(uintptr_t addr)
+{
+  return addr / ORDOS_KERNEL_PAGE_SIZE;
 }
 
 /**
@@ -85,7 +97,7 @@ page_get(size_t index)
 __inline static uintptr_t
 page_get_phys(struct page* page)
 {
-  return page_get_index(page) * ORDOS_KERNEL_PAGE_SIZE;
+  return page_index(page) * ORDOS_KERNEL_PAGE_SIZE;
 }
 
 /**
@@ -127,18 +139,11 @@ page_get_by_virt(uintptr_t virt)
 /**
  * @brief Get memory size from pages.
  *
- * @param pages_cnt
- * @return __inline
+ * @param pages_cnt Pages count.
+ * @return size_t Memory size.
  */
 __inline static size_t
 page_size(size_t pages_cnt, size_t base)
 {
   return pages_cnt * ORDOS_KERNEL_PAGE_SIZE / base;
-}
-
-__inline static size_t
-page_phys_index(uintptr_t addr)
-{
-  // TODO: 12 is from PAGE_SIZE
-  return addr >> 12; // NOLINT
 }

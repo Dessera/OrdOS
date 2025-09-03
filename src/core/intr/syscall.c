@@ -1,5 +1,5 @@
 #include "ordos/core/intr/syscall.h"
-#include "ordos/kernel/config.h"
+#include "ordos/config.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/types.h"

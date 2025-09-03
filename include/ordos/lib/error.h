@@ -8,4 +8,5 @@ enum error_type
   E_LOAD,
   E_ALLOC,
   E_OVERFLOW,
+  E_KERNPANIC,
 };

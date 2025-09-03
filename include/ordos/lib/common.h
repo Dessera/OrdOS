@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "ordos/config.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
 
 /**
@@ -114,3 +115,15 @@
  *
  */
 #define unlikely(...) __builtin_expect(!!(__VA_ARGS__), 0)
+
+/**
+ * @brief Access virtual memory space in physical section.
+ *
+ */
+#define vaccess(ptr) (poffset(ptr, -ORDOS_KERNEL_VADDR))
+
+/**
+ * @brief Access physical memory space in vritual section.
+ *
+ */
+#define paccess(ptr) (poffset(ptr, ORDOS_KERNEL_VADDR))

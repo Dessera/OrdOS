@@ -1,11 +1,10 @@
 #include "ordos/core/mem/buddy/zone.h"
+#include "ordos/config.h"
 #include "ordos/core/mem.h"
 #include "ordos/core/mem/bootmem.h"
 #include "ordos/core/mem/buddy.h"
 #include "ordos/core/mem/buddy/page.h"
-#include "ordos/kernel/config.h"
 #include "ordos/lib/common.h"
-#include "ordos/lib/logging.h"
 #include "ordos/lib/sync.h"
 #include "ordos/lib/types.h"
 
@@ -111,16 +110,6 @@ init_zone(void)
               MEM_HIGH,
               page_phys_index(MEM_TYPE_HIGH_START),
               page_phys_index(mem_size) - 1);
-
-  kinfo("Zone DMA: %u mb, %u pages",
-        page_size(__zones[MEM_DMA].pg_cnt, MBYTES),
-        __zones[MEM_DMA].pg_cnt);
-  kinfo("zone normal: %u mb, %u pages",
-        page_size(__zones[MEM_NORMAL].pg_cnt, MBYTES),
-        __zones[MEM_NORMAL].pg_cnt);
-  kinfo("zone high: %u mb, %u pages",
-        page_size(__zones[MEM_HIGH].pg_cnt, MBYTES),
-        __zones[MEM_HIGH].pg_cnt);
 }
 
 void

@@ -1,10 +1,10 @@
 #include "ordos/drv/pic.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/module.h"
+#include "ordos/config.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/types.h"
+#include "ordos/module.h"
 
 static void
 __pic_init(u16 port, u8 offs, u8 bind)
@@ -34,4 +34,4 @@ pic_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(drv_pic, MOD_COREMOD, pic_entry);
+module_init_noexit(drv_pic, MOD_CORE, pic_entry);

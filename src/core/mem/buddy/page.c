@@ -1,11 +1,9 @@
 #include "ordos/core/mem/buddy/page.h"
-#include "ordos/core/mem.h"
+#include "ordos/config.h"
 #include "ordos/core/mem/bootmem.h"
-#include "ordos/kernel/compiler.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/init.h"
+#include "ordos/init.h"
 #include "ordos/lib/common.h"
-#include "ordos/lib/logging.h"
+#include "ordos/lib/compiler.h"
 #include "ordos/lib/types.h"
 
 struct page* __pages = NULL;
@@ -54,8 +52,4 @@ init_page(void)
 
   __mmap_reserve();
   __bootmem_reserve();
-
-  kinfo("Physical memory %u mb, %u pages",
-        page_size(__pages_cnt, MBYTES),
-        __pages_cnt);
 }

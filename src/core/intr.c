@@ -1,14 +1,14 @@
 #include "ordos/core/intr.h"
+#include "ordos/config.h"
 #include "ordos/core/intr/exception.h"
 #include "ordos/core/intr/idt.h"
 #include "ordos/core/intr/syscall.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/module.h"
 #include "ordos/lib/assert.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/types.h"
+#include "ordos/module.h"
 
 static intr_handler_t __intr_handlers[ORDOS_INTR_IDT_DESC_CNT] = { 0 };
 
@@ -96,4 +96,4 @@ intr_entry(struct module* mod)
 
 module_dependency(drv_pic);
 
-module_init_noexit(sys_intr, MOD_COREMOD | MOD_AUTOLOAD, intr_entry, drv_pic);
+module_init_noexit(sys_intr, MOD_CORE | MOD_AUTOLOAD, intr_entry, drv_pic);

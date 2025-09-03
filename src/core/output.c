@@ -1,10 +1,13 @@
 #include "ordos/core/output.h"
 #include "ordos/drv/vga.h"
-#include "ordos/kernel/module.h"
-#include "ordos/kernel/utils.h"
+#include "ordos/lib/common.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
+#include "ordos/lib/sync.h"
 #include "ordos/lib/types.h"
+#include "ordos/module.h"
+
+struct mutex_lock __plock;
 
 static vga_cursor_t
 __kputdefault(char c, vga_cursor_t cursor)
@@ -64,11 +67,11 @@ __kputchar(char c)
 void
 kputs(const char* str)
 {
-  // mutex_lock(&__plock);
+  mutex_lock(&__plock);
 
   kputs_unsafe(str);
 
-  // mutex_unlock(&__plock);
+  mutex_unlock(&__plock);
 }
 
 void
@@ -252,12 +255,13 @@ int
 print_entry(struct module* mod)
 {
   unused(mod);
-  // mutex_lock_init(&__plock);
 
+  mutex_lock_init(&__plock);
   vga_clear();
+
   return E_SUCCESS;
 }
 
 module_dependency(drv_vga);
 
-module_init_noexit(sys_output, MOD_COREMOD, print_entry, drv_vga);
+module_init_noexit(sys_output, MOD_CORE, print_entry, drv_vga);

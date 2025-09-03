@@ -1,10 +1,8 @@
 #include "ordos/core/mem/buddy.h"
+#include "ordos/config.h"
 #include "ordos/core/mem/buddy/page.h"
 #include "ordos/core/mem/buddy/zone.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/module.h"
 #include "ordos/lib/assert.h"
-#include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/sync.h"
 #include "ordos/lib/types.h"
@@ -17,12 +15,12 @@
 static struct page*
 __buddy_page_to_buddy(struct page* page, u8 order)
 {
-  size_t index = page_get_index(page) ^ (buddy_order_to_page_cnt(order));
+  size_t index = page_index(page) ^ (buddy_order_to_page_cnt(order));
   if (page_index_is_overflow(index)) {
     return NULL;
   }
 
-  return page_get(page_get_index(page) ^ buddy_order_to_page_cnt(order));
+  return page_get(page_index(page) ^ buddy_order_to_page_cnt(order));
 }
 
 /**
@@ -32,7 +30,14 @@ __buddy_page_to_buddy(struct page* page, u8 order)
 static struct page*
 __buddy_page_ascend(struct page* page, u8 order)
 {
-  return page_get(page_get_index(page) & ~buddy_order_to_page_cnt(order));
+  return page_get(page_index(page) & ~buddy_order_to_page_cnt(order));
+}
+
+void
+init_buddy(void)
+{
+  init_page();
+  init_zone();
 }
 
 void
@@ -134,7 +139,7 @@ alloc_end:
 bool
 buddy_page_is_aligned(struct page* page, u8 order)
 {
-  return !(page_get_index(page) & ((buddy_order_to_page_cnt(order))-1));
+  return !(page_index(page) & ((buddy_order_to_page_cnt(order))-1));
 }
 
 bool
@@ -154,16 +159,3 @@ buddy_page_cnt_to_order(size_t page_cnt)
   }
   return order;
 }
-
-int
-buddy_entry(struct module* mod)
-{
-  (void)mod;
-
-  init_page();
-  init_zone();
-
-  return E_SUCCESS;
-}
-
-module_init_noexit(sys_mem_buddy, MOD_COREMOD, buddy_entry);

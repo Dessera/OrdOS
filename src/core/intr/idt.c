@@ -1,6 +1,6 @@
 #include "ordos/core/intr/idt.h"
+#include "ordos/config.h"
 #include "ordos/core/mem/gdt.h"
-#include "ordos/kernel/config.h"
 #include "ordos/lib/logging.h"
 
 extern void* _asm_intr_vecs[ORDOS_INTR_IDT_DESC_CNT];

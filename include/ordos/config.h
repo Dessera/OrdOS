@@ -26,6 +26,12 @@
 #define ORDOS_INTR_SYSCALL 0x80            /**< IDT syscall index. */
 #define ORDOS_INTR_EXCEPTIONS_CNT 0x14     /**< Interrupt exceptions count. */
 #define ORDOS_INTR_SYSCALLS_CNT 0x10       /**< Interrupt syscalls count. */
+#define ORDOS_TASK_PIDPOOL_SIZE 128        /**< PID pool buffer size. */
+#define ORDOS_TASK_NAME_LENGTH 64          /**< Task name length. */
+#define ORDOS_TASK_KMAIN_NAME "kmain"      /**< Task kmain name. */
+#define ORDOS_TASK_KIDLE_NAME "kidle"      /**< Task kidle name. */
+#define ORDOS_TASK_DEFAULT_PRIO 31         /**< Default task priority. */
+#define ORDOS_TASK_IDLE_PRIO 10            /**< Idle priority. */
 #define ORDOS_DEV_PIC_MASK 0xF8BF          /**< PIC master & slave mask. */
 #define ORDOS_DEV_PIT_MAX_TICKS 0xFFFFFFFF /**< PIT watcher max ticks. */
 #define ORDOS_IO_BUFSIZE 0x200             /**< IO buffer size. */

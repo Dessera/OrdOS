@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/flag.h" // IWYU pragma: keep
-#include "ordos/lib/common.h"  // IWYU pragma: keep
+#include "ordos/config.h"
+#include "ordos/lib/common.h" // IWYU pragma: keep
+#include "ordos/lib/flag.h"   // IWYU pragma: keep
 #include "ordos/lib/types.h"
 
 #define GDT_NULL_INDEX 0  /**< GDT NULL descriptor index. */

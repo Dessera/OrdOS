@@ -1,18 +1,26 @@
 #include "ordos/core/mem/sslab.h"
+#include "ordos/config.h"
 #include "ordos/core/mem/sslab/cache.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/module.h"
 #include "ordos/lib/assert.h"
-#include "ordos/lib/error.h"
 #include "ordos/lib/util/list_head.h"
 
 static struct sslab __sslab[ORDOS_MEM_SSLAB_MAX_ORDER + 1] = { 0 };
 
 void
+init_sslab(void)
+{
+  for (int i = 0; i <= ORDOS_MEM_SSLAB_MAX_ORDER; i++) {
+    sslab_init(&__sslab[i], sslab_order_to_size(i));
+  }
+}
+
+void
 sslab_init(struct sslab* sslab, size_t obj_size)
 {
   kassert(obj_size <= sslab_order_to_size(ORDOS_MEM_SSLAB_MAX_ORDER),
-          "SSLAB: Object size too large");
+          "SSLAB: Object size too large %u (>%u)",
+          obj_size,
+          sslab_order_to_size(ORDOS_MEM_SSLAB_MAX_ORDER));
 
   list_init(&sslab->caches);
   spin_lock_init(&sslab->lock);
@@ -121,19 +129,3 @@ sslab_size_to_order(size_t size)
 
   return order;
 }
-
-int
-sslab_entry(struct module* mod)
-{
-  (void)mod;
-
-  for (int i = 0; i <= ORDOS_MEM_SSLAB_MAX_ORDER; i++) {
-    sslab_init(&__sslab[i], sslab_order_to_size(i));
-  }
-
-  return E_SUCCESS;
-}
-
-module_dependency(sys_mem_buddy);
-
-module_init_noexit(sys_mem_sslab, MOD_COREMOD, sslab_entry, sys_mem_buddy);

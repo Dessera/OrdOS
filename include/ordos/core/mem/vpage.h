@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ordos/kernel/config.h"
+#include "ordos/config.h"
 #include "ordos/lib/asm.h"
 #include "ordos/lib/types.h"
 
@@ -39,13 +39,14 @@
  * @brief Get pde index from addr.
  *
  */
-#define pde_index(addr) (((uintptr_t)(addr)) >> 22)
+#define pde_index(addr)                                                        \
+  (((uintptr_t)(addr)) / ORDOS_KERNEL_PAGE_SIZE / VPAGE_DESC_CNT)
 
 /**
  * @brief Get pte index from addr.
  *
  */
-#define pte_index(addr) ((((uintptr_t)(addr)) >> 12) & 0x3FF)
+#define pte_index(addr) ((((uintptr_t)(addr)) / ORDOS_KERNEL_PAGE_SIZE) & 0x3FF)
 
 /**
  * @brief PDE type.

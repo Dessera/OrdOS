@@ -1,9 +1,15 @@
+#include "ordos/core/mem.h"
+#include "ordos/core/mem/buddy.h"
+#include "ordos/core/mem/buddy/page.h"
+#include "ordos/core/mem/buddy/zone.h"
+#include "ordos/core/mem/sslab.h"
 #include "ordos/core/mem/vpage.h"
-#include "ordos/kernel/init.h"
-#include "ordos/kernel/module.h"
-#include "ordos/kernel/utils.h"
+#include "ordos/init.h"
+#include "ordos/lib/common.h"
 #include "ordos/lib/error.h"
+#include "ordos/lib/logging.h"
 #include "ordos/lib/types.h" // IWYU pragma: keep
+#include "ordos/module.h"
 
 /**
  * @brief Unload top pages.
@@ -22,16 +28,25 @@ __init_vpage(void)
 int
 mem_entry(struct module* mod)
 {
-  (void)mod;
+  init_buddy();
+  init_sslab();
 
   __init_vpage();
+
+  minfo(mod,
+        "DMA memory    %u MB, %u pages",
+        page_size(__zones[MEM_DMA].pg_free, MBYTES),
+        __zones[MEM_DMA].pg_free);
+  minfo(mod,
+        "NORMAL memory %u MB, %u pages",
+        page_size(__zones[MEM_NORMAL].pg_free, MBYTES),
+        __zones[MEM_NORMAL].pg_free);
+  minfo(mod,
+        "HIGH memory   %u MB, %u pages",
+        page_size(__zones[MEM_HIGH].pg_free, MBYTES),
+        __zones[MEM_HIGH].pg_free);
 
   return E_SUCCESS;
 }
 
-module_dependency(sys_mem_sslab);
-
-module_init_noexit(sys_mem,
-                   MOD_COREMOD | MOD_AUTOLOAD,
-                   mem_entry,
-                   sys_mem_sslab);
+module_init_noexit(sys_mem, MOD_CORE | MOD_AUTOLOAD, mem_entry);

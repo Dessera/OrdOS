@@ -110,3 +110,10 @@
       hlt();                                                                   \
     }                                                                          \
   } while (0)
+
+#define mtrace(mod, fmt, ...) ktrace("%s: " fmt, mod->name, ##__VA_ARGS__)
+#define mdebug(mod, fmt, ...) kdebug("%s: " fmt, mod->name, ##__VA_ARGS__)
+#define minfo(mod, fmt, ...) kinfo("%s: " fmt, mod->name, ##__VA_ARGS__)
+#define mwarn(mod, fmt, ...) kwarn("%s: " fmt, mod->name, ##__VA_ARGS__)
+#define merror(mod, fmt, ...) kerror("%s: " fmt, mod->name, ##__VA_ARGS__)
+#define mpanic(mod, fmt, ...) kpanic("%s: " fmt, mod->name, ##__VA_ARGS__)

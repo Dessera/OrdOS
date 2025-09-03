@@ -1,7 +1,7 @@
-#include "ordos/kernel/module.h"
-#include "ordos/kernel/compiler.h"
-#include "ordos/kernel/config.h"
+#include "ordos/module.h"
+#include "ordos/config.h"
 #include "ordos/lib/common.h"
+#include "ordos/lib/compiler.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/string.h" // IWYU pragma: keep
@@ -130,11 +130,11 @@ find_module(const char* name)
 size_t
 autoload_module(int flags)
 {
-  int req = mask_flags(flags, MOD_AUTOLOAD | MOD_NOLOAD);
+  int req = mask_flags(flags, MOD_AUTOLOAD);
   size_t res = 0;
 
   for (size_t i = 0; i < __mods_cnt; ++i) {
-    if (mask_flags(__mods[i].flag, MOD_AUTOLOAD | MOD_NOLOAD) == req) {
+    if (mask_flags(__mods[i].flag, MOD_AUTOLOAD) == req) {
       if (has_flags(__mods[i].flag, MOD_AUTOLOAD) && __mods[i].refs_cnt == 0 &&
           __load_module(&__mods[i]) == E_SUCCESS) {
         ++res;
@@ -148,6 +148,5 @@ autoload_module(int flags)
 void
 __module_default_exit(struct module* mod)
 {
-  kpanic("Module: Cannot unload module %s because it's declared with noexit",
-         mod->name);
+  mpanic(mod, "Module: Cannot unload because it's declared with noexit");
 }

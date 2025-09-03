@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ordos/kernel/config.h"
+#include "ordos/config.h"
 #include "ordos/lib/common.h" // IWYU pragma: keep
 #include "ordos/lib/types.h"
 #include "ordos/lib/util/list_head.h"

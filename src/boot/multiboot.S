@@ -1,5 +1,5 @@
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/boot/multiboot.h"
+#include "ordos/config.h"
+#include "ordos/boot/multiboot.h"
 
 .section .text.init, "ax"
 

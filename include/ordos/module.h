@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ordos/kernel/config.h"
+#include "ordos/config.h"
 #include "ordos/lib/common.h"
 #include "ordos/lib/expr.h"
 #include "ordos/lib/section.h"
@@ -97,10 +97,9 @@ typedef void (*module_exit_t)(struct module* mod);
  */
 enum module_flag
 {
-  MOD_NOLOAD = 0x00,   // Module will not be loaded automatically.
   MOD_AUTOLOAD = 0x01, // Module will be loaded automatically.
-  MOD_SYSMOD = 0x00,   // Module is system module (common module).
-  MOD_COREMOD = 0x02,  // Module is core module (kernel basic subsystem).
+  MOD_CORE = 0x02,     // Module is core module (kernel basic subsystem).
+  MOD_SCHED = 0x04,    // Module is scheduler.
 };
 
 /**
@@ -118,6 +117,10 @@ struct module
   module_exit_t exit;
   u32 magic;
 };
+
+extern struct module* __mods; /**< Mods pointer */
+
+extern size_t __mods_cnt; /**< Mods size. */
 
 /**
  * @brief Initialize module subsystem.
@@ -163,9 +166,21 @@ size_t
 autoload_module(int flags);
 
 /**
+ * @brief Get modules count.
+ *
+ * @return size_t Modules count.
+ */
+__inline static size_t
+module_count(void)
+{
+  return __mods_cnt;
+}
+
+/**
  * @brief Default exit function for modules that cannot be unloaded.
  *
  * @param mod Loaded module.
+ * @note Should not use it directly.
  */
 void
 __module_default_exit(struct module* mod);

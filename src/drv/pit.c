@@ -1,13 +1,13 @@
 #include "ordos/drv/pit.h"
+#include "ordos/config.h"
 #include "ordos/core/intr.h"
 #include "ordos/core/mem.h"
-#include "ordos/kernel/config.h"
-#include "ordos/kernel/module.h"
 #include "ordos/lib/error.h"
 #include "ordos/lib/logging.h"
 #include "ordos/lib/sync.h"
 #include "ordos/lib/types.h"
 #include "ordos/lib/util/list_head.h"
+#include "ordos/module.h"
 
 enum pit_io_port : u16
 {
@@ -144,4 +144,6 @@ pit_entry(struct module* mod)
   return E_SUCCESS;
 }
 
-module_init_noexit(drv_pit, MOD_COREMOD, pit_entry);
+module_dependency(sys_intr);
+
+module_init_noexit(drv_pit, MOD_CORE, pit_entry, sys_intr);
